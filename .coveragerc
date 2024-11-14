@@ -1,0 +1,18 @@
+# .coveragerc
+[run]
+source = django_spellbook
+omit = 
+    */tests/*
+    */venv/*
+    views.py
+    urls.py
+    setup.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if __name__ == .__main__.:
+    raise NotImplementedError
+    pass
+    raise ImportError

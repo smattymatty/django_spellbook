@@ -1,0 +1,7 @@
+asgiref==3.8.1
+coverage==7.6.4
+Django==5.0
+Markdown==3.7
+PyYAML==6.0.2
+sqlparse==0.5.1
+typing_extensions==4.12.2
