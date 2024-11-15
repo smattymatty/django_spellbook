@@ -1,4 +1,3 @@
-{# A_content/blocks/alert.html #}
 <style>
 .spellbook-alert {
     padding: 1rem;
@@ -50,7 +49,6 @@
 }
 {% endif %}
 </style>
-
 <div class="spellbook-alert spellbook-alert-{{ type }} {% if kwargs.class %}{{ kwargs.class }}{% endif %}">
     {{ content|safe }}
 </div>

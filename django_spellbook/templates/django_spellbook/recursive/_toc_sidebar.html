@@ -1,0 +1,26 @@
+{% load spellbook_tags %}
+{% for key, data in items.items %}
+    <li class="toc-item {% if data.url == current_url %}active{% endif %}">
+        <div class="toc-item-header">
+            {% if data.children %}
+                <button class="toc-toggle" aria-label="Toggle section">
+                    <svg class="toc-arrow" viewBox="0 0 24 24" width="12" height="12">
+                        <path d="M7 10l5 5 5-5H7z" />
+                    </svg>
+                </button>
+            {% endif %}
+            {% if data.url %}
+                <a href="{% spellbook_url data.url %}"
+                   class="toc-link {% if data.children %}has-children{% endif %}">{{ data.title }}</a>
+            {% else %}
+                <span class="toc-section">{{ data.title }}</span>
+            {% endif %}
+        </div>
+        {% if data.children %}
+            <ul class="toc-sublist">
+                {% include "django_spellbook/recursive/_toc_sidebar.html" with
+                items=data.children %}
+            </ul>
+        {% endif %}
+    </li>
+{% endfor %}

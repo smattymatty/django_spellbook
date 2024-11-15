@@ -61,3 +61,5 @@ Thumbs.db
 
 # Documentation
 docs/_build/
+
+deploy.sh

@@ -1,4 +1,3 @@
-{# A_content/blocks/card.html #}
 <style>
 .spellbook-card {
     position: relative;
@@ -53,21 +52,12 @@
     box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
 }
 </style>
-
 <div class="spellbook-card {% if kwargs.class %}spellbook-{{ kwargs.class }}{% endif %}">
     {% if title %}
         <div class="spellbook-card-header">
             <h5 class="spellbook-card-title">{{ title }}</h5>
         </div>
     {% endif %}
-    
-    <div class="spellbook-card-body">
-        {{ content|safe }}
-    </div>
-    
-    {% if footer %}
-        <div class="spellbook-card-footer">
-            {{ footer }}
-        </div>
-    {% endif %}
+    <div class="spellbook-card-body">{{ content|safe }}</div>
+    {% if footer %}<div class="spellbook-card-footer">{{ footer }}</div>{% endif %}
 </div>

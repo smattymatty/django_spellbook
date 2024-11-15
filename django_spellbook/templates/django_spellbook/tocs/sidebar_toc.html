@@ -1,0 +1,195 @@
+{% load spellbook_tags %}
+<div class="toc-wrapper">
+    {% if toc.children %}
+        <ul class="toc-list">
+            {% include "django_spellbook/recursive/_toc_sidebar.html" with
+            items=toc.children %}
+        </ul>
+    {% endif %}
+</div>
+<style>
+  .toc-wrapper {
+    font-size: 0.95rem;
+  }
+
+  .toc-list,
+  .toc-sublist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .toc-sublist {
+    margin-left: 1.5rem;
+    border-left: 1px solid #eee;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+
+  /* Optional: Add visual depth indicators */
+  .toc-sublist .toc-sublist {
+    margin-left: 1rem; /* Slightly smaller indent for deeper levels */
+    border-left-style: dashed; /* Different border style for deeper levels */
+  }
+
+  .toc-sublist .toc-sublist .toc-sublist {
+    border-left-color: #eee; /* Lighter border for even deeper levels */
+  }
+  .toc-item,
+  .toc-subitem {
+    margin: 0.5rem 0;
+  }
+
+  .toc-link {
+    text-decoration: none;
+    color: #555;
+    display: block;
+    padding: 0.25rem 0.5rem !important;
+    width: 100%;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .toc-link:hover {
+    background-color: #f5f5f5;
+    color: #000;
+  }
+
+  .toc-section {
+    font-weight: 600;
+    color: #333;
+    display: block;
+    padding: 0.25rem 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .toc-item.active > .toc-link,
+  .toc-subitem.active > .toc-link {
+    background-color: #e9ecef;
+    color: #000;
+    font-weight: 500;
+  }
+
+  /* Optional: Mobile optimization */
+  @media (max-width: 767px) {
+    .toc-wrapper {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      padding: 0.5rem;
+    }
+  }
+
+  .toc-item-header {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+    padding: 0.25rem;
+  }
+
+  /* Prevent the link from having its own click area */
+  .toc-item-header .toc-link {
+    pointer-events: auto;
+    padding: 0;
+  }
+  .toc-toggle {
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .toc-arrow {
+    transition: transform 0.3s ease;
+    fill: currentColor;
+  }
+
+  .toc-toggle.collapsed .toc-arrow {
+    transform: rotate(-90deg);
+  }
+
+  .toc-sublist.collapsed {
+    max-height: 0;
+  }
+</style>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Initialize all sublists to be collapsed by default
+    document.querySelectorAll(".toc-sublist").forEach((sublist) => {
+      sublist.style.maxHeight = "0px";
+      sublist.classList.add("collapsed");
+    });
+
+    document.querySelectorAll(".toc-toggle").forEach((toggle) => {
+      toggle.classList.add("collapsed");
+    });
+
+    document.querySelectorAll(".toc-item-header").forEach((header) => {
+      header.addEventListener("click", (e) => {
+        const toggle = header.querySelector(".toc-toggle");
+        const link = header.querySelector(".toc-link");
+        const sublist = header.nextElementSibling;
+
+        // If there's a sublist, toggle it
+        if (sublist && sublist.classList.contains("toc-sublist")) {
+          e.preventDefault();
+          toggle.classList.toggle("collapsed");
+
+          if (sublist.style.maxHeight !== "0px") {
+            // Collapse this sublist and all nested sublists
+            sublist.style.maxHeight = "0px";
+            sublist.classList.add("collapsed");
+            sublist.querySelectorAll(".toc-sublist").forEach((nested) => {
+              nested.style.maxHeight = "0px";
+              nested.classList.add("collapsed");
+              nested.previousElementSibling
+                .querySelector(".toc-toggle")
+                ?.classList.add("collapsed");
+            });
+          } else {
+            // Calculate total height including all nested content
+            let totalHeight = sublist.scrollHeight;
+            sublist.classList.remove("collapsed");
+
+            // If this item is inside another sublist, update parent heights
+            let parent = sublist.parentElement.closest(".toc-sublist");
+            while (parent) {
+              parent.style.maxHeight = parent.scrollHeight + totalHeight + "px";
+              parent = parent.parentElement.closest(".toc-sublist");
+            }
+
+            sublist.style.maxHeight = totalHeight + "px";
+          }
+        } else if (link) {
+          window.location.href = link.href;
+        }
+      });
+    });
+
+    function expandActiveSection() {
+      const activeItem = document.querySelector(
+        ".toc-item.active, .toc-subitem.active"
+      );
+      if (activeItem) {
+        let parent = activeItem.closest(".toc-sublist");
+        while (parent) {
+          const totalHeight = parent.scrollHeight;
+          parent.style.maxHeight = totalHeight + "px";
+          parent.classList.remove("collapsed");
+          const toggle =
+            parent.previousElementSibling?.querySelector(".toc-toggle");
+          if (toggle) toggle.classList.remove("collapsed");
+          parent = parent.parentElement.closest(".toc-sublist");
+        }
+      }
+    }
+
+    // Run on page load
+    expandActiveSection();
+  });
+</script>

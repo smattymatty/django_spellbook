@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-spellbook',
-    version='0.0.3a2',  # Increment version
+    version='0.0.3a3',  # Increment version
     author='Mathew Storm',
     author_email='mathewstormdev@gmail.com',
     description='A Django package for creating beautiful, reusable content blocks in markdown for developers and bloggers',
@@ -40,7 +40,7 @@ setup(
     ],
     python_requires='>=3.10',
     project_urls={
-        'Bug Reports': 'https://github.com/yourusername/django-spellbook/issues',
-        'Source': 'https://github.com/yourusername/django-spellbook',
+        'Bug Reports': 'https://github.com/smattymatty/django_spellbook/issues',
+        'Source': 'https://github.com/smattymatty/django_spellbook',
     },
 )

@@ -1,7 +1,5 @@
 <div class="test-block">
-  {{ content|safe }} {% if required_param %}
-  <div class="required">{{ required_param }}</div>
-  {% endif %} {% if optional_param %}
-  <div class="optional">{{ optional_param }}</div>
-  {% endif %}
+    {{ content|safe }}
+    {% if required_param %}<div class="required">{{ required_param }}</div>{% endif %}
+    {% if optional_param %}<div class="optional">{{ optional_param }}</div>{% endif %}
 </div>
