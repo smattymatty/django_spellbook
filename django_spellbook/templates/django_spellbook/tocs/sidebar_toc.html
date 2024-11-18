@@ -2,8 +2,7 @@
 <div class="toc-wrapper">
     {% if toc.children %}
         <ul class="toc-list">
-            {% include "django_spellbook/recursive/_toc_sidebar.html" with
-            items=toc.children %}
+            {% include "django_spellbook/recursive/_toc_sidebar.html" with items=toc.children %}
         </ul>
     {% endif %}
 </div>
@@ -26,7 +25,6 @@
     transition: max-height 0.3s ease-out;
   }
 
-  /* Optional: Add visual depth indicators */
   .toc-sublist .toc-sublist {
     margin-left: 1rem; /* Slightly smaller indent for deeper levels */
     border-left-style: dashed; /* Different border style for deeper levels */
@@ -70,7 +68,6 @@
     font-weight: 500;
   }
 
-  /* Optional: Mobile optimization */
   @media (max-width: 767px) {
     .toc-wrapper {
       max-height: 300px;

@@ -4,6 +4,8 @@ from typing import Optional
 from django.conf import settings
 from django.core.management.base import CommandError
 
+from django.template.loader import render_to_string
+
 
 class TemplateGenerator:
     """Handles template creation and management for markdown-generated content."""

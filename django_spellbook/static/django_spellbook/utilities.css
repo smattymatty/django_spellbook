@@ -1,0 +1,110 @@
+/* Spacing */
+.spellbook-p-1 {
+  padding: 0.25rem;
+}
+.spellbook-p-2 {
+  padding: 0.5rem;
+}
+.spellbook-p-3 {
+  padding: 1rem;
+}
+.spellbook-mb-1 {
+  margin-bottom: 0.25rem;
+}
+.spellbook-mb-2 {
+  margin-bottom: 0.5rem;
+}
+.spellbook-mb-3 {
+  margin-bottom: 1rem;
+}
+
+/* Borders */
+.spellbook-border {
+  border: 1px solid rgba(0, 0, 0, 0.125);
+}
+.spellbook-border-radius-sm {
+  border-radius: 0.25rem;
+}
+.spellbook-border-radius-lg {
+  border-radius: 0.5rem;
+}
+
+/* Shadows */
+.spellbook-shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+.spellbook-shadow-lg {
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+}
+
+/* Colors */
+.spellbook-bg-light {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+.spellbook-bg-info {
+  background-color: #cff4fc;
+}
+.spellbook-bg-warning {
+  background-color: #fff3cd;
+}
+.spellbook-bg-success {
+  background-color: #d1eedd;
+}
+.spellbook-bg-danger {
+  background-color: #f8d7da;
+}
+.spellbook-border-info {
+  border-color: #b6effb;
+}
+.spellbook-border-warning {
+  border-color: #ffecb5;
+}
+.spellbook-border-success {
+  border-color: #badbcc;
+}
+.spellbook-border-danger {
+  border-color: #f5c2c7;
+}
+.spellbook-text-info {
+  color: #055160;
+}
+.spellbook-text-warning {
+  color: #664d03;
+}
+.spellbook-text-success {
+  color: #0f5132;
+}
+.spellbook-text-danger {
+  color: #842029;
+}
+
+/* Typography */
+.spellbook-font-bold {
+  font-weight: 600;
+}
+.spellbook-font-light {
+  font-weight: 300;
+}
+.spellbook-text-sm {
+  font-size: 0.875rem;
+}
+.spellbook-text-lg {
+  font-size: 1.25rem;
+}
+
+/* Flexbox */
+.spellbook-flex {
+  display: flex;
+}
+.spellbook-flex-column {
+  flex-direction: column;
+}
+.spellbook-flex-center {
+  align-items: center;
+  justify-content: center;
+}
+
+/* Transitions */
+.spellbook-transition {
+  transition: all 0.3s ease-in-out;
+}

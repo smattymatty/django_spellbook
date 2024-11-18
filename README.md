@@ -47,23 +47,37 @@ The above will render as HTML with the specified class and ID attributes:
 </div>
 ```
 
-You aren't just limited to class or ID attributes, you can set any attribute you want, and even use HTMX attributes like `hx-get` or `hx-swap`:
-
-```markdown
-{% button .my-class #my-id hx-get="/api/get-data" hx-swap="outerHTML" %}
-This is a custom div block with a class, an ID, and HTMX attributes.
-{% endbutton %}
-```
-
-The above will render as HTML with the specified class, ID, and HTMX attributes:
-
-```html
-<button class="my-class" id="my-id" hx-get="/api/get-data" hx-swap="outerHTML">
-  This is a custom div block with a class, an ID, and HTMX attributes.
-</button>
-```
+You aren't just limited to class or ID attributes, you can set any attribute you want.
 
 Paired with powerful libraries like HTMX, this can create dynamic and interactive interfaces that are both visually appealing and highly functional without ever having to leave your markdown files.
+
+### Example: SpellBlocks, re-usable Content Components
+
+Spellblocks are reusable content components that can be embedded directly in your markdown content. They provide a powerful way to create rich, interactive content while maintaining the simplicity of markdown syntax.
+
+```markdown
+{~ alert type="warning" ~}
+Warning: This is an important notice!
+{~~}
+```
+
+IMAGE INCOMING
+
+```markdown
+{~ card title="Getting Started" footer="Last updated: 2024" ~}
+
+This is the main content of the card.
+
+- Supports markdown
+- Can include lists
+- And other **markdown** elements
+
+{~~}
+```
+
+IMAGE INCOMING
+
+Those are two examples of built-in Spellblocks. You can also create your own custom Spellblocks by extending the `BasicSpellBlock` class and registering them with the `SpellBlockRegistry`. See the [documentation on Spellblocks](google.com) for more information.
 
 ### Commands
 

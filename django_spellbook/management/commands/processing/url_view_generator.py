@@ -144,6 +144,20 @@ def {view_name}(request):
 
         Returns:
             Dictionary with processed context values
+        Example: 
+            {
+                'title': 'My Page',
+                'created_at': '2023-01-01 12:00:00',
+                'updated_at': '2023-01-01 12:00:00',
+                'url_path': 'my/page',
+                'raw_content': '# My Page\nThis is my page content',
+                'is_public': True,
+                'tags': ['tag1', 'tag2'],
+                'custom_meta': {'key': 'value'},
+                'toc': {...},
+                'next_page': 'next/page',
+                'prev_page': 'prev/page'
+            }
         """
         context_dict = context.__dict__.copy()
         del context_dict['toc']  # Remove the existing toc
