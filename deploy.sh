@@ -1,4 +1,7 @@
 #!/bin/bash
+set -a
+source .env
+set +a
 
 # Colors for output
 RED='\033[0;31m'
@@ -28,6 +31,10 @@ fi
 
 echo -e "${GREEN}All tests passed with 100% coverage!${NC}"
 
+echo "Cleaning up generated files..."
+
+rm -f django_spellbook/urls_*.py django_spellbook/views_*.py
+
 # Clean up old distribution files
 echo "Cleaning up old distribution files..."
 rm -rf dist/ build/ *.egg-info
@@ -44,7 +51,7 @@ fi
 
 # Upload to PyPI
 echo "Uploading to PyPI..."
-python -m twine upload dist/*
+python -m twine upload dist/* -u __token__ -p "$PYPI_KEY"
 upload_status=$?
 
 if [ $upload_status -ne 0 ]; then

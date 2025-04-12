@@ -2,6 +2,9 @@
 import yaml
 from datetime import datetime
 from pathlib import Path
+
+from django_spellbook.utils import remove_leading_dash, titlefy
+
 from .context import SpellbookContext
 
 
@@ -36,12 +39,20 @@ class FrontMatterParser:
             self.raw_content = self.content
 
     def get_context(self, url_path: str) -> SpellbookContext:
+        split_path = url_path.split('/')
+        clean_path = []
+        for i, part in enumerate(split_path):
+            clean_path.append(remove_leading_dash(part))
+
+        clean_url = "/".join(clean_path)
         stats = self.file_path.stat()
         return SpellbookContext(
-            title=self.metadata.get('title', self.file_path.stem),
+            title=titlefy(remove_leading_dash(
+                self.metadata.get('title', self.file_path.stem))
+            ),
             created_at=datetime.fromtimestamp(stats.st_ctime),
             updated_at=datetime.fromtimestamp(stats.st_mtime),
-            url_path=url_path,
+            url_path=clean_url,
             raw_content=self.raw_content,
             is_public=multi_bool(self.metadata.get('is_public', True)),
             tags=self.metadata.get('tags', []),

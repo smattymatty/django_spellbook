@@ -1,11 +1,12 @@
 import unittest
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import Mock, patch, mock_open, MagicMock
 from pathlib import Path
 from django.core.management.base import CommandError
 from django.test import TestCase
 from django_spellbook.management.commands.processing.url_view_generator import URLViewGenerator
 from django_spellbook.markdown.context import SpellbookContext
 from django_spellbook.management.commands.processing.file_processor import ProcessedFile
+from django_spellbook.utils import get_clean_url
 
 
 class TestURLViewGenerator(TestCase):
@@ -32,21 +33,27 @@ class TestURLViewGenerator(TestCase):
     @patch('os.path.exists')
     @patch('builtins.open', new_callable=mock_open)
     def test_ensure_urls_views_files_creation(self, mock_file, mock_exists):
-        """Test creation of URLs and views files."""
+        """Test creation of app-specific URLs and views files."""
         mock_exists.return_value = False
 
         self.generator._ensure_urls_views_files()
 
-        self.assertEqual(mock_file.call_count, 2)
+        # Should create app-specific files and main urls.py
+        urls_module = f"urls_test_app"
+        views_module = f"views_test_app"
+        
+        mock_file.assert_any_call(
+            f"{self.generator.spellbook_dir}/{urls_module}.py", 'w')
+        mock_file.assert_any_call(
+            f"{self.generator.spellbook_dir}/{views_module}.py", 'w')
         mock_file.assert_any_call(
             f"{self.generator.spellbook_dir}/urls.py", 'w')
-        mock_file.assert_any_call(
-            f"{self.generator.spellbook_dir}/views.py", 'w')
 
     def test_generate_view_name(self):
         """Test view name generation from URL pattern."""
         url_pattern = 'docs/getting-started/index'
-        expected = 'view_docs_getting-started_index'
+        # Update expected value without 'view_' prefix
+        expected = 'docs_getting_started_index'
 
         result = self.generator._generate_view_name(url_pattern)
 
@@ -86,6 +93,32 @@ class TestURLViewGenerator(TestCase):
         written_content = mock_file().write.call_args[0][0]
         self.assertIn('urlpatterns = [', written_content)
         self.assertIn("path('test'", written_content)
+
+    @patch('builtins.open', new_callable=mock_open)
+    def test_write_urls_with_dashes(self, mock_file):
+        """Test writing URL patterns to file with dashes in URLs."""
+        urls = ["path('--test', views.view_test, name='view_test')"]
+
+        self.generator._write_urls(urls)
+
+        mock_file.assert_called_once()
+        written_content = mock_file().write.call_args[0][0]
+        self.assertIn('urlpatterns = [', written_content)
+        self.assertIn("path('test'", written_content)
+
+    @patch('builtins.open', new_callable=mock_open)
+    def test_write_urls_with_dashes_in_multiple_parts(self, mock_file):
+        """Test writing URL patterns to file with dashes in multiple parts."""
+        urls = [
+            "path('--test-name/--test-name-2', views.view_test, name='view_test')",
+        ]
+
+        self.generator._write_urls(urls)
+
+        mock_file.assert_called_once()
+        written_content = mock_file().write.call_args[0][0]
+        self.assertIn('urlpatterns = [', written_content)
+        self.assertIn("path('test-name/test-name-2'", written_content)
 
     @patch('builtins.open', new_callable=mock_open)
     def test_write_views(self, mock_file):
@@ -236,6 +269,24 @@ class TestURLViewGenerator(TestCase):
         with self.assertRaises(TypeError):
             self.generator._generate_views_file_content(invalid_views, {})
 
+    def test_generate_view_name_with_dashes(self):
+        """Test view name generation with dashes in URL pattern."""
+        url_pattern = '--view-name'
+        expected = '__view_name'
+
+        result = self.generator._generate_view_name(url_pattern)
+
+        self.assertEqual(result, expected)
+
+    def test_get_clean_url(self):
+        """Test URL cleaning"""
+        url = '--test-url/--test-url-2/---test-url-3'
+        expected = 'test-url/test-url-2/test-url-3'
+
+        result = get_clean_url(url)
+
+        self.assertEqual(result, expected)
+
     @patch('os.path.join')
     def test_get_template_path_error(self, mock_join):
         """Test error handling in _get_template_path"""
@@ -250,3 +301,147 @@ class TestURLViewGenerator(TestCase):
 
         with self.assertRaises(AttributeError):
             self.generator._generate_view_name(invalid_url)
+
+    @patch('os.path.exists')
+    @patch('builtins.open', new_callable=mock_open, read_data="urlpatterns = []")
+    def test_update_main_urls_file(self, mock_file, mock_exists):
+        """Test updating the main urls.py to include app-specific URL modules."""
+        mock_exists.return_value = True
+
+        self.generator._update_main_urls_file()
+        
+        # Verify main urls.py was updated with the app inclusion
+        mock_file.assert_any_call(f"{self.generator.spellbook_dir}/urls.py", 'w')
+        written_content = mock_file().write.call_args[0][0]
+        
+        # Should contain path to include the app-specific URL module
+        self.assertIn(f"include('django_spellbook.urls_test_app')", written_content)
+        self.assertIn(f"path('test_app/'", written_content)
+            
+    def test_app_specific_file_generation(self):
+        """Test generation of app-specific urls and views files."""
+        processed_file = ProcessedFile(
+            original_path=Path('/test/file.md'),
+            html_content='<h1>Test</h1>',
+            template_path=Path('/test/template.html'),
+            relative_url='test',
+            context=self.mock_context
+        )
+        
+        with patch.object(self.generator, '_write_file') as mock_write:
+            self.generator.generate_urls_and_views([processed_file], {})
+            
+            # Should write to app-specific files
+            urls_module = f"urls_test_app.py"
+            views_module = f"views_test_app.py"
+            
+            # Check that app-specific files were written to
+            mock_write.assert_any_call(urls_module, unittest.mock.ANY)
+            mock_write.assert_any_call(views_module, unittest.mock.ANY)
+            
+    
+    @patch('os.path.exists')
+    @patch('builtins.open')
+    @patch('django_spellbook.management.commands.processing.url_view_generator.logger')
+    def test_exception_handling_in_update_main_urls(self, mock_logger, mock_open, mock_exists):
+        """Test exception handling when reading the urls.py file"""
+        # Set up conditions for exception
+        mock_exists.return_value = True
+        
+        # Make open raise an exception when trying to read the file
+        file_mock = mock_open.return_value.__enter__.return_value
+        file_mock.read.side_effect = IOError("Test file read error")
+        
+        # Call the method - should not raise the exception
+        self.generator._update_main_urls_file()
+        
+        # Verify logger.error was called with the right message
+        mock_logger.error.assert_called_once()
+        error_msg = mock_logger.error.call_args[0][0]
+        self.assertIn("Error reading urls.py", error_msg)
+        self.assertIn("Test file read error", error_msg)
+        
+        # Verify the method continued execution and wrote the file
+        # There should be a second call to open in write mode
+        self.assertEqual(mock_open.call_count, 2)
+        calls = mock_open.call_args_list
+        self.assertEqual(calls[0][0][1], 'r')  # First call should be in read mode
+        self.assertEqual(calls[1][0][1], 'w')  # Second call should be in write mode
+        
+
+import os
+import shutil
+import tempfile
+import datetime
+
+
+
+
+class URLViewGeneratorIntegrationTest(TestCase):
+    """Integration tests for URL name generation in URLViewGenerator"""
+    
+    def setUp(self):
+        # Create temporary directory for testing
+        self.temp_dir = tempfile.mkdtemp()
+        
+        # Create a temporary spellbook directory structure
+        self.spellbook_dir = os.path.join(self.temp_dir, 'django_spellbook')
+        os.makedirs(self.spellbook_dir, exist_ok=True)
+        
+        # Set up the generator with a real filesystem
+        self.generator = URLViewGenerator('test_app', os.path.join(self.temp_dir, 'content'))
+        
+        # Override the spellbook directory to use our temporary one
+        self.generator.spellbook_dir = self.spellbook_dir
+        
+        # Create a mock context for processed files
+        self.context = SpellbookContext(
+            title='Test',
+            created_at=datetime.datetime(2024, 11, 10, 3, 29, 58, 8432),
+            updated_at=datetime.datetime(2024, 11, 10, 3, 29, 58, 8432),
+            url_path='test',
+            raw_content='# Test\nThis is a test',
+        )
+        
+        
+    def tearDown(self):
+        # Clean up temporary directory
+        shutil.rmtree(self.temp_dir)
+    
+    def _create_processed_file(self, relative_url):
+        """Helper to create a processed file with a specific relative URL"""
+        return ProcessedFile(
+            original_path=Path(f"/test/{relative_url}.md"),
+            html_content="<h1>Test</h1>",
+            template_path=Path(f"/test/templates/{relative_url}.html"),
+            relative_url=relative_url,
+            context=self.context
+        )
+    
+    def test_actual_urls_file_generation(self):
+        """Test the actual generation of the urls.py file with proper URL names"""
+        # Process multiple files with different path structures
+        processed_files = [
+            self._create_processed_file("first_blog"),
+            self._create_processed_file("lifestyle/digital-minimalism"),
+            self._create_processed_file("blocks/practice"),
+            self._create_processed_file("blocks/quote"),
+            self._create_processed_file("tech/sustainable-tech")
+        ]
+        
+        # Generate URLs and views
+        self.generator.generate_urls_and_views(processed_files, {})
+        
+        # Read the generated urls.py file
+        urls_file_path = os.path.join(self.spellbook_dir, 'urls_test_app.py')
+        self.assertTrue(os.path.exists(urls_file_path), "URLs file was not created")
+        
+        with open(urls_file_path, 'r') as f:
+            urls_content = f.read()
+        
+        # Verify URL patterns have correct names
+        self.assertIn("path('first_blog/', first_blog, name='first_blog')", urls_content)
+        self.assertIn("path('lifestyle/digital-minimalism/', lifestyle_digital_minimalism, name='lifestyle_digital-minimalism')", urls_content)
+        self.assertIn("path('blocks/practice/', blocks_practice, name='blocks_practice')", urls_content)
+        self.assertIn("path('blocks/quote/', blocks_quote, name='blocks_quote')", urls_content)
+        self.assertIn("path('tech/sustainable-tech/', tech_sustainable_tech, name='tech_sustainable-tech')", urls_content)

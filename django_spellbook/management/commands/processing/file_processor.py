@@ -26,6 +26,7 @@ class MarkdownProcessingError(Exception):
 class MarkdownFileProcessor:
     def __init__(self):
         self.parser = MarkdownParser
+        self.current_source_path = None  # to store the current source path
 
     def process_file(self, file_path: Path, dirpath: str, filename: str, folders: List[str]) -> Optional[ProcessedFile]:
         """Main processing function that orchestrates the markdown processing"""
@@ -47,6 +48,7 @@ class MarkdownFileProcessor:
         except Exception as e:
             raise MarkdownProcessingError(
                 f"Unexpected error processing {filename}: {str(e)}")
+
 
     def _validate_and_get_path(self, dirpath: str, filename: str) -> Path:
         """Validates and returns the full file path"""
@@ -99,9 +101,13 @@ class MarkdownFileProcessor:
     def _calculate_relative_url(self, file_path: Path) -> str:
         """Calculates the relative URL for a file"""
         try:
-            return str(file_path.relative_to(
-                Path(settings.SPELLBOOK_MD_PATH)
-            ).with_suffix('')).replace('\\', '/')
+            # Use the current source path instead of the global setting
+            if self.current_source_path is None:
+                raise MarkdownProcessingError(
+                    "No source path set for markdown processing")
+            
+            return str(file_path.relative_to(Path(self.current_source_path))
+            ).replace('.md', '').replace('\\', '/')
         except Exception as e:
             raise MarkdownProcessingError(
                 f"Error calculating relative URL: {str(e)}")

@@ -7,7 +7,8 @@ from django.test import TestCase, override_settings
 from django.core.exceptions import ImproperlyConfigured
 from django_spellbook.templatetags.spellbook_tags import sidebar_toc, TOC
 from django.urls import reverse, NoReverseMatch
-from django_spellbook.templatetags.spellbook_tags import spellbook_url, spellbook_styles
+from django_spellbook.templatetags.spellbook_tags import spellbook_url, spellbook_styles, dash_strip
+
 from . import settings
 
 
@@ -27,7 +28,7 @@ class TestSpellbookTags(TestCase):
     def test_returns_toc(self):
         """Test that sidebar_toc returns an empty dictionary"""
         result = sidebar_toc(Context({'toc': TOC}))
-        self.assertEqual(result, {'toc': TOC})
+        self.assertEqual(result['toc'], TOC)
 
     def test_empty_sidebar_toc_tag(self):
         """Test that sidebar_toc raises ImproperlyConfigured when TOC is missing"""
@@ -52,11 +53,11 @@ class TestSpellbookUrl(TestCase):
             mock_reverse.return_value = '/test/url/'
 
             # Test with a simple path
-            result = spellbook_url('test/page')
+            result = spellbook_url('test_page')
 
             # Verify the result
             self.assertEqual(result, '/test/url/')
-            mock_reverse.assert_called_once_with('view_test_page')
+            mock_reverse.assert_called_once_with('test_page')
 
     def test_invalid_url_path(self):
         """Test spellbook_url with an invalid URL path that cannot be reversed"""
@@ -68,7 +69,7 @@ class TestSpellbookUrl(TestCase):
             result = spellbook_url('invalid/path')
 
             # Verify fallback behavior
-            self.assertEqual(result, '#')
+            self.assertEqual(result, 'invalid/path')
 
     def test_empty_url_path(self):
         """Test spellbook_url with an empty URL path"""
@@ -82,11 +83,11 @@ class TestSpellbookUrl(TestCase):
             mock_reverse.return_value = '/special/url/'
 
             # Test with a path containing special characters
-            result = spellbook_url('special/page@#$')
+            result = spellbook_url('special_page@#$')
 
             # Verify the result
             self.assertEqual(result, '/special/url/')
-            mock_reverse.assert_called_once_with('view_special_page@#$')
+            mock_reverse.assert_called_once_with('special_page@#$')
 
 
 class TestSpellbookStyles(TestCase):
@@ -94,3 +95,10 @@ class TestSpellbookStyles(TestCase):
         """Test that spellbook_styles tag returns an empty dictionary"""
         result = spellbook_styles()
         self.assertEqual(result, {})
+
+
+class TestDashStrip(TestCase):
+    def test_dash_strip(self):
+        """Test that dash_strip removes the initial dashes from a string"""
+        result = dash_strip('--test-string')
+        self.assertEqual(result, 'test-string')

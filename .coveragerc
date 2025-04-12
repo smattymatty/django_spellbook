@@ -5,7 +5,9 @@ omit =
     */tests/*
     */venv/*
     views.py
+    views_*.py
     urls.py
+    urls_*.py
     setup.py
 
 [report]

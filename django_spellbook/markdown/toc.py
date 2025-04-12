@@ -3,6 +3,10 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 
+from django.conf import settings
+
+from django_spellbook.utils import remove_leading_dash, get_clean_url, titlefy
+
 
 @dataclass
 class TOCEntry:
@@ -24,11 +28,14 @@ class TOCGenerator:
         parts = file_path.parent.parts
         current = self.root
 
+        title = remove_leading_dash(title)
+        title = titlefy(title)
+
         # Handle root-level files
         if not parts:
             current.children[file_path.stem] = TOCEntry(
                 title=title,
-                url=url,
+                url=get_clean_url(url),
             )
             return
 
@@ -37,7 +44,8 @@ class TOCGenerator:
             if part not in current.children:
                 current.children[part] = TOCEntry(
                     title=part.replace('-', ' ').title(),
-                    url=part,  # Just use the directory name
+                    # Just use the directory name
+                    url=get_clean_url(part),
                 )
             current = current.children[part]
 
@@ -45,15 +53,16 @@ class TOCGenerator:
         filename = file_path.stem
         current.children[filename] = TOCEntry(
             title=title,
-            url=url,  # Use the full provided URL for files
+            # Use the full provided URL for files
+            url=get_clean_url(url),
         )
 
     def get_toc(self) -> Dict:
         """Get the complete TOC structure"""
         def _convert_to_dict(entry: TOCEntry) -> Dict:
             result = {
-                'title': entry.title,
-                'url': entry.url,
+                'title': remove_leading_dash(entry.title),
+                'url': get_clean_url(entry.url),
             }
             if entry.children:
                 result['children'] = {

@@ -1,0 +1,18 @@
+<blockquote class="sb-blockquote sb-pl-4 sb-border-accent sb-border-0 sb-border-solid sb-border-l sb-mb-4 {% if image %}sb-quote-with-image{% endif %} {% if class %}{{ class }}{% endif %}">
+    <div class="sb-quote-inner">
+        {% if image %}
+        <div class="sb-quote-image-wrapper">
+            <img src="{{ image }}" alt="{% if author %}{{ author }}{% else %}Quote author{% endif %}" class="sb-quote-image">
+        </div>
+        {% endif %}
+        <div class="sb-quote-content">
+            <p class="sb-italic">{{ content|safe }}</p>
+            {% if author or source %}
+            <footer class="sb-text-sm sb-mt-2">
+                {% if author %}<cite class="sb-bold">{{ author }}</cite>{% endif %}
+                {% if source %}<span class="sb-neutral-50">, {{ source }}</span>{% endif %}
+            </footer>
+            {% endif %}
+        </div>
+    </div>
+</blockquote>

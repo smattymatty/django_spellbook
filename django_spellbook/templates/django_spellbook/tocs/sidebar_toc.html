@@ -20,18 +20,18 @@
 
   .toc-sublist {
     margin-left: 1.5rem;
-    border-left: 1px solid #eee;
+    border-left: 1px solid #00000044;
     overflow: hidden;
     transition: max-height 0.3s ease-out;
   }
 
   .toc-sublist .toc-sublist {
     margin-left: 1rem; /* Slightly smaller indent for deeper levels */
-    border-left-style: dashed; /* Different border style for deeper levels */
+    border-left-style: dashed; 
   }
 
   .toc-sublist .toc-sublist .toc-sublist {
-    border-left-color: #eee; /* Lighter border for even deeper levels */
+    border-left-color: #15151575; 
   }
   .toc-item,
   .toc-subitem {
@@ -49,7 +49,7 @@
   }
 
   .toc-link:hover {
-    background-color: #f5f5f5;
+    background-color: #f5f5f555;
     color: #000;
   }
 
@@ -61,11 +61,17 @@
     margin-top: 1rem;
   }
 
-  .toc-item.active > .toc-link,
-  .toc-subitem.active > .toc-link {
-    background-color: #e9ecef;
-    color: #000;
+  .toc-item.active div a,
+  .toc-subitem.active div a {
+    background-color: #b1b1b18f !important;
+    color: #363636;
     font-weight: 500;
+  }
+
+  .toc-item.active div a:hover,
+  .toc-subitem.active div a:hover {
+    background-color: #bebebe9a !important;
+    color: #242424;
   }
 
   @media (max-width: 767px) {

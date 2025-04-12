@@ -42,3 +42,34 @@ class CardBlock(BasicSpellBlock):
         context['class'] = self.kwargs.get('class', '')
 
         return context
+
+@SpellBlockRegistry.register()
+class QuoteBlock(BasicSpellBlock):
+    name = 'quote'
+    template = 'blog/blocks/quote.html'
+
+    def get_context(self):
+        context = super().get_context()
+        context['author'] = self.kwargs.get('author', '')
+        context['source'] = self.kwargs.get('source', '')
+        
+        # Additional styling classes
+        context['class'] = self.kwargs.get('class', '')
+        return context
+    
+    
+@SpellBlockRegistry.register()
+class PracticeBlock(BasicSpellBlock):
+    name = 'practice'
+    template = 'blog/blocks/practice.html'
+
+    def get_context(self):
+        context = super().get_context()
+        context['difficulty'] = self.kwargs.get('difficulty', 'Moderate')
+        context['timeframe'] = self.kwargs.get('timeframe', 'Varies')
+        context['impact'] = self.kwargs.get('impact', 'Medium')
+        context['focus'] = self.kwargs.get('focus', 'General')
+        
+        # Additional styling classes
+        context['class'] = self.kwargs.get('class', '')
+        return context

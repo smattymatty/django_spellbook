@@ -6,6 +6,8 @@ from django_spellbook.markdown.context import SpellbookContext
 import tempfile
 import os
 
+from django_spellbook.utils import titlefy
+
 
 class TestFrontMatterParser(unittest.TestCase):
     def setUp(self):
@@ -112,7 +114,7 @@ Content"""
         parser = FrontMatterParser(content, self.temp_file)
         context = parser.get_context('/test/url')
 
-        self.assertEqual(context.title, self.temp_file.stem)
+        self.assertEqual(context.title, titlefy(self.temp_file.stem))
         self.assertTrue(context.is_public)
         self.assertEqual(context.tags, [])
         self.assertEqual(context.custom_meta, {})
@@ -128,6 +130,18 @@ Unicode content 内容"""
         self.assertEqual(parser.metadata['title'], '测试标题')
         self.assertEqual(parser.metadata['tags'], ['测试', '示例'])
         self.assertEqual(parser.raw_content, 'Unicode content 内容')
+
+    def test_dash_stripped_url_path(self):
+        """Test URL path generation with dashes"""
+        content = """---
+title: Test Title
+---
+Content"""
+        parser = FrontMatterParser(content, self.temp_file)
+        context = parser.get_context('--test-url-path/--test-url-path-2')
+
+        self.assertEqual(context.title, 'Test Title')
+        self.assertEqual(context.url_path, 'test-url-path/test-url-path-2')
 
 
 class TestMultiBool(unittest.TestCase):

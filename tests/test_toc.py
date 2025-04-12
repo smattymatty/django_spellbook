@@ -1,5 +1,8 @@
 import unittest
 from pathlib import Path
+
+from django.test import override_settings
+
 from django_spellbook.markdown.toc import TOCGenerator, TOCEntry
 
 
@@ -63,6 +66,52 @@ class TestTOCGenerator(unittest.TestCase):
         self.assertEqual(intro["title"], "Introduction")
         self.assertEqual(intro["url"], "/docs/guide/intro")
 
+    def test_dashes_replaced_with_spaces_in_titlles(self):
+        """Test that dashes in titles are replaced with spaces"""
+        self.toc.add_entry(
+            Path("docs/guide/intro-to-django.md"),
+            title="intro-to-django",
+            url="/docs/guide/intro-to-django",
+        )
+        toc_dict = self.toc.get_toc()
+
+        self.assertIn("Intro to Django",
+                      toc_dict["children"]
+                      ['docs']['children']['guide']['children']
+                      ["intro-to-django"]['title']
+                      )
+
+    def test_auto_capitalization_of_title_in_words_longer_than_2_characters(self):
+        """Test that titles are automatically capitalized if they are longer than 3 characters"""
+        self.toc.add_entry(
+            Path("docs/guide/when-to-use-django.md"),
+            title="when-to-use-django",
+            url="/docs/guide/When-to-use-Django",
+        )
+        toc_dict = self.toc.get_toc()
+
+        self.assertIn("When to Use Django",
+                      toc_dict["children"]
+                      ['docs']['children']['guide']['children']
+                      ["when-to-use-django"]['title']
+                      )
+
+    @override_settings(SPELLBOOK_MD_TITLEFY=False)
+    def test_false_capitalization_of_title_in_words_longer_than_2_characters(self):
+        """Test that titles are not automatically capitalized if SPELLBOOK_MD_TITLE_CAPITALIZATION is set to False"""
+        self.toc.add_entry(
+            Path("docs/guide/when-to-use-django.md"),
+            title="when-to-use-django",
+            url="/docs/guide/when-to-use-django",
+        )
+        toc_dict = self.toc.get_toc()
+
+        self.assertIn("when-to-use-django",
+                      toc_dict["children"]
+                      ['docs']['children']['guide']['children']
+                      ["when-to-use-django"]['title']
+                      )
+
     def test_multiple_files_same_directory(self):
         """Test adding multiple files to the same directory"""
         self.toc.add_entry(
@@ -100,7 +149,7 @@ class TestTOCGenerator(unittest.TestCase):
             ("index.md", "Home", "/"),
             ("about.md", "About", "/about"),
             ("docs/index.md", "Documentation", "/docs"),
-            ("docs/guide/start.md", "Getting Started", "/docs/guide/start"),
+            ("docs/guide/start.md", "Getting-started", "/docs/guide/start"),
             ("docs/guide/advanced.md", "Advanced", "/docs/guide/advanced"),
         ]
 

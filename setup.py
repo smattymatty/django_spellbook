@@ -1,25 +1,17 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
 setup(
     name='django-spellbook',
-    version='0.0.4',  # Increment version
+    version='0.1.9b11',  # Increment version
     author='Mathew Storm',
     author_email='mathewstormdev@gmail.com',
     description='A Django library for creating and managing content blocks in markdown for developers and bloggers',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/yourusername/django-spellbook',
-    packages=find_packages(),
+    url='https://github.com/smattymatty/django_spellbook',
+    packages=find_namespace_packages(include=['django_spellbook', 'django_spellbook.*']),
     include_package_data=True,
-    package_data={
-        'django_spellbook': [
-            'templates/*.html',
-            'templates/*/*.html',
-            'templates/*/*/*.html',
-            'static/*',
-            'static/*/*',
-        ],
-    },
+    license='MIT', 
     install_requires=[
         'django>=5.0',
         'markdown>=3.0',
@@ -30,16 +22,13 @@ setup(
         'Framework :: Django',
         'Framework :: Django :: 5.0',
         'Intended Audience :: Developers',
-        'Intended Audience :: Other Audience',
-        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.10',
-        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
     python_requires='>=3.10',
     project_urls={
+        'Documentation': 'https://django-spellbook.org/',
         'Bug Reports': 'https://github.com/smattymatty/django_spellbook/issues',
         'Source': 'https://github.com/smattymatty/django_spellbook',
     },

@@ -3,6 +3,7 @@ from unittest.mock import patch, Mock
 from django.test import TestCase
 from django.template.loader import render_to_string
 from django_spellbook.blocks.base import BasicSpellBlock
+from django_spellbook.markdown.extensions.django_like import DjangoLikeTagExtension
 
 
 class TestBasicSpellBlock(TestCase):
@@ -53,26 +54,37 @@ class TestBasicSpellBlock(TestCase):
     def test_process_content(self, mock_markdown):
         """Test markdown content processing."""
         mock_markdown.return_value = '<h1>Test Header</h1>\n<p>Test content</p>'
-
         block = self.BlockClass(self.test_content)
         processed_content = block.process_content()
-
-        # Verify markdown was called with correct parameters
-        mock_markdown.assert_called_once_with(
-            self.test_content,
-            extensions=[
-                'markdown.extensions.fenced_code',
-                'markdown.extensions.tables',
-                'markdown.extensions.nl2br',
-                'markdown.extensions.sane_lists',
-            ]
-        )
-
+        
+        # Get the actual call arguments
+        args, kwargs = mock_markdown.call_args
+        
+        # Verify the content matches
+        self.assertEqual(args[0], self.test_content + '\n')
+        
+        # Verify extensions list length
+        extensions = kwargs['extensions']
+        self.assertEqual(len(extensions), 5)
+        
+        # Verify the type of the first extension
+        self.assertIsInstance(extensions[0], DjangoLikeTagExtension)
+        
+        # Verify the remaining extensions match exactly
+        self.assertEqual(extensions[1:], [
+            'markdown.extensions.fenced_code',
+            'markdown.extensions.tables',
+            'markdown.extensions.nl2br',
+            'markdown.extensions.sane_lists',
+        ])
+        
         self.assertEqual(
             processed_content,
             '<h1>Test Header</h1>\n<p>Test content</p>'
         )
 
+    
+    
     def test_render(self):
         """Test template rendering with context."""
         expected_output = '<div>Rendered content</div>'

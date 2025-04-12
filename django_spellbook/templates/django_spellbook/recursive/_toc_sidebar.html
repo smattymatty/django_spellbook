@@ -11,6 +11,7 @@
             {% endif %}
             {% if data.url %}
                 <a href="{% spellbook_url data.url %}"
+                
                    class="toc-link {% if data.children %}has-children{% endif %}">{{ data.title }}</a>
             {% else %}
                 <span class="toc-section">{{ data.title }}</span>
@@ -18,8 +19,7 @@
         </div>
         {% if data.children %}
             <ul class="toc-sublist">
-                {% include "django_spellbook/recursive/_toc_sidebar.html" with
-                items=data.children %}
+                {% include "django_spellbook/recursive/_toc_sidebar.html" with items=data.children %}
             </ul>
         {% endif %}
     </li>

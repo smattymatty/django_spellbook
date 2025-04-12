@@ -1,0 +1,19 @@
+<div class="sb-practice-block sb-border sb-border-radius-lg sb-p-4 sb-mb-4 sb-shadow-sm {% if kwargs.class %}{{ kwargs.class }}{% endif %}">
+    <div class="sb-practice-metadata sb-flex sb-flex-wrap sb-gap-3 sb-mb-3 sb-p-2 sb-border-radius-md">
+        <span class="sb-difficulty-level sb-badge" data-difficulty="{{ difficulty|lower }}">
+            <strong>Difficulty:</strong> {{ difficulty }}
+        </span>
+        <span class="sb-time-commitment sb-badge">
+            <strong>Time:</strong> {{ timeframe }}
+        </span>
+        <span class="sb-impact-level sb-badge" data-impact="{{ impact|lower }}">
+            <strong>Impact:</strong> {{ impact }}
+        </span>
+        <span class="sb-focus-area sb-badge">
+            <strong>Focus:</strong> {{ focus }}
+        </span>
+    </div>
+    <div class="sb-practice-content">
+        {{ content|safe }}
+    </div>
+</div>

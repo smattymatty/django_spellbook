@@ -7,6 +7,8 @@ from django.test import override_settings
 from django_spellbook.management.commands.processing.file_processor import (
     MarkdownFileProcessor,
     MarkdownProcessingError,
+    FrontMatterParser,
+    SpellbookContext,
 )
 
 
@@ -102,36 +104,32 @@ class TestMarkdownFileProcessor(unittest.TestCase):
         self.assertEqual(html_content, "<h1>Test Content</h1>")
         mock_frontmatter.assert_called_once_with(md_text, file_path)
 
-    @override_settings(SPELLBOOK_MD_PATH='/fake/path')
     def test_calculate_relative_url(self):
         """Test relative URL calculation"""
-        file_path = Path("/fake/path/subfolder/test.md")
-
+        # Set current_source_path for testing
+        self.processor.current_source_path = '/test/path'
+        file_path = Path('/test/path/subfolder/file.md')
+        
         relative_url = self.processor._calculate_relative_url(file_path)
+        
+        self.assertEqual(relative_url, 'subfolder/file')
 
-        self.assertEqual(relative_url, "subfolder/test")
-
-    @override_settings(SPELLBOOK_MD_PATH='/fake/path')
-    @patch('django_spellbook.management.commands.spellbook_md.FrontMatterParser')
-    def test_generate_file_metadata(self, mock_frontmatter):
+    def test_generate_file_metadata(self):
         """Test file metadata generation"""
-        # Setup
-        file_path = Path("/fake/path/test.md")
-        html_content = "<h1>Test</h1>"
-        mock_context = Mock()
-        mock_frontmatter.return_value.get_context.return_value = mock_context
-
-        processed_content = (html_content, mock_frontmatter.return_value)
-
-        # Test
+        # Set current_source_path for testing
+        self.processor.current_source_path = '/test/path'
+        file_path = Path('/test/path/test.md')
+        html_content = '<h1>Test</h1>'
+        frontmatter = Mock(spec=FrontMatterParser)
+        context = Mock(spec=SpellbookContext)
+        frontmatter.get_context.return_value = context
+        
         result_html, result_path, result_context = self.processor._generate_file_metadata(
-            file_path, processed_content
-        )
-
-        # Assertions
+            file_path, (html_content, frontmatter))
+        
         self.assertEqual(result_html, html_content)
         self.assertEqual(result_path, file_path)
-        self.assertEqual(result_context, mock_context)
+        self.assertEqual(result_context, context)
 
     @override_settings(SPELLBOOK_MD_PATH='/fake/path')
     @patch.object(MarkdownFileProcessor, '_validate_and_get_path')

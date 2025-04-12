@@ -1,6 +1,5 @@
-/* alert block  */
-
-.spellbook-alert {
+/* Alert Block */
+.sb-alert {
   padding: 1rem;
   margin-bottom: 1rem;
   border: 1px solid transparent;
@@ -12,14 +11,49 @@
   margin-bottom: 1rem;
 }
 
-.spellbook-alert-icon {
+.sb-alert-icon {
   display: inline-block;
   margin-right: 0.5rem;
 }
 
-/* card block */
+.sb-alert-info {
+  background-color: color-mix(in srgb, var(--info-color) 15%, white);
+  border-color: color-mix(in srgb, var(--info-color) 25%, white);
+  color: color-mix(in srgb, var(--info-color) 70%, black);
+}
 
-.spellbook-card {
+.sb-alert-warning {
+  background-color: color-mix(in srgb, var(--warning-color) 15%, white);
+  border-color: color-mix(in srgb, var(--warning-color) 25%, white);
+  color: color-mix(in srgb, var(--warning-color) 70%, black);
+}
+
+.sb-alert-success {
+  background-color: color-mix(in srgb, var(--success-color) 15%, white);
+  border-color: color-mix(in srgb, var(--success-color) 25%, white);
+  color: color-mix(in srgb, var(--success-color) 70%, black);
+}
+
+.sb-alert-danger {
+  background-color: color-mix(in srgb, var(--error-color) 15%, white);
+  border-color: color-mix(in srgb, var(--error-color) 25%, white);
+  color: color-mix(in srgb, var(--error-color) 70%, black);
+}
+
+.sb-alert-primary {
+  background-color: color-mix(in srgb, var(--primary-color) 15%, white);
+  border-color: color-mix(in srgb, var(--primary-color) 25%, white);
+  color: color-mix(in srgb, var(--primary-color) 70%, black);
+}
+
+.sb-alert-secondary {
+  background-color: color-mix(in srgb, var(--secondary-color) 15%, white);
+  border-color: color-mix(in srgb, var(--secondary-color) 25%, white);
+  color: color-mix(in srgb, var(--secondary-color) 70%, black);
+}
+
+/* Card Block */
+.sb-card {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -27,39 +61,228 @@
   max-width: 90%;
   margin: auto;
   word-wrap: break-word;
-  background-color: #fff;
+  background-color: white;
   background-clip: border-box;
-  border: 1px solid rgba(0, 0, 0, 0.125);
+  border: 1px solid color-mix(in srgb, var(--neutral-color) 15%, transparent);
   border-radius: 0.375rem;
   transition: all 0.3s ease-in-out;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  box-shadow: 0 0.125rem 0.25rem color-mix(in srgb, black 7.5%, transparent);
 }
 
-.spellbook-card:hover {
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+.sb-card:hover {
+  box-shadow: 0 0.5rem 1rem color-mix(in srgb, black 15%, transparent);
   transform: translateY(-2px);
 }
 
-.spellbook-card-header {
+.sb-card-header {
   padding: 0.75rem 1rem;
   margin-bottom: 0;
-  background-color: rgba(0, 0, 0, 0.03);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+  background-color: color-mix(in srgb, var(--neutral-color) 3%, white);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--neutral-color) 15%, transparent);
 }
 
-.spellbook-card-title {
+.sb-card-title {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 500;
+  color: color-mix(in srgb, var(--neutral-color) 99%, black);
 }
 
-.spellbook-card-body {
+.sb-card-body {
   flex: 1 1 auto;
   padding: 1rem;
 }
 
-.spellbook-card-footer {
+.sb-card-footer {
   padding: 0.75rem 1rem;
-  background-color: rgba(0, 0, 0, 0.03);
-  border-top: 1px solid rgba(0, 0, 0, 0.125);
+  background-color: color-mix(in srgb, var(--neutral-color) 3%, white);
+  border-top: 1px solid
+    color-mix(in srgb, var(--neutral-color) 33%, transparent);
+}
+/* Quote Block */
+.sb-blockquote {
+  position: relative;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  background-color: color-mix(in srgb, var(--neutral-color) 3%, white);
+  border-left: 4px solid var(--accent-color);
+  border-radius: 0.375rem;
+  max-width: 90%;
+  margin: auto;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0.125rem 0.25rem color-mix(in srgb, black 5%, transparent);
+  transition: all 0.2s ease-in-out;
+}
+
+.sb-blockquote:hover {
+  box-shadow: 0 0.25rem 0.5rem color-mix(in srgb, black 7.5%, transparent);
+  border-left-width: 6px;
+}
+
+.sb-blockquote p {
+  font-style: italic;
+  color: color-mix(in srgb, var(--neutral-color) 90%, black);
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.sb-blockquote footer {
+  font-size: 0.875rem;
+  color: color-mix(in srgb, var(--neutral-color) 70%, black);
+}
+
+.sb-blockquote cite {
+  font-weight: 600;
+  font-style: normal;
+}
+/* Quote block styles with image support */
+.sb-quote-with-image .sb-quote-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.sb-quote-image-wrapper {
+  flex-shrink: 0;
+}
+
+.sb-quote-image {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.sb-quote-content {
+  flex-grow: 1;
+  min-width: 0; /* Prevents text from overflowing */
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .sb-quote-with-image .sb-quote-inner {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+  }
+  
+  .sb-quote-image {
+      margin-bottom: 0.75rem;
+  }
+}
+
+/* Practice Block */
+.sb-practice-block {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 90%;
+  margin: auto;
+  margin-bottom: 2rem;
+  word-wrap: break-word;
+  background-color: white;
+  background-clip: border-box;
+  border: 1px solid color-mix(in srgb, var(--neutral-color) 20%, transparent);
+  border-radius: 0.5rem;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 0.125rem 0.375rem color-mix(in srgb, black 10%, transparent);
+}
+
+.sb-practice-block:hover {
+  box-shadow: 0 0.5rem 1rem color-mix(in srgb, black 15%, transparent);
+  transform: translateY(-3px);
+}
+
+.sb-practice-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: color-mix(in srgb, var(--neutral-color) 5%, white);
+  border-bottom: 1px solid color-mix(in srgb, var(--neutral-color) 15%, transparent);
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.sb-practice-content {
+  padding: 1.25rem;
+}
+
+.sb-practice-content h3 {
+  margin-top: 0;
+  color: color-mix(in srgb, var(--primary-color) 80%, black);
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.sb-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  border-radius: 9999px;
+  background-color: color-mix(in srgb, var(--neutral-color) 10%, white);
+  color: color-mix(in srgb, var(--neutral-color) 70%, black);
+  transition: all 0.2s ease;
+}
+
+.sb-badge strong {
+  margin-right: 0.25rem;
+}
+
+/* Difficulty badges */
+.sb-difficulty-level[data-difficulty="beginner"] {
+  background-color: color-mix(in srgb, var(--success-color) 15%, white);
+  color: color-mix(in srgb, var(--success-color) 70%, black);
+}
+
+.sb-difficulty-level[data-difficulty="intermediate"] {
+  background-color: color-mix(in srgb, var(--warning-color) 15%, white);
+  color: color-mix(in srgb, var(--warning-color) 70%, black);
+}
+
+.sb-difficulty-level[data-difficulty="advanced"] {
+  background-color: color-mix(in srgb, var(--error-color) 15%, white);
+  color: color-mix(in srgb, var(--error-color) 70%, black);
+}
+
+/* Impact badges */
+.sb-impact-level[data-impact="high"] {
+  background-color: color-mix(in srgb, var(--info-color) 15%, white);
+  color: color-mix(in srgb, var(--info-color) 70%, black);
+}
+
+.sb-impact-level[data-impact="transformative"] {
+  background-color: color-mix(in srgb, var(--primary-color) 15%, white);
+  color: color-mix(in srgb, var(--primary-color) 70%, black);
+}
+
+/* Focus badges */
+.sb-focus-area {
+  background-color: color-mix(in srgb, var(--secondary-color) 15%, white);
+  color: color-mix(in srgb, var(--secondary-color) 70%, black);
+}
+
+/* Timeframe badges */
+.sb-time-commitment {
+  background-color: color-mix(in srgb, var(--accent-color) 15%, white);
+  color: color-mix(in srgb, var(--accent-color) 70%, black);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sb-practice-metadata {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .sb-badge {
+    width: 100%;
+  }
 }

@@ -1,5 +1,5 @@
-<div class="spellbook-alert spellbook-bg-{{ type }} spellbook-border-{{ type }} spellbook-text-{{ type }} spellbook-p-3 spellbook-border-radius-lg spellbook-mb-3 spellbook-shadow-sm {% if kwargs.class %}{{ kwargs.class }}{% endif %}">
-    <span class="spellbook-alert-icon">
+<div class="sb-alert sb-alert-{{ type }} sb-p-3 sb-border-radius-lg sb-mb-3 sb-shadow-sm {% if kwargs.class %}{{ kwargs.class }}{% endif %}">
+    <span class="sb-alert-icon">
         {% if type == "info" %}
             ℹ️
         {% elif type == "warning" %}
@@ -10,7 +10,7 @@
             🚫
         {% endif %}
     </span>
-    <span class="spellbook-alert-content">
+    <span class="sb-alert-content">
         {{ content|safe }}
     </span>
 </div>

@@ -10,6 +10,7 @@ from pathlib import Path
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from django.apps import apps
+from django.urls import reverse
 from django.template.loader import render_to_string
 
 from django_spellbook.management.commands.processing.file_processor import MarkdownFileProcessor, ProcessedFile
@@ -29,9 +30,11 @@ class Command(BaseCommand):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # These will be validated in handle()
-        self.md_file_path = getattr(settings, 'SPELLBOOK_MD_PATH', None)
-        self.content_app = getattr(settings, 'SPELLBOOK_CONTENT_APP', None)
+        # Initialize empty attributes to be populated in validate_settings()
+        self.md_file_paths = None  # Will hold the list of paths
+        self.content_apps = None   # Will hold the list of apps
+        self.md_file_path = None   # For backward compatibility (first path)
+        self.content_app = None    # For backward compatibility (first app)
         self.content_dir_path = ""
         self.template_dir = ""
         self.toc_generator = TOCGenerator()
@@ -77,98 +80,151 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """Process markdown files from all configured source-destination pairs"""
         try:
             # Validate settings first
             self.validate_settings()
-
-            processed_files = []
-
-            # First pass: Build complete TOC
-            complete_toc = self._build_toc()
-
-            # Second pass: Process files
-            self.stdout.write("Processing markdown files...")
-
-            # Get all markdown files first
-            markdown_files = []
-            for dirpath, dirnames, filenames in os.walk(self.md_file_path):
-                for filename in filenames:
-                    if filename.endswith('.md'):
-                        markdown_files.append((dirpath, filename))
-
-            self.stdout.write(
-                f"Found {len(markdown_files)} markdown files to process")
-
-            # Process each file
-            for dirpath, filename in markdown_files:
-                self.stdout.write(f"Processing {filename}...")
-
-                if not self.content_dir_path:
-                    self._setup_directory_structure(dirpath)
-                    self.template_generator = TemplateGenerator(
-                        self.content_app, self.template_dir)
-                    self.url_generator = URLViewGenerator(
-                        self.content_app, self.content_dir_path)
-
-                try:
-                    folder_list = self._get_folder_list(dirpath)
-                    html_content, file_path, context = self.file_processor.process_file(
-                        Path(dirpath), dirpath, filename, folder_list
-                    )
-
-                    relative_path = Path(file_path).relative_to(
-                        Path(self.md_file_path))
-                    template_path = self.template_generator.get_template_path(
-                        filename, folder_list
-                    )
-                    relative_url = str(
-                        relative_path.with_suffix('')).replace('\\', '/')
-
-                    # Use the complete TOC for all files
-                    context.toc = complete_toc
-
-                    processed_file = ProcessedFile(
-                        original_path=file_path,
-                        html_content=html_content,
-                        template_path=template_path,
-                        relative_url=relative_url,
-                        context=context
-                    )
-                    processed_files.append(processed_file)
-
-                    self.template_generator.create_template(
-                        template_path,
-                        html_content
-                    )
-                    self.stdout.write(self.style.SUCCESS(
-                        f"Successfully processed {filename}"))
-
-                except Exception as e:
-                    self.stdout.write(
-                        self.style.ERROR(
-                            f"Error processing {filename}: {str(e)}")
-                    )
-                    continue
-
-            if processed_files:
-                self.stdout.write("Generating URLs and views...")
-                self.url_generator.generate_urls_and_views(
-                    processed_files, complete_toc)
+            
+            # Process each source-destination pair
+            for i, (md_path, content_app) in enumerate(zip(self.md_file_paths, self.content_apps)):
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f"Successfully processed {len(processed_files)} files")
+                        f"Processing source-destination pair {i+1}/{len(self.md_file_paths)}: {md_path} → {content_app}"
+                    )
                 )
-            else:
-                raise CommandError(
-                    "No markdown files were processed successfully")
-
+                try:
+                    self._process_source_destination_pair(md_path, content_app)
+                except Exception as e:
+                    self.stdout.write(
+                        self.style.ERROR(f"Error processing pair {md_path} → {content_app}: {str(e)}")
+                    )
+                    if len(self.md_file_paths) > 1:
+                        self.stdout.write("Continuing with next pair...")
+                        continue
+                    else:
+                        raise
+                
         except Exception as e:
             self.stdout.write(
                 self.style.ERROR(f"Command failed: {str(e)}")
             )
             raise
 
-    def _build_toc(self) -> Dict:
+    def _process_source_destination_pair(self, md_path, content_app):
+        """Process all markdown files for a single source-destination pair"""
+        # Reset processors for each pair
+        self.file_processor = MarkdownFileProcessor()
+        self.template_generator = None  
+        self.url_generator = None
+    
+    # Set current source path on processor
+        self.file_processor.current_source_path = md_path
+        # Set current pair for backward compatibility with existing methods
+        self.md_file_path = md_path
+        self.content_app = content_app
+        self.content_dir_path = ""  # Reset for each pair
+        self.template_dir = ""      # Reset for each pair
+        self.template_generator = None  
+        self.url_generator = None       
+            
+        processed_files = []
+        
+        # Build TOC for this source path
+        complete_toc = self._build_toc(content_app)
+        
+        # Find and process markdown files
+        markdown_files = self._find_markdown_files()
+        if not markdown_files:
+            raise CommandError(f"No markdown files found in {md_path}")
+    
+        
+        self.stdout.write(f"Found {len(markdown_files)} markdown files to process")
+        
+        # Process each file
+        for i, (dirpath, filename) in enumerate(markdown_files):
+            self.stdout.write(f"Processing file {i+1}/{len(markdown_files)}: {filename}")
+            processed_file = self._process_markdown_file(dirpath, filename, complete_toc)
+            if processed_file:
+                processed_files.append(processed_file)
+        
+        # Generate URLs and views
+        if processed_files:
+            self.stdout.write("Generating URLs and views...")
+            self.url_generator.generate_urls_and_views(processed_files, complete_toc)
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Successfully processed {len(processed_files)} files for {content_app}"
+                )
+            )
+        else:
+            raise CommandError(f"No markdown files were processed successfully for {content_app}")
+
+    def _find_markdown_files(self):
+        """Find all markdown files in the current source path"""
+        markdown_files = []
+        for dirpath, dirnames, filenames in os.walk(self.md_file_path):
+            for filename in filenames:
+                if filename.endswith('.md'):
+                    markdown_files.append((dirpath, filename))
+        return markdown_files
+
+    def _process_markdown_file(self, dirpath, filename, complete_toc):
+        """Process a single markdown file and return a ProcessedFile or None on failure"""
+        # Setup directory structure first
+        if not self.content_dir_path:
+            self._setup_directory_structure(dirpath)
+        
+        # Initialize generators if not already set
+        if not self.template_generator:
+            self.template_generator = TemplateGenerator(
+                self.content_app, self.template_dir)
+        if not self.url_generator:
+            self.url_generator = URLViewGenerator(
+                content_app=self.content_app,
+                content_dir_path=self.content_dir_path,
+                source_path=self.md_file_path  # Add this parameter
+            )
+        try:
+            folder_list = self._get_folder_list(dirpath)
+            html_content, file_path, context = self.file_processor.process_file(
+                Path(dirpath), dirpath, filename, folder_list
+            )
+            
+            relative_path = Path(file_path).relative_to(Path(self.md_file_path))
+            template_path = self.template_generator.get_template_path(
+                filename, folder_list
+            )
+            relative_url = str(
+                relative_path.with_suffix('')).replace('\\', '/')
+            
+            # Use the complete TOC for all files
+            context.toc = complete_toc
+            
+            processed_file = ProcessedFile(
+                original_path=file_path,
+                html_content=html_content,
+                template_path=template_path,
+                relative_url=relative_url,
+                context=context
+            )
+            
+            self.template_generator.create_template(
+                template_path,
+                html_content
+            )
+            self.stdout.write(self.style.SUCCESS(
+                f"Successfully processed {filename}"))
+            
+            return processed_file
+            
+        except Exception as e:
+            self.stdout.write(
+                self.style.ERROR(
+                    f"Error processing {filename}: {str(e)}")
+            )
+            return None
+
+    def _build_toc(self, content_app:str) -> Dict:
         """Build complete table of contents"""
         toc_generator = TOCGenerator()
 
@@ -179,9 +235,9 @@ class Command(BaseCommand):
                         file_path = Path(dirpath) / filename
                         relative_path = file_path.relative_to(
                             Path(self.md_file_path))
-                        url = str(relative_path.with_suffix(
+                        url = f"{content_app}:" + str(relative_path.with_suffix(
                             '')).replace('\\', '/')
-
+                        url = url.replace('/', '_')
                         # Get title from frontmatter
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
@@ -194,8 +250,8 @@ class Command(BaseCommand):
                         logger.error(
                             f"Error adding TOC entry for {filename}: {str(e)}")
                         continue
-
-        return toc_generator.get_toc()
+        returned_toc = toc_generator.get_toc()
+        return returned_toc
 
     def _setup_directory_structure(self, dirpath: str):
         """Set up the necessary directory structure for content processing"""
@@ -217,13 +273,9 @@ class Command(BaseCommand):
     def _setup_template_directory(self):
         """Set up the template directory structure"""
         try:
-            base_template_dir = os.path.join(
-                self.content_dir_path,
-                f"templates/{self.content_app}/spellbook_md"
-            )
-            if not os.path.exists(base_template_dir):
-                os.makedirs(base_template_dir)
-            self.template_dir = base_template_dir
+            base_template_dir = Path(self.content_dir_path) / 'templates' / self.content_app / 'spellbook_md'
+            base_template_dir.mkdir(parents=True, exist_ok=True)
+            self.template_dir = str(base_template_dir)
         except Exception as e:
             raise CommandError(
                 f"Could not create template directory {base_template_dir}: {str(e)}"
@@ -251,13 +303,69 @@ class Command(BaseCommand):
         logger.debug(f"Generated folder list: {folder_list}")
         return folder_list
 
+    def _normalize_settings(self):
+        """Convert settings to normalized lists and provide backward compatibility"""
+        # Get settings values with backward compatibility
+        md_path = getattr(settings, 'SPELLBOOK_MD_PATH', None)
+        md_app = getattr(settings, 'SPELLBOOK_MD_APP', None)
+        content_app = getattr(settings, 'SPELLBOOK_CONTENT_APP', None)
+        
+        # Prefer SPELLBOOK_MD_APP but fall back to SPELLBOOK_CONTENT_APP
+        app_setting = md_app if md_app is not None else content_app
+        
+        # Show deprecation warning if using old setting name
+        if md_app is None and content_app is not None:
+            self.stdout.write(
+                self.style.WARNING(
+                    "SPELLBOOK_CONTENT_APP is deprecated, use SPELLBOOK_MD_APP instead."
+                )
+            )
+        
+        # Convert to lists if needed
+        md_paths = [md_path] if isinstance(md_path, (str, Path)) else md_path
+        md_apps = [app_setting] if isinstance(app_setting, str) else app_setting
+        return md_paths, md_apps
+
     def validate_settings(self):
-        """Validate required settings"""
-        required_settings = ['SPELLBOOK_MD_PATH', 'SPELLBOOK_CONTENT_APP']
-        missing_settings = [
-            setting for setting in required_settings
-            if not getattr(settings, setting, None)
-        ]
+        """Validate required settings and support multiple source-destination pairs"""
+        # Normalize settings to lists
+        self.md_file_paths, self.content_apps = self._normalize_settings()
+        
+        # Check for missing settings
+        missing_settings = []
+        if not self.md_file_paths:
+            missing_settings.append('SPELLBOOK_MD_PATH')
+        if not self.content_apps:
+            missing_settings.append('SPELLBOOK_MD_APP or SPELLBOOK_CONTENT_APP')
+        
         if missing_settings:
+            raise CommandError(f"Missing required settings: {', '.join(missing_settings)}")
+        
+        # Validate list lengths match
+        if len(self.md_file_paths) != len(self.content_apps):
             raise CommandError(
-                f"Missing required settings: {', '.join(missing_settings)}")
+                "SPELLBOOK_MD_PATH and SPELLBOOK_MD_APP must have the same number of entries"
+            )
+        
+        # Set the first pair as current (for backward compatibility)
+        self.md_file_path = self.md_file_paths[0]
+        self.content_app = self.content_apps[0]
+        
+        # Warn if multiple pairs are defined but we're only using the first one
+        if len(self.md_file_paths) > 1:
+            self.stdout.write(
+                self.style.WARNING(
+                    "Multiple source-destination pairs detected. Currently only processing the first pair."
+                )
+            )
+        # ensure that each string is not empty
+        for md_path in self.md_file_paths:
+            if not md_path:
+                raise CommandError(
+                    "SPELLBOOK_MD_PATH must be a non-empty string."
+                )
+        for app_setting in self.content_apps:
+            if not app_setting:
+                raise CommandError(
+                    "SPELLBOOK_MD_APP must be a non-empty string."
+                )

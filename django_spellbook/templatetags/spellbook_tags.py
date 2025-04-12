@@ -4,6 +4,8 @@ from django import template
 from django.urls import reverse, NoReverseMatch
 from django.core.exceptions import ImproperlyConfigured
 
+from django_spellbook.utils import remove_leading_dash
+
 register = template.Library()
 
 
@@ -22,11 +24,12 @@ def sidebar_toc(context) -> Dict:
         ImproperlyConfigured: If TOC is not found in the context
     """
     toc = context.get('toc')
+    current_url = context.get('current_url')
     if toc is None:
         raise ImproperlyConfigured(
             "The 'toc' variable is required in the context for sidebar_toc tag"
         )
-    return {'toc': toc}
+    return {'toc': toc, 'current_url': current_url}
 
 
 @register.inclusion_tag('django_spellbook/data/metadata.html')
@@ -52,17 +55,21 @@ def spellbook_url(url_path: str) -> str:
         >>> spellbook_url('invalid/path')
         '#'
     """
-    if not url_path:
-        return '#'
-
-    view_name = f"view_{url_path.replace('/', '_')}"
     try:
-        return reverse(view_name)
+        if not url_path:
+            return '#'
+        return reverse(url_path)
     except NoReverseMatch:
-        return '#'
+        return url_path
 
 
 @register.inclusion_tag('django_spellbook/data/styles.html')
 def spellbook_styles():
     """Include the spellbook styles in the page"""
     return {}
+
+
+@register.simple_tag
+def dash_strip(string: str) -> str:
+    """Strip the initial dashes from a string"""
+    return remove_leading_dash(string)

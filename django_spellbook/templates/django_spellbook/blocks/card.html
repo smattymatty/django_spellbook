@@ -1,14 +1,14 @@
-<div class="spellbook-card spellbook-border spellbook-border-radius-lg spellbook-shadow-sm spellbook-transition spellbook-mb-3 spellbook-bg-light {% if kwargs.class %}{{ kwargs.class }}{% endif %}">
+<div class="sb-card sb-border sb-border-radius-lg sb-shadow-sm sb-transition sb-mb-3 sb-bg-light {% if kwargs.class %}{{ kwargs.class }}{% endif %}">
     {% if title %}
-        <div class="spellbook-card-header spellbook-bg-light spellbook-p-2 spellbook-font-bold">
-            <h5 class="spellbook-card-title">{{ title }}</h5>
+        <div class="sb-card-header sb-p-2 sb-bold">
+            <h5 class="sb-card-title">{{ title }}</h5>
         </div>
     {% endif %}
-    <div class="spellbook-card-body spellbook-p-3">
+    <div class="sb-card-body sb-p-3">
         {{ content|safe }}
     </div>
     {% if footer %}
-        <div class="spellbook-card-footer spellbook-bg-light spellbook-p-2 spellbook-border-t">
+        <div class="sb-card-footer sb-p-2">
             {{ footer }}
         </div>
     {% endif %}
