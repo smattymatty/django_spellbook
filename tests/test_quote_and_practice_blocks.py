@@ -23,7 +23,7 @@ class TestQuoteBlock(TestCase):
         self.assertEqual(block.content, self.test_content)
         self.assertEqual(block.kwargs, self.test_kwargs)
         self.assertEqual(block.name, 'quote')
-        self.assertEqual(block.template, 'blog/blocks/quote.html')
+        self.assertEqual(block.template, 'django_spellbook/blocks/quote.html')
 
     def test_get_context(self):
         """Test context generation for template rendering."""
@@ -53,7 +53,7 @@ class TestQuoteBlock(TestCase):
 
                 # Verify render_to_string was called with correct parameters
                 mock_render.assert_called_once_with(
-                    'blog/blocks/quote.html',
+                    'django_spellbook/blocks/quote.html',
                     {
                         'content': '<p>This is a quote</p>',
                         'author': 'Test Author',
@@ -115,7 +115,7 @@ class TestPracticeBlock(TestCase):
         self.assertEqual(block.content, self.test_content)
         self.assertEqual(block.kwargs, self.test_kwargs)
         self.assertEqual(block.name, 'practice')
-        self.assertEqual(block.template, 'blog/blocks/practice.html')
+        self.assertEqual(block.template, 'django_spellbook/blocks/practice.html')
 
     def test_get_context(self):
         """Test context generation for template rendering."""
@@ -142,7 +142,7 @@ class TestPracticeBlock(TestCase):
 
                 # Verify render_to_string was called with correct parameters
                 mock_render.assert_called_once_with(
-                    'blog/blocks/practice.html',
+                    'django_spellbook/blocks/practice.html',
                     {
                         'content': '<p>Practice steps</p><ol><li>Step one</li><li>Step two</li></ol>',
                         'difficulty': 'Advanced',

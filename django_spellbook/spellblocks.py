@@ -46,12 +46,13 @@ class CardBlock(BasicSpellBlock):
 @SpellBlockRegistry.register()
 class QuoteBlock(BasicSpellBlock):
     name = 'quote'
-    template = 'blog/blocks/quote.html'
+    template = 'django_spellbook/blocks/quote.html'
 
     def get_context(self):
         context = super().get_context()
         context['author'] = self.kwargs.get('author', '')
         context['source'] = self.kwargs.get('source', '')
+        context['image'] = self.kwargs.get('image', '')
         
         # Additional styling classes
         context['class'] = self.kwargs.get('class', '')
@@ -61,7 +62,7 @@ class QuoteBlock(BasicSpellBlock):
 @SpellBlockRegistry.register()
 class PracticeBlock(BasicSpellBlock):
     name = 'practice'
-    template = 'blog/blocks/practice.html'
+    template = 'django_spellbook/blocks/practice.html'
 
     def get_context(self):
         context = super().get_context()
