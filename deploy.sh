@@ -35,6 +35,16 @@ echo "Cleaning up generated files..."
 
 rm -f django_spellbook/urls_*.py django_spellbook/views_*.py
 
+# Reset urls.py to clean state
+echo "Resetting urls.py to clean state..."
+cat > django_spellbook/urls.py << 'EOF'
+from django.urls import path, include
+
+urlpatterns = [
+    
+]
+EOF
+
 # Clean up old distribution files
 echo "Cleaning up old distribution files..."
 rm -rf dist/ build/ *.egg-info

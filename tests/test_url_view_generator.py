@@ -272,7 +272,7 @@ class TestURLViewGenerator(TestCase):
     def test_generate_view_name_with_dashes(self):
         """Test view name generation with dashes in URL pattern."""
         url_pattern = '--view-name'
-        expected = '__view_name'
+        expected = 'view_name'
 
         result = self.generator._generate_view_name(url_pattern)
 
@@ -422,10 +422,10 @@ class URLViewGeneratorIntegrationTest(TestCase):
         """Test the actual generation of the urls.py file with proper URL names"""
         # Process multiple files with different path structures
         processed_files = [
-            self._create_processed_file("first_blog"),
-            self._create_processed_file("lifestyle/digital-minimalism"),
+            self._create_processed_file("----first_blog"),
+            self._create_processed_file("lifestyle/--digital-minimalism"),
             self._create_processed_file("blocks/practice"),
-            self._create_processed_file("blocks/quote"),
+            self._create_processed_file("blocks/-quote"),
             self._create_processed_file("tech/sustainable-tech")
         ]
         

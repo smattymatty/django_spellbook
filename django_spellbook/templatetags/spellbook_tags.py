@@ -47,20 +47,18 @@ def spellbook_url(url_path: str) -> str:
         url_path (str): The URL path to convert
 
     Returns:
-        str: The reversed URL if successful, '#' otherwise
+        str: The reversed URL if successful
+        
+    Exceptions:
+        NoReverseMatch: If the URL path is not found
 
-    Examples:
-        >>> spellbook_url('docs/page')
-        '/docs/page/'
-        >>> spellbook_url('invalid/path')
-        '#'
     """
     try:
         if not url_path:
             return '#'
         return reverse(url_path)
     except NoReverseMatch:
-        return url_path
+        return f"{url_path} xx Not Found"
 
 
 @register.inclusion_tag('django_spellbook/data/styles.html')

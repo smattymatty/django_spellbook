@@ -66,10 +66,10 @@ class TestSpellbookUrl(TestCase):
             mock_reverse.side_effect = NoReverseMatch()
 
             # Test with an invalid path
-            result = spellbook_url('invalid/path')
+            result = spellbook_url('docs:__getitem__')
 
             # Verify fallback behavior
-            self.assertEqual(result, 'invalid/path')
+            self.assertEqual(result, 'docs:__getitem__ xx Not Found')
 
     def test_empty_url_path(self):
         """Test spellbook_url with an empty URL path"""

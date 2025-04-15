@@ -30,12 +30,17 @@ class TOCGenerator:
 
         title = remove_leading_dash(title)
         title = titlefy(title)
+        
+        # split the url by _
+        split_url = url.split("_")
+        split_url = [remove_leading_dash(part) for part in split_url]
+        clean_url = "_".join(split_url)
 
         # Handle root-level files
         if not parts:
             current.children[file_path.stem] = TOCEntry(
                 title=title,
-                url=get_clean_url(url),
+                url=clean_url,
             )
             return
 
@@ -45,16 +50,17 @@ class TOCGenerator:
                 current.children[part] = TOCEntry(
                     title=part.replace('-', ' ').title(),
                     # Just use the directory name
-                    url=get_clean_url(part),
+                    url=url.replace("-", "_"),
                 )
             current = current.children[part]
 
         # Add the actual file
         filename = file_path.stem
+        
         current.children[filename] = TOCEntry(
             title=title,
             # Use the full provided URL for files
-            url=get_clean_url(url),
+            url=clean_url,
         )
 
     def get_toc(self) -> Dict:
@@ -62,7 +68,7 @@ class TOCGenerator:
         def _convert_to_dict(entry: TOCEntry) -> Dict:
             result = {
                 'title': remove_leading_dash(entry.title),
-                'url': get_clean_url(entry.url),
+                'url': entry.url,
             }
             if entry.children:
                 result['children'] = {

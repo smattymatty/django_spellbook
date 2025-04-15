@@ -2,7 +2,7 @@ from django.conf import settings
 
 
 def remove_leading_dash(url: str) -> str:
-    return url.lstrip('-')  # Ensure all leading dashes are removed
+    return url.lstrip('-') 
 
 
 def get_clean_url(url: str) -> str:

@@ -8,13 +8,15 @@
                         <path d="M7 10l5 5 5-5H7z" />
                     </svg>
                 </button>
-            {% endif %}
+                <a class="toc-link has-children">{{ data.title }}</a>
+            {% else %}
             {% if data.url %}
                 <a href="{% spellbook_url data.url %}"
                 
-                   class="toc-link {% if data.children %}has-children{% endif %}">{{ data.title }}</a>
+                   class="toc-link">{{ data.title }}</a>
             {% else %}
                 <span class="toc-section">{{ data.title }}</span>
+            {% endif %}
             {% endif %}
         </div>
         {% if data.children %}

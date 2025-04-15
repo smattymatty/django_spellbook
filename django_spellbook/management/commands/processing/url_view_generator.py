@@ -191,10 +191,23 @@ urlpatterns = [
             )
         }
 
-    def _generate_view_name(self, url_pattern: str) -> str:
-        """Generate a valid Python function name from URL pattern."""
-        # No need to include 'view_' prefix as it's app-specific now
-        return f"{url_pattern.replace('/', '_').replace('.', '_').replace('-', '_')}"
+    def _generate_view_name(self, url_pattern):
+        """Generate a valid Python identifier for view name from URL pattern."""
+        # Split by slashes first to handle each path component separately
+        parts = url_pattern.split('/')
+        
+        # Process each part to clean dashes
+        cleaned_parts = []
+        for part in parts:
+            # Remove leading dashes and replace internal dashes with underscores
+            cleaned_part = part.lstrip('-')
+            cleaned_part = cleaned_part.replace('-', '_')
+            cleaned_parts.append(cleaned_part)
+        
+        # Join with underscores (replacing slashes with underscores)
+        view_name = '_'.join(cleaned_parts)
+        
+        return view_name
 
     def _get_template_path(self, relative_url: str) -> str:
         """Generate template path from relative URL."""
