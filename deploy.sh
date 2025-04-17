@@ -61,7 +61,7 @@ fi
 
 # Upload to PyPI
 echo "Uploading to PyPI..."
-python -m twine upload dist/* -u __token__ -p "$PYPI_KEY"
+python -m twine upload dist/* -u __token__ -p "$PYPI_KEY" --verbose
 upload_status=$?
 
 if [ $upload_status -ne 0 ]; then

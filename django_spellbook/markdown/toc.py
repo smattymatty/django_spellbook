@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from django.conf import settings
 
-from django_spellbook.utils import remove_leading_dash, get_clean_url, titlefy
+from django_spellbook.utils import remove_leading_dash, titlefy
 
 
 @dataclass

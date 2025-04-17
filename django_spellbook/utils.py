@@ -5,17 +5,6 @@ def remove_leading_dash(url: str) -> str:
     return url.lstrip('-') 
 
 
-def get_clean_url(url: str) -> str:
-    """Clean up the URL by removing leading dashes"""
-    split_path = url.split('/')
-    clean_path = []
-    for i, part in enumerate(split_path):
-        clean_path.append(remove_leading_dash(part))
-
-    clean_url = "/".join(clean_path)
-    return clean_url
-
-
 def titlefy(text: str) -> str:
     """Capitalize the first letter of each word in a string if it's longet than 2 chars.
     Also replace any dashes with spaces."""
