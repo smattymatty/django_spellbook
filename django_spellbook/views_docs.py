@@ -6,13 +6,13 @@ TOC = {'title': 'root', 'url': '', 'children': {'intro': {'title': 'Documentatio
 
 
 def intro(request):
-    context = {'title': 'Documentation Intro', 'created_at': 'datetime.datetime(2025, 4, 17, 12, 41, 54, 885747)', 'updated_at': 'datetime.datetime(2025, 4, 17, 12, 41, 54, 885747)', 'url_path': 'intro', 'raw_content': '# Welcome to Docs\nThis is documentation.', 'is_public': True, 'tags': [], 'custom_meta': {}, 'next_page': None, 'prev_page': None}
+    context = {'title': 'Documentation Intro', 'created_at': 'datetime.datetime(2025, 4, 18, 14, 38, 4, 320671)', 'updated_at': 'datetime.datetime(2025, 4, 18, 14, 38, 4, 320671)', 'url_path': 'intro', 'raw_content': '# Welcome to Docs\nThis is documentation.', 'is_public': True, 'tags': [], 'custom_meta': {}, 'next_page': None, 'prev_page': None}
     context['toc'] = TOC 
     context['current_url'] = 'intro'
     context['metadata'] = {
         'title': 'Documentation Intro',
-        'created_at': datetime.datetime(2025, 4, 17, 12, 41, 54, 885747),
-        'updated_at': datetime.datetime(2025, 4, 17, 12, 41, 54, 885747),
+        'created_at': datetime.datetime(2025, 4, 18, 14, 38, 4, 320671),
+        'updated_at': datetime.datetime(2025, 4, 18, 14, 38, 4, 320671),
         'url_path': 'intro',
         'raw_content': '# Welcome to Docs\nThis is documentation.',
         'is_public': True,

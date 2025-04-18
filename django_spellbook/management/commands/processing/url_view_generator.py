@@ -12,6 +12,10 @@ from django_spellbook.management.commands.processing.file_writer import FileWrit
 
 logger = logging.getLogger(__name__)
 
+class URLGenerationError(Exception):
+    """Base exception for all URL generation errors."""
+    pass
+
 class URLViewGenerator:
     """
     Coordinates URL and view generation for markdown-generated content.

@@ -6,13 +6,13 @@ TOC = {'title': 'root', 'url': '', 'children': {'first-post': {'title': 'First P
 
 
 def first_post(request):
-    context = {'title': 'First Post', 'created_at': 'datetime.datetime(2025, 4, 17, 12, 41, 54, 885747)', 'updated_at': 'datetime.datetime(2025, 4, 17, 12, 41, 54, 885747)', 'url_path': 'first-post', 'raw_content': '# Blog Begins\nThis is our first blog post.', 'is_public': True, 'tags': [], 'custom_meta': {}, 'next_page': None, 'prev_page': None}
+    context = {'title': 'First Post', 'created_at': 'datetime.datetime(2025, 4, 18, 14, 38, 4, 320671)', 'updated_at': 'datetime.datetime(2025, 4, 18, 14, 38, 4, 320671)', 'url_path': 'first-post', 'raw_content': '# Blog Begins\nThis is our first blog post.', 'is_public': True, 'tags': [], 'custom_meta': {}, 'next_page': None, 'prev_page': None}
     context['toc'] = TOC 
     context['current_url'] = 'first-post'
     context['metadata'] = {
         'title': 'First Post',
-        'created_at': datetime.datetime(2025, 4, 17, 12, 41, 54, 885747),
-        'updated_at': datetime.datetime(2025, 4, 17, 12, 41, 54, 885747),
+        'created_at': datetime.datetime(2025, 4, 18, 14, 38, 4, 320671),
+        'updated_at': datetime.datetime(2025, 4, 18, 14, 38, 4, 320671),
         'url_path': 'first-post',
         'raw_content': '# Blog Begins\nThis is our first blog post.',
         'is_public': True,

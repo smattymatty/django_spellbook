@@ -10,14 +10,28 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-def normalize_settings(setting_path, setting_app):
-    """Convert settings to normalized lists with backward compatibility."""
-    md_paths = [setting_path] if isinstance(setting_path, (str, Path)) else setting_path
-    md_apps = [setting_app] if isinstance(setting_app, str) else setting_app
+def normalize_settings(setting_path: str, setting_app:str):
+    """
+    Convert settings to normalized lists with backward compatibility.
+    
+    Args:
+        setting_path (str): Path to markdown files.
+        setting_app (str): Name of the content app.
+    
+    Returns:
+        Tuple[List[str], List[str]]: md_paths and md_apps.
+    """
+    md_paths: List[str] = [setting_path] if isinstance(setting_path, (str, Path)) else setting_path
+    md_apps: List[str] = [setting_app] if isinstance(setting_app, str) else setting_app
     return md_paths, md_apps
 
 def validate_spellbook_settings():
-    """Validate required settings and support multiple source-destination pairs."""
+    """
+    Validate required settings and support multiple source-destination pairs.
+    
+    Returns:
+        Tuple[List[str], List[str]]: Normalized settings.
+    """
     # Get settings values with backward compatibility
     md_path = getattr(settings, 'SPELLBOOK_MD_PATH', None)
     md_app = getattr(settings, 'SPELLBOOK_MD_APP', None)
@@ -37,8 +51,17 @@ def validate_spellbook_settings():
     
     return md_file_paths, content_apps
 
-def _validate_setting_values(md_file_paths, content_apps):
-    """Validate setting values for correctness and compatibility."""
+def _validate_setting_values(md_file_paths: List[str], content_apps: List[str]):
+    """
+    Validate setting values for correctness and compatibility.
+    
+    Args:
+        md_file_paths (List[str]): List of paths to markdown files.
+        content_apps (List[str]): List of content app names.
+        
+    Raises:
+        CommandError: If any settings are missing or invalid.
+    """
     # Check for missing settings
     missing_settings = []
     if not md_file_paths:
@@ -56,13 +79,31 @@ def _validate_setting_values(md_file_paths, content_apps):
     # Ensure each string is not empty
     for md_path in md_file_paths:
         if not md_path:
-            raise CommandError("SPELLBOOK_MD_PATH must be a non-empty string.")
+            raise CommandError(
+                "Invalid SPELLBOOK_MD_PATH configuration!\n"
+                "Reason: Empty value found in path list\n"
+                "Solution: Ensure all paths in settings.SPELLBOOK_MD_PATH "
+                "are non-empty strings\n"
+                "Documentation: https://django-spellbook.org/docs/settings/"
+            )
     for app_setting in content_apps:
         if not app_setting:
             raise CommandError("SPELLBOOK_MD_APP must be a non-empty string.")
 
-def setup_directory_structure(content_app, dirpath):
-    """Set up the necessary directory structure for content processing."""
+def setup_directory_structure(content_app: str, dirpath: str):
+    """
+    Set up the necessary directory structure for content processing.
+    
+    Args:
+        content_app (str): Name of the content app.
+        dirpath (str): Path to the directory containing the markdown files.
+    
+    Returns:
+        Tuple[str, str]: content_dir_path and template_dir.
+    
+    Raises:
+        CommandError: If the content app is not found in the directory.
+    """
     try:
         base_path = "/".join(dirpath.split("/")[:-1])
         content_app_path = os.path.join(base_path, content_app)
@@ -77,8 +118,20 @@ def setup_directory_structure(content_app, dirpath):
     except Exception as e:
         raise CommandError(f"Could not set up content dir path: {str(e)}")
 
-def setup_template_directory(content_dir_path, content_app):
-    """Set up the template directory structure."""
+def setup_template_directory(content_dir_path: str, content_app: str):
+    """
+    Set up the template directory structure.
+    
+    Args:
+        content_dir_path (str): Path to the content app directory.
+        content_app (str): Name of the content app.
+    
+    Returns:
+        str: Path to the template directory.
+    
+    Raises:
+        CommandError: If the template directory could not be created.
+    """
     try:
         base_template_dir = Path(content_dir_path) / 'templates' / content_app / 'spellbook_md'
         base_template_dir.mkdir(parents=True, exist_ok=True)
@@ -86,8 +139,17 @@ def setup_template_directory(content_dir_path, content_app):
     except Exception as e:
         raise CommandError(f"Could not create template directory: {str(e)}")
 
-def get_folder_list(dirpath, md_file_path):
-    """Get list of folders from dirpath relative to md_file_path."""
+def get_folder_list(dirpath: str, md_file_path: str):
+    """
+    Get list of folders from dirpath relative to md_file_path.
+    
+    Args:
+        dirpath (str): Path to the directory containing the markdown files.
+        md_file_path (str): Path to the markdown file.
+    
+    Returns:
+        List[str]: List of folders.
+    """
     logger.debug(f"Getting folder list for: {dirpath}")
     folder_split = dirpath.split("/")
     folder_list = []

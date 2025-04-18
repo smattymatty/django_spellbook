@@ -6,6 +6,10 @@ from django.core.management.base import CommandError
 
 from django.template.loader import render_to_string
 
+class TemplateError(Exception):
+    """Base exception for all template errors."""
+    pass
+
 
 class TemplateGenerator:
     """Handles template creation and management for markdown-generated content."""
