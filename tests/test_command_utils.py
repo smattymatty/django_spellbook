@@ -1,6 +1,8 @@
 # django_spellbook/tests/test_command_utils.py
 
 import os
+import logging
+from io import StringIO
 import unittest
 from pathlib import Path
 from unittest.mock import patch, Mock
@@ -14,7 +16,8 @@ from django_spellbook.management.commands.command_utils import (
     _validate_setting_values,
     setup_directory_structure,
     setup_template_directory,
-    get_folder_list
+    get_folder_list,
+    log_and_write
 )
 
 class TestNormalizeSettings(TestCase):
@@ -261,3 +264,32 @@ class TestGetFolderList(unittest.TestCase):
         
         # Verify result
         self.assertEqual(folders, ['file.md'])
+        
+        
+class TestLogAndWrite(unittest.TestCase):
+    """Tests for log_and_write function."""
+    
+    def test_log_and_write(self):
+        """Test the log_and_write helper function properly logs and writes to stdout."""
+        stdout = StringIO()
+        
+        with patch('django_spellbook.management.commands.command_utils.logger') as mock_logger:
+            # Test info level logging
+            log_and_write("Info message", 'info', stdout)
+            mock_logger.info.assert_called_once_with("Info message")
+            self.assertEqual(stdout.getvalue(), "Info message")
+            
+            # Reset stdout and mock
+            stdout = StringIO()
+            mock_logger.reset_mock()
+            
+            # Test debug level logging
+            log_and_write("Debug message", 'debug', stdout)
+            mock_logger.debug.assert_called_once_with("Debug message")
+            self.assertEqual(stdout.getvalue(), "Debug message")
+            
+            # Test without stdout (should still log)
+            mock_logger.reset_mock()
+            log_and_write("No stdout message", 'info')
+            mock_logger.info.assert_called_once_with("No stdout message")
+            

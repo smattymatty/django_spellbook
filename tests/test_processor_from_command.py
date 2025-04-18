@@ -115,6 +115,7 @@ class TestMarkdownProcessor(TestCase):
         
         # Verify children structure
         children = toc['children']
+
         
         # Check if dir1 is in the structure
         self.assertIn('dir1', children)

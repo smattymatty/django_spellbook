@@ -30,7 +30,7 @@ class TOCGenerator:
 
         title = remove_leading_dash(title)
         title = titlefy(title)
-        
+        print(f"url: {url}")
         # split the url by _
         split_url = url.split("_")
         split_url = [remove_leading_dash(part) for part in split_url]
@@ -38,6 +38,7 @@ class TOCGenerator:
 
         # Handle root-level files
         if not parts:
+            print(f"Adding {file_path.stem} to {current.title}")
             current.children[file_path.stem] = TOCEntry(
                 title=title,
                 url=clean_url,
@@ -70,6 +71,7 @@ class TOCGenerator:
                 'title': remove_leading_dash(entry.title),
                 'url': entry.url,
             }
+            print(f"Converting {entry.url} to {result['url']}")
             if entry.children:
                 result['children'] = {
                     k: _convert_to_dict(v)

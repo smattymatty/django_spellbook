@@ -2,7 +2,7 @@
 
 import os
 import logging
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, IO, Set
 from pathlib import Path
 
 from django.core.management.base import CommandError
@@ -169,3 +169,16 @@ def get_folder_list(dirpath: str, md_file_path: str):
 
     logger.debug(f"Generated folder list: {folder_list}")
     return folder_list
+
+def log_and_write(message: str, level: str = 'info', stdout: Optional[IO] = None) -> None:
+    """
+    Log a message and optionally write to stdout.
+    
+    Args:
+        message: The message to log and write
+        level: The logging level (debug, info, warning, error)
+        stdout: Optional output stream to write to
+    """
+    getattr(logger, level)(message)
+    if stdout:
+        stdout.write(message)

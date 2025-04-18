@@ -15,29 +15,6 @@ from django_spellbook.management.commands.spellbook_md_p.discovery import (
 class TestDiscoveryFunctions(TestCase):
     """Test basic functionality of the discovery module functions."""
     
-    def test_log_and_write(self):
-        """Test the log_and_write helper function properly logs and writes to stdout."""
-        stdout = StringIO()
-        
-        with patch('django_spellbook.management.commands.spellbook_md_p.discovery.logger') as mock_logger:
-            # Test info level logging
-            log_and_write("Info message", 'info', stdout)
-            mock_logger.info.assert_called_once_with("Info message")
-            self.assertEqual(stdout.getvalue(), "Info message")
-            
-            # Reset stdout and mock
-            stdout = StringIO()
-            mock_logger.reset_mock()
-            
-            # Test debug level logging
-            log_and_write("Debug message", 'debug', stdout)
-            mock_logger.debug.assert_called_once_with("Debug message")
-            self.assertEqual(stdout.getvalue(), "Debug message")
-            
-            # Test without stdout (should still log)
-            mock_logger.reset_mock()
-            log_and_write("No stdout message", 'info')
-            mock_logger.info.assert_called_once_with("No stdout message")
     
     @patch('django_spellbook.management.commands.spellbook_md_p.discovery.importlib.import_module')
     @patch('django_spellbook.management.commands.spellbook_md_p.discovery.apps.get_app_configs')

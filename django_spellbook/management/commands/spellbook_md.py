@@ -17,29 +17,9 @@ from django_spellbook.management.commands.spellbook_md_p.discovery import (
 from django_spellbook.management.commands.spellbook_md_p.processor import (
     MarkdownProcessor
 )
+from django_spellbook.management.commands.spellbook_md_p.exceptions import *
 
 logger = logging.getLogger(__name__)
-
-# Custom Exception Classes
-class SpellbookMDError(CommandError):
-    """Base exception for all Spellbook MD errors."""
-    pass
-
-class ConfigurationError(SpellbookMDError):
-    """Error related to configuration issues (settings, paths, etc.)."""
-    pass
-
-class ContentDiscoveryError(SpellbookMDError):
-    """Error related to finding and parsing content files."""
-    pass
-
-class ProcessingError(SpellbookMDError):
-    """Error during markdown processing."""
-    pass
-
-class OutputGenerationError(SpellbookMDError):
-    """Error generating templates, views, or URLs."""
-    pass
 
 class Command(BaseCommand):
     help = "Converts markdown to html, with a spellbook twist"
@@ -56,73 +36,14 @@ class Command(BaseCommand):
         self.continue_on_error = options.get('continue_on_error', False)
         
         try:
-            # Discover spell blocks
-            try:
-                block_count = discover_blocks(self.stdout)
-                self.stdout.write(f"Discovered {block_count} SpellBlocks")
-            except Exception as e:
-                self.stdout.write(
-                    self.style.WARNING(
-                        f"Error during block discovery: {str(e)}. "
-                        "Processing will continue but some content may not render correctly."
-                    )
-                )
-                logger.warning(f"Block discovery error: {str(e)}", exc_info=True)
-            
-            # Validate settings
-            try:
-                md_file_paths, content_apps = validate_spellbook_settings()
-            except Exception as e:
-                error_message = f"Configuration error: {str(e)}"
-                self.stdout.write(self.style.ERROR(error_message))
-                self.stdout.write(
-                    "Please check your Django settings.py file and ensure "
-                    "SPELLBOOK_MD_PATH and SPELLBOOK_MD_APP are correctly configured."
-                )
-                logger.error(f"Settings validation error: {str(e)}", exc_info=True)
-                raise ConfigurationError(f"Settings validation failed: {str(e)}")
-            
+            self.discover_spellblocks()
+            # Validate settings (Should all be List[str] of equal lengths)
+            md_file_paths, content_apps = self.validate_settings()
             # Process each source-destination pair
-            pair_results = []
-            for i, (md_path, content_app) in enumerate(zip(md_file_paths, content_apps)):
-                pair_name = f"pair {i+1}/{len(md_file_paths)}: {md_path} → {content_app}"
-                self.stdout.write(
-                    self.style.SUCCESS(f"Processing source-destination {pair_name}")
-                )
-                
-                try:
-                    processed_count = self._process_source_destination_pair(md_path, content_app)
-                    pair_results.append((md_path, content_app, True, processed_count))
-                except Exception as e:
-                    error_message = f"Error processing {pair_name}: {str(e)}"
-                    self.stdout.write(self.style.ERROR(error_message))
-                    # Always use 0 as the count for failed pairs to avoid None
-                    pair_results.append((md_path, content_app, False, 0))
-                    logger.error(f"Error processing {pair_name}: {str(e)}", exc_info=True)
-                    
-                    if len(md_file_paths) > 1:
-                        self.stdout.write("Continuing with next pair...")
-                        continue
-                    else:
-                        raise
-            
-            # Summary report
-            self.stdout.write("\nProcessing Summary:")
-            success_count = sum(1 for _, _, success, _ in pair_results if success)
-            total_processed = sum(count for _, _, success, count in pair_results if success)
-            
-            if success_count == len(pair_results):
-                self.stdout.write(self.style.SUCCESS(
-                    f"All {len(pair_results)} source-destination pairs processed successfully. "
-                    f"Total files processed: {total_processed}."
-                ))
-            else:
-                failed_pairs = [(src, dst) for src, dst, success, _ in pair_results if not success]
-                self.stdout.write(self.style.WARNING(
-                    f"{success_count} of {len(pair_results)} pairs processed successfully. "
-                    f"Total files processed: {total_processed}. "
-                    f"Failed pairs: {', '.join(f'{src} → {dst}' for src, dst in failed_pairs)}"
-                ))
+            pair_results: List[Tuple[str, str, bool, int]] = self.process_each_source_pair(md_file_paths, content_apps)
+            # (md_path, content_app, success, processed_count)
+            # Output Summary Report
+            self.summary_report(pair_results)
                 
         except Exception as e:
             error_message = f"Command failed: {str(e)}"
@@ -253,3 +174,102 @@ class Command(BaseCommand):
             raise ProcessingError(error_message)
         
         return len(processed_files)
+    
+    def discover_spellblocks(self) -> int:
+        '''
+        Discover available spellblocks for use in markdown processing.
+        '''
+        try:
+            block_count = discover_blocks(self.stdout)
+            self.stdout.write(f"Discovered {block_count} SpellBlocks")
+        except Exception as e:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Error during block discovery: {str(e)}. "
+                    "Processing will continue but some content may not render correctly."
+                )
+            )
+            logger.warning(f"Block discovery error: {str(e)}", exc_info=True)
+            
+    def validate_settings(self) -> Tuple[List[Path], List[str]]:
+        '''
+        Validate the Django settings required for spellbook markdown processing.
+        
+        returns:
+            Tuple[List[Path], List[str]]: md_paths and md_apps
+            
+        raises:
+            ConfigurationError: If any settings are missing or invalid
+        '''
+        try:
+            md_file_paths, content_apps = validate_spellbook_settings()
+        except Exception as e:
+            error_message = f"Configuration error: {str(e)}"
+            self.stdout.write(self.style.ERROR(error_message))
+            self.stdout.write(
+                "Please check your Django settings.py file and ensure "
+                "SPELLBOOK_MD_PATH and SPELLBOOK_MD_APP are correctly configured."
+            )
+            logger.error(f"Settings validation error: {str(e)}", exc_info=True)
+            raise ConfigurationError(f"Settings validation failed: {str(e)}")
+        
+        return md_file_paths, content_apps
+    
+    def process_each_source_pair(self, md_file_paths: List[Path], content_apps: List[str]) -> List[Tuple[str, str, bool, int]]:
+        '''
+        Process each source-destination pair.
+        
+        returns:
+            List[Tuple[str, str, bool, int]]: List of tuples containing
+                (md_path, content_app, success, processed_count)
+                
+        raises:
+            ProcessingError: If there is an error processing a source-destination pair
+        '''
+        pair_results: List[Tuple[str, str, bool, int]] = []
+        for i, (md_path, content_app) in enumerate(zip(md_file_paths, content_apps)):
+            pair_name = f"pair {i+1}/{len(md_file_paths)}: {md_path} → {content_app}"
+            self.stdout.write(
+                self.style.SUCCESS(f"Processing source-destination {pair_name}")
+            )
+            
+            try:
+                processed_count = self._process_source_destination_pair(md_path, content_app)
+                pair_results.append((md_path, content_app, True, processed_count))
+            except Exception as e:
+                error_message = f"Error processing {pair_name}: {str(e)}"
+                self.stdout.write(self.style.ERROR(error_message))
+                # Always use 0 as the count for failed pairs to avoid None
+                pair_results.append((md_path, content_app, False, 0))
+                logger.error(f"Error processing {pair_name}: {str(e)}", exc_info=True)
+                
+                if len(md_file_paths) > 1:
+                    self.stdout.write("Continuing with next pair...")
+                    continue
+                else:
+                    raise
+        return pair_results
+        
+    def summary_report(self, pair_results: List[Tuple[str, str, bool, int]]):
+        '''
+        Output a summary report of the processing results.
+        
+        Args:
+            pair_results: List of tuples containing (md_path, content_app, success, processed_count)
+        '''
+        self.stdout.write("\nProcessing Summary:")
+        success_count = sum(1 for _, _, success, _ in pair_results if success)
+        total_processed = sum(count for _, _, success, count in pair_results if success)
+        
+        if success_count == len(pair_results):
+            self.stdout.write(self.style.SUCCESS(
+                f"All {len(pair_results)} source-destination pairs processed successfully. "
+                f"Total files processed: {total_processed}."
+            ))
+        else:
+            failed_pairs = [(src, dst) for src, dst, success, _ in pair_results if not success]
+            self.stdout.write(self.style.WARNING(
+                f"{success_count} of {len(pair_results)} pairs processed successfully. "
+                f"Total files processed: {total_processed}. "
+                f"Failed pairs: {', '.join(f'{src} → {dst}' for src, dst in failed_pairs)}"
+            ))

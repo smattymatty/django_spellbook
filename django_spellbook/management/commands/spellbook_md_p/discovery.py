@@ -1,4 +1,4 @@
-# django_spellbook/management/commands/spellbook_md/discovery.py
+# django_spellbook/management/commands/spellbook_md_p/discovery.py
 
 import os
 import logging
@@ -11,21 +11,10 @@ from django.apps import apps
 from django.core.management.base import CommandError
 
 from django_spellbook.blocks import SpellBlockRegistry
+from django_spellbook.management.commands.command_utils import log_and_write
 
 logger = logging.getLogger(__name__)
 
-def log_and_write(message: str, level: str = 'info', stdout: Optional[IO] = None) -> None:
-    """
-    Log a message and optionally write to stdout.
-    
-    Args:
-        message: The message to log and write
-        level: The logging level (debug, info, warning, error)
-        stdout: Optional output stream to write to
-    """
-    getattr(logger, level)(message)
-    if stdout:
-        stdout.write(message)
 
 @lru_cache(maxsize=1)
 def discover_blocks(stdout: Optional[IO] = None) -> int:

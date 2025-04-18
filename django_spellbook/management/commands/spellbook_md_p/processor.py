@@ -1,4 +1,4 @@
-# django_spellbook/management/commands/spellbook_md/processor.py
+# django_spellbook/management/commands/spellbook_md_p/processor.py
 
 import os
 import logging
@@ -9,6 +9,10 @@ from django.core.management.base import CommandError
 
 from django_spellbook.management.commands.processing.file_processor import (
     MarkdownFileProcessor, ProcessedFile, MarkdownProcessingError
+)
+from django_spellbook.management.commands.processing.generator_utils import (
+    remove_leading_dash,
+
 )
 from django_spellbook.management.commands.processing.template_generator import TemplateGenerator, TemplateError
 from django_spellbook.management.commands.processing.url_view_generator import URLViewGenerator, URLGenerationError
@@ -94,32 +98,40 @@ class MarkdownProcessor:
         logger.info(f"Building table of contents from {self.source_path}")
 
         try:
-            for dirpath, dirnames, filenames in os.walk(str(self.source_path)):
-                md_files = [f for f in filenames if f.endswith('.md')]
-                for filename in md_files:
-                    try:
-                        file_path = Path(dirpath) / filename
-                        relative_path = file_path.relative_to(self.source_path)
-                        url = f"{self.content_app}:" + str(relative_path.with_suffix('')).replace('\\', '/')
-                        url = url.replace('/', '_')
-                        
-                        # Get title from frontmatter
-                        with open(file_path, 'r', encoding='utf-8') as f:
-                            content = f.read()
-                        frontmatter = FrontMatterParser(content, str(file_path))
-                        title = frontmatter.metadata.get('title', relative_path.stem)
+            # First, collect all markdown files to process
+            md_files = []
+            for dirpath, _, filenames in os.walk(str(self.source_path)):
+                for filename in [f for f in filenames if f.endswith('.md')]:
+                    file_path = Path(dirpath) / filename
+                    md_files.append(file_path)
+            
+            # Sort files to ensure deterministic order (root files first)
+            md_files.sort(key=lambda p: len(p.parts))
+            
+            # Process each file
+            for file_path in md_files:
+                try:
+                    relative_path = file_path.relative_to(self.source_path)
+                    url = f"{self.content_app}:" + remove_leading_dash(str(relative_path.with_suffix('')).replace('\\', '/'))
+                    url = url.replace('/', '_')
+                    
+                    # Get title from frontmatter
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    frontmatter = FrontMatterParser(content, str(file_path))
+                    title = frontmatter.metadata.get('title', relative_path.stem)
 
-                        logger.debug(f"Adding TOC entry for {relative_path}: {title}")
-                        toc_generator.add_entry(relative_path, title, url)
-                    except Exception as e:
-                        logger.error(f"Error adding TOC entry for {filename}: {str(e)}")
-                        # Continue with next file instead of failing completely
-                        continue
+                    logger.debug(f"Adding TOC entry for {relative_path}: {title}")
+                    toc_generator.add_entry(relative_path, title, url)
+                except Exception as e:
+                    logger.error(f"Error adding TOC entry for {file_path}: {str(e)}")
+                    # Continue with next file instead of failing completely
+                    continue
             
             toc = toc_generator.get_toc()
-            logger.info(f"Built TOC with {len(toc)} entries")
+            logger.info(f"Built TOC with {len(toc['children']) if 'children' in toc else 0} entries")
             return toc
-            
+                
         except Exception as e:
             error_msg = f"Failed to build table of contents: {str(e)}"
             logger.error(error_msg)
