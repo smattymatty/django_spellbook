@@ -35,10 +35,16 @@ class TestGeneratorUtils(TestCase):
         
     def test_generate_view_name(self):
         """Test generating valid Python identifier for view name from URL pattern."""
-        self.assertEqual(generate_view_name("test/page"), "test_page")
-        self.assertEqual(generate_view_name("--test/--page"), "test_page")
-        self.assertEqual(generate_view_name("test-page"), "test_page")
-        self.assertEqual(generate_view_name("test_page"), "test_page")
+        self.assertEqual(generate_view_name("test/page"), "view_test_page")
+        self.assertEqual(generate_view_name("--test/--page"), "view_test_page")
+        self.assertEqual(generate_view_name("test-page"), "view_test_page")
+        self.assertEqual(generate_view_name("test_page"), "view_test_page")
+        
+    def test_generate_view_name_with_numeric_paths(self):
+        """Test that generate_view_name properly handles numeric paths."""
+        self.assertEqual(generate_view_name("0.1.0-release"), "view_0-1-0_release")
+        self.assertEqual(generate_view_name("1.0/docs"), "view_1-0_docs")
+        self.assertEqual(generate_view_name("normal-path"), "view_normal_path")
         
     def test_get_template_path(self):
         """Test generating template path from content app and relative URL."""

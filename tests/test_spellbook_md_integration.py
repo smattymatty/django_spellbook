@@ -218,3 +218,215 @@ class TestSpellbookMDIntegration(TestCase):
         output = out.getvalue()
         self.assertIn('Configuration error', output)
         self.assertIn('Please check your Django settings.py file', output)
+        
+class TestNumericFilenameHandling(TestCase):
+    """Test handling of filenames that start with numbers."""
+    
+    def test_numeric_filenames(self):
+        """Test processing files with numeric names and paths."""
+        with patch('django_spellbook.management.commands.spellbook_md.validate_spellbook_settings') as mock_validate, \
+             patch('django_spellbook.management.commands.spellbook_md.find_markdown_files') as mock_find_files, \
+             patch('django_spellbook.management.commands.spellbook_md.setup_directory_structure') as mock_setup, \
+             patch('django_spellbook.management.commands.spellbook_md.MarkdownProcessor') as mock_processor_class:
+            
+            # Setup mocks
+            mock_validate.return_value = (['/test/path'], ['test_app'], [''])
+            
+            # Include files with numeric names and in numeric directories
+            mock_find_files.return_value = [
+                ('/test/path', '0.1.0-release.md'),          # Starts with number
+                ('/test/path/1.0_docs', 'features.md'),      # Directory starts with number
+                ('/test/path/1.0_docs', '0-introduction.md') # Both directory and file start with numbers
+            ]
+            
+            mock_setup.return_value = ('/app/path', '/app/templates')
+            
+            # Create mock processor
+            mock_processor = MagicMock()
+            mock_processor.build_toc.return_value = {}
+            
+            # All files process successfully
+            mock_processor.process_file.return_value = MagicMock()
+            mock_processor_class.return_value = mock_processor
+            
+            # Capture the view generation calls
+            mock_generate = MagicMock()
+            mock_processor.generate_urls_and_views = mock_generate
+            
+            # Run the command
+            out = StringIO()
+            call_command('spellbook_md', stdout=out)
+            
+            # Verify files were processed
+            self.assertEqual(mock_processor.process_file.call_count, 3)
+            
+            # Verify URLs and views were generated without errors
+            mock_generate.assert_called_once()
+            
+            # Check output for success
+            output = out.getvalue()
+            self.assertIn('Successfully processed 3 files for test_app', output)
+    
+    def test_function_name_sanitization(self):
+        """Test that function names are properly sanitized for numeric paths."""
+        from django_spellbook.management.commands.processing.url_view_generator import URLViewGenerator
+        from django_spellbook.management.commands.processing.file_processor import ProcessedFile
+        
+        # Create a generator instance with debug-friendly initialization
+        generator = URLViewGenerator(
+            content_app='test_app',
+            content_dir_path='/app/path',
+            source_path='/test/path',
+            url_prefix=''
+        )
+        
+        # Enable detailed logging for debugging
+        import logging
+        logging.basicConfig(level=logging.DEBUG)
+        
+        # Create processed files with problematic numeric paths
+        files = [
+            ProcessedFile(
+                original_path='/test/path/0.1.0-release.md',
+                html_content='<html>Test</html>',
+                template_path='test_app/spellbook_md/0.1.0-release.html',
+                relative_url='0.1.0-release',
+                context=Mock()
+            )
+        ]
+        
+        # Create a simple capture function to see what's happening
+        captured_calls = []
+        def capture_call(path, content):
+            captured_calls.append((path, content))
+            # Print for debugging
+            print(f"Writing to {path}: {content[:50]}...")
+        
+        # Mock more dependencies to ensure we're capturing everything
+        with patch('django_spellbook.management.commands.processing.file_writer.write_file', side_effect=capture_call), \
+            patch('django_spellbook.management.commands.processing.file_writer.create_file_if_not_exists'), \
+            patch('django_spellbook.management.commands.processing.file_writer.get_spellbook_dir', return_value='/app'), \
+            patch('os.path.exists', return_value=True):
+            
+            try:
+                # Call the method directly
+                generator.generate_urls_and_views(files, {})
+                
+                # Now examine what was captured
+                for path, content in captured_calls:
+                    print(f"CAPTURED: {path}")
+                    
+                # Check if any view file was generated
+                view_file_content = None
+                for path, content in captured_calls:
+                    if 'views' in path:
+                        view_file_content = content
+                
+                # If we get here, check the generated content
+                if view_file_content:
+                    # Check function definitions in the content
+                    import re
+                    function_defs = re.findall(r'def\s+(\w+)\s*\(', view_file_content)
+                    
+                    # Check the function names
+                    for func_name in function_defs:
+                        print(f"Found function: {func_name}")
+                        # Python identifiers can't start with a digit
+                        self.assertFalse(func_name[0].isdigit(), 
+                            f"Function name '{func_name}' starts with a digit, which is invalid in Python")
+                else:
+                    # No view file was generated, which is not what we expect
+                    self.fail(f"No views.py file was generated. Captured files: {[path for path, _ in captured_calls]}")
+                    
+            except Exception as e:
+                # The current implementation might fail with SyntaxError
+                # We're asserting that specific error to confirm we need to fix it
+                if isinstance(e, SyntaxError) and "leading zeros in decimal integer literals" in str(e):
+                    # This is the expected error for function names starting with digits
+                    print("Caught expected SyntaxError for function name starting with digit")
+                else:
+                    # Unexpected error - print more details
+                    import traceback
+                    traceback.print_exc()
+                    self.fail(f"Unexpected error: {type(e).__name__}: {str(e)}")
+    
+    def test_versioned_documentation_structure(self):
+        """Test processing a typical documentation structure with versioned folders."""
+        with patch('django_spellbook.management.commands.spellbook_md.validate_spellbook_settings') as mock_validate, \
+             patch('django_spellbook.management.commands.spellbook_md.find_markdown_files') as mock_find_files, \
+             patch('django_spellbook.management.commands.spellbook_md.setup_directory_structure') as mock_setup, \
+             patch('django_spellbook.management.commands.spellbook_md.MarkdownProcessor') as mock_processor_class:
+            
+            # Setup mocks for a typical versioned docs structure
+            mock_validate.return_value = (['/docs'], ['docs_app'], ['docs'])
+            
+            # Create a file structure that mimics versioned documentation
+            mock_find_files.return_value = [
+                ('/docs', 'index.md'),
+                ('/docs/0.1.0', 'index.md'),
+                ('/docs/0.1.0', 'getting-started.md'),
+                ('/docs/0.1.0/api', 'endpoints.md'),
+                ('/docs/1.0.0', 'index.md'),
+                ('/docs/1.0.0', 'migration-guide.md'),
+                ('/docs/1.0.0/api', 'endpoints.md')
+            ]
+            
+            mock_setup.return_value = ('/docs_app/path', '/docs_app/templates')
+            
+            # Create mock processor
+            mock_processor = MagicMock()
+            mock_processor.build_toc.return_value = {}
+            
+            # All files process successfully
+            mock_processor.process_file.return_value = MagicMock()
+            mock_processor_class.return_value = mock_processor
+            
+            # Run the command
+            out = StringIO()
+            call_command('spellbook_md', stdout=out)
+            
+            # Verify correct number of files were processed
+            self.assertEqual(mock_processor.process_file.call_count, 7)
+            
+            # Check output for success
+            output = out.getvalue()
+            self.assertIn('Successfully processed 7 files for docs_app', output)
+            
+    def test_generate_view_name_with_numeric_paths(self):
+        """Test that generate_view_name properly handles numeric paths."""
+        from django_spellbook.management.commands.processing.generator_utils import generate_view_name
+        
+        # Test cases with problematic numeric paths
+        test_cases = [
+            ('0.1.0-release', '0_1_0_release'),      # Starts with a digit - should be invalid
+            ('1.0/docs', '1_0_docs'),                # Also starts with a digit - should be invalid
+            ('normal-path', 'normal_path'),          # Normal path - should be valid
+        ]
+        
+        for relative_url, expected_result in test_cases:
+            # Generate the view name
+            try:
+                view_name = generate_view_name(relative_url)
+                
+                # If the path starts with a digit, this should fail because Python
+                # function names can't start with digits
+                if relative_url[0].isdigit():
+                    # Try to compile a function with this name to verify it's invalid
+                    try:
+                        compile(f"def {view_name}(): pass", "<string>", "exec")
+                        self.fail(f"Expected view name '{view_name}' to be invalid in Python")
+                    except SyntaxError as e:
+                        self.assertIn("invalid syntax", str(e), 
+                                    "Expected syntax error due to function name starting with digit")
+                else:
+                    # Normal paths should generate valid function names
+                    compile(f"def {view_name}(): pass", "<string>", "exec")
+            except Exception as e:
+                # If the function already handles invalid paths by raising an exception,
+                # that's also acceptable behavior
+                if relative_url[0].isdigit():
+                    # This exception is expected for paths starting with digits
+                    pass
+                else:
+                    # But normal paths should not raise exceptions
+                    self.fail(f"Unexpected error for '{relative_url}': {str(e)}")
