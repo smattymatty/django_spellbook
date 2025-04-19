@@ -140,6 +140,27 @@ With this configuration:
 - Content from `blog_content` is processed to the `blog_app`
 - Each app maintains its own set of templates, views, and URLs
 
+#### URL Prefixes
+
+Django Spellbook allows you to customize URL prefixes for your markdown content:
+
+```python
+# Single source with custom URL prefix
+SPELLBOOK_MD_URL_PREFIX = "docs"  # Content at /docs/
+
+# Multiple sources with custom URL prefixes
+SPELLBOOK_MD_URL_PREFIX = [
+    "documentation",  # First source at /documentation/
+    "blog"           # Second source at /blog/
+]
+
+```
+
+If not specified:
+
+- For single app configurations: Empty prefix (content at root URL)
+- For multiple apps: First app gets empty prefix, others use their app name
+
 ## Accessing Your Spellbook Markdown Content
 
 After running the markdown processing command, your content will be organized within your specified app's templates under `templates/spellbook_md/`. These files are created automatically in your app directory based on your `SPELLBOOK_MD_APP` setting.
@@ -153,24 +174,47 @@ from django.urls import path, include
 
 urlpatterns = [
     # other paths...
-    path('content/', include('django_spellbook.urls')),
-    # other includes...
+    path('', include('django_spellbook.urls')),  # Mount at root for cleanest URLs
+    # Or use a prefix if needed
+    # path('content/', include('django_spellbook.urls')),
 ]
 ```
 
-### Single Source Configuration
+### URL Structure Based on Configuration
 
-For a single source configuration, this will make your content available at paths like:
-- `/content/page-name/`
-- `/content/folder/sub-page/`
+The URL structure for your content depends on your settings:
 
-### Multiple Source Configuration
+#### Single Source Configuration
 
-When using multiple source-destination pairs, your content will be organized under app-specific prefixes:
-- `/content/docs_app/installation/`
-- `/content/blog_app/first-post/`
+For a single source with no URL prefix specified:
 
-Each app's content gets its own URL namespace based on the app name, ensuring no conflicts between content from different sources.
+- `/page-name/`
+- `/folder/sub-page/`
+
+With a custom URL prefix:
+
+```python
+SPELLBOOK_MD_URL_PREFIX = "docs"
+```
+
+- `/docs/page-name/`
+- `/docs/folder/sub-page/`
+
+#### Multiple Source Configuration
+
+When using multiple source-destination pairs with custom URL prefixes:
+
+```python
+SPELLBOOK_MD_URL_PREFIX = ["docs", "blog"]
+```
+
+- `/docs/installation/`
+- `/blog/first-post/`
+
+If no URL prefixes are specified, the default behavior gives the first app an empty prefix and uses app names for others:
+
+- `/installation/`  (First app at root)
+- `/blog_app/first-post/`  (Second app with app name prefix)
 
 ### How Views and URLs Are Generated
 
@@ -211,6 +255,7 @@ def articles_guide(request):
 - For each view function, Spellbook creates a URL pattern in the app-specific URL module.
 - For multi-source setups, each app gets its own URL module (e.g., `urls_docs_app.py`).
 - The main `urls.py` in django_spellbook includes all app-specific URL modules with their prefixes.
+- URL patterns incorporate the configured URL prefixes from `SPELLBOOK_MD_URL_PREFIX`, or use defaults if not specified.
 
 5. Accessing the Generated URLs and Views:
 

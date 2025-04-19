@@ -33,6 +33,8 @@ def generate_view_name(url_pattern: str) -> str:
     
     # Join with underscores (replacing slashes with underscores)
     view_name = '_'.join(cleaned_parts)
+    view_name = f"view_{view_name}"
+    view_name = view_name.replace('.', '-')
     
     return view_name
 
