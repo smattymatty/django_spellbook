@@ -22,7 +22,13 @@ class URLViewGenerator:
     Acts as a facade for the URLGenerator, ViewGenerator, and FileWriter components.
     """
     
-    def __init__(self, content_app: str, content_dir_path: str, source_path: str=None):
+    def __init__(
+        self, 
+        content_app: str, 
+        content_dir_path: str, 
+        source_path: str=None,
+        url_prefix: str = ''
+        ):
         """
         Initialize URL and view generator.
 
@@ -30,15 +36,17 @@ class URLViewGenerator:
             content_app (str): Django app name where content will be stored
             content_dir_path (str): Base directory path for content
             source_path (str): Base directory path for source files
+            url_prefix (str): URL prefix for the content app
         """
         self.source_path = source_path
         self.content_app = content_app
         self.content_dir_path = content_dir_path
+        self.url_prefix = url_prefix
         
         # Initialize components
         self.url_generator = URLGenerator(content_app)
         self.view_generator = ViewGenerator(content_app)
-        self.file_writer = FileWriter(content_app)
+        self.file_writer = FileWriter(content_app, url_prefix)
     
     def generate_urls_and_views(self, processed_files: List[ProcessedFile], toc: Dict) -> None:
         """

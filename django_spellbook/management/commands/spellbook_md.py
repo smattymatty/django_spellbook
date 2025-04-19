@@ -38,9 +38,9 @@ class Command(BaseCommand):
         try:
             self.discover_spellblocks()
             # Validate settings (Should all be List[str] of equal lengths)
-            md_file_paths, content_apps = self.validate_settings()
+            md_file_paths, content_apps, md_url_prefix = self.validate_settings()
             # Process each source-destination pair
-            pair_results: List[Tuple[str, str, bool, int]] = self.process_each_source_pair(md_file_paths, content_apps)
+            pair_results: List[Tuple[str, str, bool, int]] = self.process_each_source_pair(md_file_paths, content_apps, md_url_prefix)
             # (md_path, content_app, success, processed_count)
             # Output Summary Report
             self.summary_report(pair_results)
@@ -51,8 +51,21 @@ class Command(BaseCommand):
             logger.error(f"Command failed: {str(e)}", exc_info=True)
             raise
 
-    def _process_source_destination_pair(self, md_path, content_app):
-        """Process all markdown files for a single source-destination pair."""
+    def _process_source_destination_pair(self, md_path: Path, content_app: str, md_url_prefix: str):
+        """
+        Process all markdown files for a single source-destination pair.
+        
+        Args:
+            md_path (Path): Path to the source markdown directory
+            content_app (str): Name of the content app
+            md_url_prefix (str): URL prefix for the content app
+            
+        Raises:
+            ContentDiscoveryError if no markdown files are found
+            
+        Returns:
+            Length of the processed files list
+        """
         # Find markdown files
         try:
             markdown_files = find_markdown_files(md_path)
@@ -92,7 +105,8 @@ class Command(BaseCommand):
                 content_app=content_app,
                 source_path=md_path,
                 content_dir_path=content_dir_path,
-                template_dir=template_dir
+                template_dir=template_dir,
+                url_prefix=md_url_prefix
             )
         except Exception as e:
             logger.error(f"Error initializing markdown processor: {str(e)}", exc_info=True)
@@ -191,18 +205,18 @@ class Command(BaseCommand):
             )
             logger.warning(f"Block discovery error: {str(e)}", exc_info=True)
             
-    def validate_settings(self) -> Tuple[List[Path], List[str]]:
+    def validate_settings(self) -> Tuple[List[Path], List[str], List[str]]:
         '''
         Validate the Django settings required for spellbook markdown processing.
         
         returns:
-            Tuple[List[Path], List[str]]: md_paths and md_apps
+            Tuple[List[Path], List[str], List[str]]: md_paths, md_apps, md_url_prefix
             
         raises:
             ConfigurationError: If any settings are missing or invalid
         '''
         try:
-            md_file_paths, content_apps = validate_spellbook_settings()
+            md_file_paths, content_apps, md_url_prefix = validate_spellbook_settings()
         except Exception as e:
             error_message = f"Configuration error: {str(e)}"
             self.stdout.write(self.style.ERROR(error_message))
@@ -213,34 +227,49 @@ class Command(BaseCommand):
             logger.error(f"Settings validation error: {str(e)}", exc_info=True)
             raise ConfigurationError(f"Settings validation failed: {str(e)}")
         
-        return md_file_paths, content_apps
+        return md_file_paths, content_apps, md_url_prefix
     
-    def process_each_source_pair(self, md_file_paths: List[Path], content_apps: List[str]) -> List[Tuple[str, str, bool, int]]:
+    def process_each_source_pair(
+        self, 
+        md_file_paths: List[Path], 
+        content_apps: List[str],
+        md_url_prefix: List[str]
+    ) -> List[Tuple[str, str, str, bool, int]]:
         '''
         Process each source-destination pair.
         
+        Args:
+            md_file_paths (List[Path]): List of paths to markdown files
+            content_apps (List[str]): List of content app names
+            md_url_prefix (List[str]): List of URL prefixes for the content app
+        
         returns:
-            List[Tuple[str, str, bool, int]]: List of tuples containing
-                (md_path, content_app, success, processed_count)
+            List[Tuple[str, str, str, bool, int]]: List of tuples containing
+                (md_path, content_app, url_prefix, success, processed_count)
                 
         raises:
             ProcessingError: If there is an error processing a source-destination pair
         '''
         pair_results: List[Tuple[str, str, bool, int]] = []
-        for i, (md_path, content_app) in enumerate(zip(md_file_paths, content_apps)):
+        for i, (md_path, content_app, url_prefix) in enumerate(zip(md_file_paths, content_apps, md_url_prefix)):
             pair_name = f"pair {i+1}/{len(md_file_paths)}: {md_path} → {content_app}"
+            
+            # Use the original output format for backward compatibility with tests
             self.stdout.write(
                 self.style.SUCCESS(f"Processing source-destination {pair_name}")
             )
             
+            # Log the URL prefix separately for new functionality
+            self.stdout.write(f"Using URL prefix: '{url_prefix}'")
+                
             try:
-                processed_count = self._process_source_destination_pair(md_path, content_app)
-                pair_results.append((md_path, content_app, True, processed_count))
+                processed_count = self._process_source_destination_pair(md_path, content_app, url_prefix)
+                pair_results.append((md_path, content_app, url_prefix, True, processed_count))            
             except Exception as e:
                 error_message = f"Error processing {pair_name}: {str(e)}"
                 self.stdout.write(self.style.ERROR(error_message))
                 # Always use 0 as the count for failed pairs to avoid None
-                pair_results.append((md_path, content_app, False, 0))
+                pair_results.append((md_path, content_app, url_prefix, False, 0))
                 logger.error(f"Error processing {pair_name}: {str(e)}", exc_info=True)
                 
                 if len(md_file_paths) > 1:
@@ -250,16 +279,16 @@ class Command(BaseCommand):
                     raise
         return pair_results
         
-    def summary_report(self, pair_results: List[Tuple[str, str, bool, int]]):
+    def summary_report(self, pair_results: List[Tuple[str, str, str, bool, int]]):
         '''
         Output a summary report of the processing results.
         
         Args:
-            pair_results: List of tuples containing (md_path, content_app, success, processed_count)
+            pair_results: List of tuples containing (md_path, content_app, url_prefix, success, processed_count)
         '''
         self.stdout.write("\nProcessing Summary:")
-        success_count = sum(1 for _, _, success, _ in pair_results if success)
-        total_processed = sum(count for _, _, success, count in pair_results if success)
+        success_count = sum(1 for _, _, _, success, _ in pair_results if success)
+        total_processed = sum(count for _, _, _, success, count in pair_results if success)
         
         if success_count == len(pair_results):
             self.stdout.write(self.style.SUCCESS(
@@ -267,9 +296,9 @@ class Command(BaseCommand):
                 f"Total files processed: {total_processed}."
             ))
         else:
-            failed_pairs = [(src, dst) for src, dst, success, _ in pair_results if not success]
+            failed_pairs = [(src, dst, prefix) for src, dst, prefix, success, _ in pair_results if not success]
             self.stdout.write(self.style.WARNING(
                 f"{success_count} of {len(pair_results)} pairs processed successfully. "
                 f"Total files processed: {total_processed}. "
-                f"Failed pairs: {', '.join(f'{src} → {dst}' for src, dst in failed_pairs)}"
+                f"Failed pairs: {', '.join(f'{src} → {dst} (prefix: {prefix})' for src, dst, prefix in failed_pairs)}"
             ))

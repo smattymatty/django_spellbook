@@ -40,14 +40,16 @@ urlpatterns = [
 ]
 """
 
-    def __init__(self, content_app: str):
+    def __init__(self, content_app: str, url_prefix: str = ''):
         """
         Initialize the file writer.
         
         Args:
             content_app: Django app name where content will be stored
+            url_prefix: URL prefix for the content app
         """
         self.content_app = content_app
+        self.url_prefix = url_prefix.strip('/')  # Normalize by removing trailing slashes
         self.spellbook_dir = get_spellbook_dir()
         
         # Create module names for app-specific files
@@ -103,8 +105,9 @@ urlpatterns = [
                 logger.error(f"Error reading urls.py: {str(e)}")
         
         # Add current module's include if not already present
-        if self.urls_module not in includes:
-            includes[self.urls_module] = self.content_app
+        # Use the provided URL prefix if available, otherwise use the app name
+        prefix_to_use = self.url_prefix if self.url_prefix else self.content_app
+        includes[self.urls_module] = prefix_to_use
             
         # Generate the includes list for the urlpatterns
         includes_str = ',\n    '.join([

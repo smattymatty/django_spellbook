@@ -62,10 +62,11 @@ class TestValidateSpellbookSettings(TestCase):
     @override_settings(SPELLBOOK_MD_PATH='/test/path', SPELLBOOK_MD_APP='test_app')
     def test_settings_with_new_names(self):
         """Test validation with new setting names."""
-        md_paths, md_apps = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes = validate_spellbook_settings()
         
         self.assertEqual(md_paths, ['/test/path'])
         self.assertEqual(md_apps, ['test_app'])
+        self.assertEqual(md_url_prefixes, [''])
     
     @override_settings(
         SPELLBOOK_MD_PATH='/test/path',
@@ -75,10 +76,11 @@ class TestValidateSpellbookSettings(TestCase):
     @patch('django_spellbook.management.commands.command_utils.logger')
     def test_settings_with_old_names(self, mock_logger):
         """Test validation with old setting names (deprecated)."""
-        md_paths, md_apps = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes = validate_spellbook_settings()
         
         self.assertEqual(md_paths, ['/test/path'])
         self.assertEqual(md_apps, ['test_app'])
+        self.assertEqual(md_url_prefixes, [''])
         
         # Check that we logged a deprecation warning
         mock_logger.warning.assert_called_with(
@@ -91,10 +93,11 @@ class TestValidateSpellbookSettings(TestCase):
     )
     def test_settings_with_multiple_pairs(self):
         """Test validation with multiple source-destination pairs."""
-        md_paths, md_apps = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes = validate_spellbook_settings()
         
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
+        self.assertEqual(md_url_prefixes, ['', 'app2'])
     
     @override_settings(
         SPELLBOOK_MD_PATH=None,
@@ -115,40 +118,40 @@ class TestValidateSettingValues(TestCase):
     def test_valid_settings(self):
         """Test validation with valid settings."""
         # This should not raise any exceptions
-        _validate_setting_values(['/test/path'], ['test_app'])
+        _validate_setting_values(['/test/path'], ['test_app'], ['test_prefix'])
     
     def test_missing_path(self):
         """Test validation with missing path."""
         with self.assertRaises(CommandError) as context:
-            _validate_setting_values([], ['test_app'])
+            _validate_setting_values([], ['test_app'], ['test_prefix'])
         
         self.assertIn("SPELLBOOK_MD_PATH", str(context.exception))
     
     def test_missing_app(self):
         """Test validation with missing app."""
         with self.assertRaises(CommandError) as context:
-            _validate_setting_values(['/test/path'], [])
+            _validate_setting_values(['/test/path'], [], ['test_prefix'])
         
         self.assertIn("SPELLBOOK_MD_APP or SPELLBOOK_CONTENT_APP", str(context.exception))
     
     def test_unequal_lengths(self):
         """Test validation with unequal lengths."""
         with self.assertRaises(CommandError) as context:
-            _validate_setting_values(['/path1', '/path2'], ['app1'])
+            _validate_setting_values(['/path1', '/path2'], ['app1'], ['test_prefix'])
         
         self.assertIn("must have the same number of entries", str(context.exception))
     
     def test_empty_path(self):
         """Test validation with empty path."""
         with self.assertRaises(CommandError) as context:
-            _validate_setting_values(['', '/path2'], ['app1', 'app2'])
+            _validate_setting_values(['', '/path2'], ['app1', 'app2'], ['test_prefix', ''])
         
         self.assertIn("Invalid SPELLBOOK_MD_PATH configuration", str(context.exception))
     
     def test_empty_app(self):
         """Test validation with empty app."""
         with self.assertRaises(CommandError) as context:
-            _validate_setting_values(['/path1', '/path2'], ['app1', ''])
+            _validate_setting_values(['/path1', '/path2'], ['app1', ''], ['test_prefix', ''])
         
         self.assertIn("SPELLBOOK_MD_APP must be a non-empty string", str(context.exception))
 
