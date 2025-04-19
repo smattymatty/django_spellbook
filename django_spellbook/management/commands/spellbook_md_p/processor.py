@@ -62,12 +62,14 @@ class MarkdownProcessor:
         content_app: str, 
         source_path: Union[str, Path], 
         content_dir_path: Union[str, Path], 
-        template_dir: Union[str, Path]
+        template_dir: Union[str, Path],
+        url_prefix: str = ''
     ):
         self.content_app: str = content_app
         self.source_path: Path = Path(source_path)
         self.content_dir_path: Path = Path(content_dir_path)
         self.template_dir: Path = Path(template_dir)
+        self.url_prefix: str = url_prefix
         
         # Initialize sub-processors
         self.file_processor = MarkdownFileProcessor()
@@ -76,7 +78,8 @@ class MarkdownProcessor:
         self.url_generator = URLViewGenerator(
             content_app=content_app,
             content_dir_path=str(self.content_dir_path),
-            source_path=str(self.source_path)
+            source_path=str(self.source_path),
+            url_prefix=self.url_prefix
         )
         
         logger.debug(f"Initialized MarkdownProcessor for app {content_app}")

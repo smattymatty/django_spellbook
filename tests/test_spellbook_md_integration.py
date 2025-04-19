@@ -23,7 +23,7 @@ class TestSpellbookMDIntegration(TestCase):
              patch('django_spellbook.management.commands.spellbook_md.MarkdownProcessor') as mock_processor_class:
             
             # Setup mocks
-            mock_validate.return_value = (['/test/path'], ['test_app'])
+            mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'])
             mock_find_files.return_value = [('/test/path', 'test.md')]
             mock_setup.return_value = ('/app/path', '/app/templates')
             
@@ -58,7 +58,7 @@ class TestSpellbookMDIntegration(TestCase):
             patch('django_spellbook.management.commands.spellbook_md.MarkdownProcessor') as mock_processor_class:
             
             # Setup mocks
-            mock_validate.return_value = (['/path1', '/path2'], ['app1', 'app2'])
+            mock_validate.return_value = (['/path1', '/path2'], ['app1', 'app2'], ['test_prefix', ''])
             
             # Use call count tracking to ensure correct behavior for each call
             find_files_calls = 0
@@ -126,7 +126,7 @@ class TestSpellbookMDIntegration(TestCase):
             patch('django_spellbook.management.commands.spellbook_md.MarkdownProcessor') as mock_processor_class:
             
             # Setup mocks
-            mock_validate.return_value = (['/test/path'], ['test_app'])
+            mock_validate.return_value = (['/test/path'], ['test_app'], [''])
             mock_find_files.return_value = [
                 ('/test/path', 'good.md'),
                 ('/test/path', 'bad.md')
@@ -167,7 +167,7 @@ class TestSpellbookMDIntegration(TestCase):
             patch('django_spellbook.management.commands.spellbook_md.MarkdownProcessor') as mock_processor_class:
             
             # Setup mocks
-            mock_validate.return_value = (['/path1', '/path2'], ['app1', 'app2'])
+            mock_validate.return_value = (['/path1', '/path2'], ['app1', 'app2'], ['', 'test_prefix'])
             
             # Track find_files calls to return different values
             find_files_calls = 0

@@ -10,19 +10,19 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-def normalize_settings(setting_path: str, setting_app:str):
+def normalize_settings(setting_path, setting_app):
     """
     Convert settings to normalized lists with backward compatibility.
     
     Args:
-        setting_path (str): Path to markdown files.
-        setting_app (str): Name of the content app.
+        setting_path: Path to markdown files.
+        setting_app: Name of the content app.
     
     Returns:
         Tuple[List[str], List[str]]: md_paths and md_apps.
     """
-    md_paths: List[str] = [setting_path] if isinstance(setting_path, (str, Path)) else setting_path
-    md_apps: List[str] = [setting_app] if isinstance(setting_app, str) else setting_app
+    md_paths = [setting_path] if isinstance(setting_path, (str, Path)) else setting_path
+    md_apps = [setting_app] if isinstance(setting_app, str) else setting_app
     return md_paths, md_apps
 
 def validate_spellbook_settings():
@@ -30,11 +30,12 @@ def validate_spellbook_settings():
     Validate required settings and support multiple source-destination pairs.
     
     Returns:
-        Tuple[List[str], List[str]]: Normalized settings.
+        Tuple[List[str], List[str], List[str]]: md_paths, md_apps, md_url_prefix.
     """
     # Get settings values with backward compatibility
     md_path = getattr(settings, 'SPELLBOOK_MD_PATH', None)
     md_app = getattr(settings, 'SPELLBOOK_MD_APP', None)
+    md_url_prefix = getattr(settings, 'SPELLBOOK_MD_URL_PREFIX', None)
     content_app = getattr(settings, 'SPELLBOOK_CONTENT_APP', None)
     
     # Prefer SPELLBOOK_MD_APP but fall back to SPELLBOOK_CONTENT_APP
@@ -46,18 +47,33 @@ def validate_spellbook_settings():
     # Normalize settings to lists
     md_file_paths, content_apps = normalize_settings(md_path, app_setting)
     
-    # Validate settings
-    _validate_setting_values(md_file_paths, content_apps)
+    # Normalize URL prefixes
+    md_url_prefixes = normalize_url_prefixes(md_url_prefix)
     
-    return md_file_paths, content_apps
+    if not content_apps:
+        raise CommandError("Missing required settings: SPELLBOOK_MD_APP or SPELLBOOK_CONTENT_APP")
+    
+    # Generate default URL prefixes if not provided
+    if not md_url_prefixes:
+        # Generate default prefixes based on app names
+        if len(content_apps) == 1:
+            md_url_prefixes = ['']  # Single app gets empty prefix
+        else:
+            # First app gets empty prefix, others use their app name as prefix
+            md_url_prefixes = [''] + content_apps[1:]
+    # Validate settings
+    _validate_setting_values(md_file_paths, content_apps, md_url_prefixes)
+    
+    return md_file_paths, content_apps, md_url_prefixes
 
-def _validate_setting_values(md_file_paths: List[str], content_apps: List[str]):
+def _validate_setting_values(md_file_paths: List[str], content_apps: List[str], md_url_prefix: List[str]):
     """
     Validate setting values for correctness and compatibility.
     
     Args:
         md_file_paths (List[str]): List of paths to markdown files.
         content_apps (List[str]): List of content app names.
+        md_url_prefix (List[str]): List of URL prefixes for the content app.
         
     Raises:
         CommandError: If any settings are missing or invalid.
@@ -75,6 +91,9 @@ def _validate_setting_values(md_file_paths: List[str], content_apps: List[str]):
     # Validate list lengths match
     if len(md_file_paths) != len(content_apps):
         raise CommandError("SPELLBOOK_MD_PATH and SPELLBOOK_MD_APP must have the same number of entries")
+    if len(md_url_prefix) != len(content_apps):
+        raise CommandError("SPELLBOOK_MD_URL_PREFIX and SPELLBOOK_MD_APP must have the same number of entries")
+    
     
     # Ensure each string is not empty
     for md_path in md_file_paths:
@@ -90,6 +109,18 @@ def _validate_setting_values(md_file_paths: List[str], content_apps: List[str]):
         if not app_setting:
             raise CommandError("SPELLBOOK_MD_APP must be a non-empty string.")
 
+    # Add to _validate_setting_values function
+    for prefix in md_url_prefix:
+        # Check for dangerous patterns
+        dangerous_patterns = ['..', '//', '<?', '%', '\x00']
+        if any(pattern in prefix for pattern in dangerous_patterns):
+            raise CommandError(f"URL prefix '{prefix}' contains invalid characters.")
+        
+        # Check for invalid URL characters
+        import re
+        if prefix and not re.match(r'^[a-zA-Z0-9_\-]+$', prefix):
+            logger.warning(f"URL prefix '{prefix}' contains characters that may cause issues with URL routing.")
+        
 def setup_directory_structure(content_app: str, dirpath: str):
     """
     Set up the necessary directory structure for content processing.
@@ -182,3 +213,35 @@ def log_and_write(message: str, level: str = 'info', stdout: Optional[IO] = None
     getattr(logger, level)(message)
     if stdout:
         stdout.write(message)
+        
+        
+def normalize_url_prefix(prefix: str) -> str:
+    """
+    Normalize URL prefix by removing leading/trailing slashes.
+    
+    Args:
+        prefix (str): URL prefix to normalize
+        
+    Returns:
+        str: Normalized URL prefix
+    """
+    # Remove leading and trailing slashes
+    prefix = prefix.strip('/')
+    return prefix
+
+def normalize_url_prefixes(setting_url_prefix) -> List[str]:
+    """
+    Normalize URL prefixes to a list.
+    
+    Args:
+        setting_url_prefix: URL prefix or list of prefixes
+        
+    Returns:
+        List[str]: Normalized list of URL prefixes
+    """
+    if setting_url_prefix is None:
+        return []
+    elif isinstance(setting_url_prefix, str):
+        return [normalize_url_prefix(setting_url_prefix)]
+    else:
+        return [normalize_url_prefix(p) for p in setting_url_prefix]
