@@ -61,7 +61,7 @@ class TestFileWriter(TestCase):
         
         # Check content
         content = mock_write.call_args[0][1]
-        self.assertIn("path('test_app/', include('django_spellbook.urls_test_app'))", content)
+        self.assertIn("path('', include('django_spellbook.urls_test_app'))", content)
         
     @patch('django_spellbook.management.commands.processing.file_writer.write_file')
     def test_write_urls_file(self, mock_write_file):

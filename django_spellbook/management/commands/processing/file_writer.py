@@ -105,13 +105,13 @@ urlpatterns = [
                 logger.error(f"Error reading urls.py: {str(e)}")
         
         # Add current module's include if not already present
-        # Use the provided URL prefix if available, otherwise use the app name
-        prefix_to_use = self.url_prefix if self.url_prefix else self.content_app
-        includes[self.urls_module] = prefix_to_use
-            
+        # Use the provided URL prefix, even if it's empty
+        if self.urls_module not in includes:
+            includes[self.urls_module] = self.url_prefix
+        slash = '/' if self.url_prefix else ''
         # Generate the includes list for the urlpatterns
         includes_str = ',\n    '.join([
-            f"path('{prefix}/', include('django_spellbook.{module}'))" 
+            f"path('{prefix}{slash}', include('django_spellbook.{module}'))" 
             for module, prefix in includes.items()
         ])
         
