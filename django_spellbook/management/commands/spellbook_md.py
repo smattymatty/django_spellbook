@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
@@ -38,7 +38,8 @@ class Command(BaseCommand):
         try:
             self.discover_spellblocks()
             # Validate settings (Should all be List[str] of equal lengths)
-            md_file_paths, content_apps, md_url_prefix = self.validate_settings()
+            md_file_paths, content_apps, md_url_prefix, base_templates = self.validate_settings()
+            print(f"Base templates: {base_templates}")
             # Process each source-destination pair
             pair_results: List[Tuple[str, str, bool, int]] = self.process_each_source_pair(md_file_paths, content_apps, md_url_prefix)
             # (md_path, content_app, success, processed_count)
@@ -205,18 +206,18 @@ class Command(BaseCommand):
             )
             logger.warning(f"Block discovery error: {str(e)}", exc_info=True)
             
-    def validate_settings(self) -> Tuple[List[Path], List[str], List[str]]:
+    def validate_settings(self) -> Tuple[List[Path], List[str], List[str], List[Optional[str]]]:
         '''
         Validate the Django settings required for spellbook markdown processing.
         
         returns:
-            Tuple[List[Path], List[str], List[str]]: md_paths, md_apps, md_url_prefix
+            Tuple[List[Path], List[str], List[str], List[Optional[str]]]: md_paths, md_apps, md_url_prefix, base_templates
             
         raises:
             ConfigurationError: If any settings are missing or invalid
         '''
         try:
-            md_file_paths, content_apps, md_url_prefix = validate_spellbook_settings()
+            md_file_paths, content_apps, md_url_prefix, base_templates = validate_spellbook_settings()
         except Exception as e:
             error_message = f"Configuration error: {str(e)}"
             self.stdout.write(self.style.ERROR(error_message))
@@ -227,7 +228,7 @@ class Command(BaseCommand):
             logger.error(f"Settings validation error: {str(e)}", exc_info=True)
             raise ConfigurationError(f"Settings validation failed: {str(e)}")
         
-        return md_file_paths, content_apps, md_url_prefix
+        return md_file_paths, content_apps, md_url_prefix, base_templates
     
     def process_each_source_pair(
         self, 
