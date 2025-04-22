@@ -33,7 +33,7 @@ class TestSpellbookMDCommand(TestCase):
         mock_validate.assert_called_once()
         
         # Verify processing was called with correct arguments
-        mock_process_pair.assert_called_once_with('/test/path', 'test_app', 'test_prefix')
+        mock_process_pair.assert_called_once_with('/test/path', 'test_app', 'test_prefix', None)
         
         # Verify success message was output
         self.command.stdout.write.assert_any_call(
@@ -55,8 +55,8 @@ class TestSpellbookMDCommand(TestCase):
         
         # Verify processing was called twice with correct arguments
         expected_calls = [
-            call('/path1', 'app1', 'test'),
-            call('/path2', 'app2', '')
+            call('/path1', 'app1', 'test', None),
+            call('/path2', 'app2', '', None)
         ]
         self.assertEqual(mock_process_pair.call_count, 2)
         mock_process_pair.assert_has_calls(expected_calls)
@@ -115,11 +115,11 @@ class TestSpellbookMDCommand(TestCase):
         """Test error handling with multiple pairs (should continue)"""
         # Set up mocks
         mock_validate.return_value = (
-            ['/path1', '/path2', '/path3'], ['app1', 'app2', 'app3'], ['test_prefix', 'gg', ''], [None, None, None]
+            ['/path1', '/path2', '/path3'], ['app1', 'app2', 'app3'], ['test_prefix', 'gg', ''], [None, 'Template', None]
             )
         
         # Set up error for the second pair
-        def side_effect(path, app, url_prefix):
+        def side_effect(path, app, url_prefix, base_template):
             if path == '/path2':
                 raise CommandError("Test processing error")
             return 1  # Return an integer count on success (not None)
@@ -131,9 +131,9 @@ class TestSpellbookMDCommand(TestCase):
         
         # Verify all pairs were attempted
         expected_calls = [
-            call('/path1', 'app1', 'test_prefix'),
-            call('/path2', 'app2', 'gg'),
-            call('/path3', 'app3', '')
+            call('/path1', 'app1', 'test_prefix', None),
+            call('/path2', 'app2', 'gg', "Template"),
+            call('/path3', 'app3', '', None)
         ]
         self.assertEqual(mock_process_pair.call_count, 3)
         mock_process_pair.assert_has_calls(expected_calls)
@@ -161,7 +161,7 @@ class TestSpellbookMDCommand(TestCase):
         
         # Execute and test
         with self.assertRaises(CommandError) as context:
-            self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix')
+            self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix', None)
         
         self.assertIn("No markdown files found", str(context.exception))
         mock_find_files.assert_called_once_with('/test/path')
@@ -187,7 +187,7 @@ class TestSpellbookMDCommand(TestCase):
         mock_processor_class.return_value = mock_processor
         
         # Execute
-        self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix')
+        self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix', None)
         
         # Verify processor was initialized correctly
         mock_processor_class.assert_called_once_with(
@@ -195,7 +195,8 @@ class TestSpellbookMDCommand(TestCase):
             source_path='/test/path',
             content_dir_path='/content/dir/path',
             template_dir='/template/dir',
-            url_prefix='test_prefix'
+            url_prefix='test_prefix',
+            base_template=None
         )
         
         # Verify TOC was built
@@ -243,7 +244,7 @@ class TestSpellbookMDCommand(TestCase):
         
         # Execute and test
         with self.assertRaises(CommandError) as context:
-            self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix')
+            self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix', None)
         
         self.assertIn("No markdown files were processed successfully", str(context.exception))
         
@@ -276,7 +277,7 @@ class TestSpellbookMDCommand(TestCase):
         mock_processor_class.return_value = mock_processor
         
         # Execute
-        self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix')
+        self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix', 'template2/path')
         
         # Verify all files were attempted
         self.assertEqual(mock_processor.process_file.call_count, 3)

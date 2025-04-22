@@ -55,6 +55,7 @@ class MarkdownProcessor:
         source_path: Path to the source directory
         content_dir_path: Path to the content app directory
         template_dir: Path to the template directory
+        base_template: Base template for the content app
     """
     
     def __init__(
@@ -63,18 +64,20 @@ class MarkdownProcessor:
         source_path: Union[str, Path], 
         content_dir_path: Union[str, Path], 
         template_dir: Union[str, Path],
-        url_prefix: str = ''
+        url_prefix: str = '',
+        base_template: Optional[str] = None
     ):
         self.content_app: str = content_app
         self.source_path: Path = Path(source_path)
         self.content_dir_path: Path = Path(content_dir_path)
         self.template_dir: Path = Path(template_dir)
         self.url_prefix: str = url_prefix
+        self.base_template: Optional[str] = base_template
         
         # Initialize sub-processors
         self.file_processor = MarkdownFileProcessor()
         self.file_processor.current_source_path = str(self.source_path)
-        self.template_generator = TemplateGenerator(content_app, str(self.template_dir))
+        self.template_generator = TemplateGenerator(content_app, str(self.template_dir), self.base_template)
         self.url_generator = URLViewGenerator(
             content_app=content_app,
             content_dir_path=str(self.content_dir_path),

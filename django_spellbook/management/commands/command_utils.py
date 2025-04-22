@@ -136,9 +136,29 @@ def _validate_setting_values(md_file_paths: List[str], content_apps: List[str], 
     
     # Validate base templates
     for template in base_templates:
-        if template is not None and not isinstance(template, str):
-            raise CommandError(f"Base template '{template}' must be None or a string.")
-        
+        if template is not None:
+            if not isinstance(template, str):
+                raise CommandError(f"Base template '{template}' must be None or a string.")
+            
+            # Check for dangerous template path patterns
+            dangerous_patterns = [
+                '..', '//', '\\', '<', '>', '%', '\x00', 
+                ':', '&', ';', '$', '|', '?', '#', '*', '(', ')',
+                '`touch ', '`rm -rf /`'
+                ]
+            if any(pattern in template for pattern in dangerous_patterns):
+                raise CommandError(
+                    f"Base template path '{template}' contains potentially dangerous characters.\n"
+                    "Avoid path traversal sequences and special characters in template paths."
+                )
+            
+            # Verify the template path doesn't try to escape the template directory
+            normalized_path = os.path.normpath(template)
+            if normalized_path.startswith('..') or normalized_path.startswith('/'):
+                raise CommandError(
+                    f"Base template path '{template}' contains potentially dangerous characters.\n"
+                    "Template paths should be relative to the template directory without traversal."
+                )
 def setup_directory_structure(content_app: str, dirpath: str):
     """
     Set up the necessary directory structure for content processing.

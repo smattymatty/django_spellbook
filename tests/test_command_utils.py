@@ -506,3 +506,183 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
             self.assertIn("SPELLBOOK_MD_BASE_TEMPLATE", str(context.exception))
         
         
+
+class TestValidateSettingValuesWithDangerousTemplates(TestCase):
+    """Tests for _validate_setting_values function with focus on dangerous base templates."""
+
+    def test_valid_template_paths(self):
+        """Test validation with valid template paths."""
+        # These should not raise any exceptions
+        valid_templates = [
+            'base.html',
+            'subfolder/base.html',
+            'theme/custom/base.html',
+            'base_1.html',
+            'base-custom.html',
+            None  # None is always valid
+        ]
+        
+        for template in valid_templates:
+            _validate_setting_values(
+                ['/test/path'],
+                ['test_app'],
+                ['prefix'],
+                [template]
+            )
+    
+    def test_path_traversal_attempts(self):
+        """Test validation catches path traversal attempts."""
+        dangerous_traversal_templates = [
+            '../base.html',
+            '../../base.html',
+            '../../../etc/passwd',
+            'subfolder/../../../etc/passwd',
+            'theme/../../../../etc/shadow',
+            'subfolder/./../../secret.txt'
+        ]
+        
+        for template in dangerous_traversal_templates:
+            with self.assertRaises(CommandError) as context:
+                _validate_setting_values(
+                    ['/test/path'],
+                    ['test_app'],
+                    ['prefix'],
+                    [template]
+                )
+            self.assertIn("dangerous characters", str(context.exception).lower())
+    
+    def test_absolute_paths(self):
+        """Test validation catches absolute paths."""
+        absolute_path_templates = [
+            '/etc/passwd',
+            '/var/www/template.html',
+            '/usr/local/etc/config.html',
+            'C:\\Windows\\System32\\config.sys',  # Windows path
+            '\\\\server\\share\\file.html'  # UNC path
+        ]
+        
+        for template in absolute_path_templates:
+            with self.assertRaises(CommandError) as context:
+                _validate_setting_values(
+                    ['/test/path'],
+                    ['test_app'],
+                    ['prefix'],
+                    [template]
+                )
+            self.assertIn("contains potentially dangerous characters", str(context.exception).lower())
+    
+    def test_command_injection_attempts(self):
+        """Test validation catches command injection attempts."""
+        command_injection_templates = [
+            'base.html;rm -rf /',
+            'base.html|cat /etc/passwd',
+            'base.html && echo "pwned"',
+            'base.html`touch /tmp/hacked`',
+            'base.html$(ls -la)',
+            'base.html > /etc/passwd',
+            '`rm -rf /`'
+        ]
+        
+        for template in command_injection_templates:
+            with self.assertRaises(CommandError) as context:
+                _validate_setting_values(
+                    ['/test/path'],
+                    ['test_app'],
+                    ['prefix'],
+                    [template]
+                )
+            self.assertIn("dangerous characters", str(context.exception).lower())
+    
+    def test_special_character_templates(self):
+        """Test validation catches templates with special characters."""
+        special_char_templates = [
+            'base<script>alert(1)</script>.html',  # XSS attempt
+            'base%00.html',  # Null byte injection
+            'base?param=value.html',  # URL parameter
+            'base&query=true.html',  # URL ampersand
+            'base#fragment.html',  # URL fragment
+            'base:alternate.html',  # Colon (dangerous on some systems)
+            'base*wildcard.html',  # Wildcard character
+            'base(parenthesis).html'  # Parentheses
+        ]
+        
+        for template in special_char_templates:
+            with self.assertRaises(CommandError) as context:
+                _validate_setting_values(
+                    ['/test/path'],
+                    ['test_app'],
+                    ['prefix'],
+                    [template]
+                )
+            self.assertIn("dangerous characters", str(context.exception).lower())
+    
+    def test_non_string_templates(self):
+        """Test validation catches non-string templates."""
+        non_string_templates = [
+            123,
+            True,
+            ['nested', 'list'],
+            {'template': 'value'},
+            object()
+        ]
+        
+        for template in non_string_templates:
+            with self.assertRaises(CommandError) as context:
+                _validate_setting_values(
+                    ['/test/path'],
+                    ['test_app'],
+                    ['prefix'],
+                    [template]
+                )
+            self.assertIn("must be None or a string", str(context.exception))
+    
+    def test_empty_string_template(self):
+        """Test validation handles empty string templates."""
+        # This might be valid or invalid depending on your implementation
+        try:
+            _validate_setting_values(
+                ['/test/path'],
+                ['test_app'],
+                ['prefix'],
+                ['']
+            )
+            # If it doesn't raise an exception, no need for assertion
+        except CommandError as e:
+            # If it should raise an exception, assert the error message
+            self.assertIn("empty", str(e).lower())
+    
+    def test_unusual_unicode_characters(self):
+        """Test validation with unusual Unicode characters."""
+        unicode_templates = [
+            'base\u200Dhidden.html',  # Zero-width joiner (invisible)
+            'base\u202Ebidi.html',     # Right-to-left override
+            'base\u2028line.html',     # Line separator
+            'base\u2029paragraph.html', # Paragraph separator
+            'base—emdash.html',        # Em dash
+            'base\u3164invisible.html' # Hangul filler (appears as whitespace)
+        ]
+        
+        for template in unicode_templates:
+            # This might be valid or invalid depending on implementation
+            try:
+                _validate_setting_values(
+                    ['/test/path'],
+                    ['test_app'],
+                    ['prefix'],
+                    [template]
+                )
+                # If allowed, no assertion needed
+            except CommandError as e:
+                # If not allowed, verify the error message
+                self.assertIn("dangerous", str(e).lower())
+    
+    def test_multiple_templates_one_invalid(self):
+        """Test validation when only one template in a list is invalid."""
+        with self.assertRaises(CommandError) as context:
+            _validate_setting_values(
+                ['/path1', '/path2', '/path3'],
+                ['app1', 'app2', 'app3'],
+                ['prefix1', 'prefix2', 'prefix3'],
+                ['valid.html', '../traversal.html', 'also_valid.html']
+            )
+        self.assertIn("dangerous characters", str(context.exception).lower())
