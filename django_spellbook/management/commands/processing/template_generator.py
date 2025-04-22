@@ -14,16 +14,18 @@ class TemplateError(Exception):
 class TemplateGenerator:
     """Handles template creation and management for markdown-generated content."""
 
-    def __init__(self, content_app: str, template_dir: str):
+    def __init__(self, content_app: str, template_dir: str, base_template: Optional[str]):
         """
         Initialize the TemplateGenerator.
 
         Args:
             content_app (str): The Django app name where content will be stored
             template_dir (str): Base directory for templates
+            base_template (Optional[str]): Base template for the content app
         """
         self.content_app = content_app
         self.template_dir = template_dir
+        self.base_template = base_template
 
     def create_template(self, template_path: Path, html_content: str) -> None:
         """
@@ -79,10 +81,8 @@ class TemplateGenerator:
 
     def _get_base_template(self) -> Optional[str]:
         """Get the base template name from settings."""
-        base_template = getattr(settings, 'SPELLBOOK_MD_BASE_TEMPLATE', None)
-        if base_template and not base_template.endswith('.html'):
-            base_template += '.html'
-        return base_template
+        # We receive this from the command on instantiation
+        return self.base_template
 
     def _wrap_with_base_template(self, content: str, base_template: str) -> str:
         """Wrap content with base template inheritance."""

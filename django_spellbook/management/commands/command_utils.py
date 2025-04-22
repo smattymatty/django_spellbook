@@ -10,42 +10,52 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-def normalize_settings(setting_path, setting_app):
+def normalize_settings(setting_path, setting_app, setting_base_template):
     """
     Convert settings to normalized lists with backward compatibility.
     
     Args:
         setting_path: Path to markdown files.
         setting_app: Name of the content app.
+        setting_base_template: Base template or list of base templates.
     
     Returns:
-        Tuple[List[str], List[str]]: md_paths and md_apps.
+        Tuple[List[str], List[str], List[Optional[str]]]: md_paths, md_apps, and base_templates.
     """
-    md_paths = [setting_path] if isinstance(setting_path, (str, Path)) else setting_path
-    md_apps = [setting_app] if isinstance(setting_app, str) else setting_app
-    return md_paths, md_apps
+    md_paths: List[str] = [setting_path] if isinstance(setting_path, (str, Path)) else setting_path
+    md_apps: List[str] = [setting_app] if isinstance(setting_app, str) else setting_app
+    
+    # Normalize base_templates to a list
+    if setting_base_template is None:
+        # If None, create a list of None values matching the number of sources
+        if md_apps:
+            base_templates = [None] * len(md_apps)
+        else:
+            base_templates = [None]
+    elif isinstance(setting_base_template, str):
+        # If a string, use the same template for all sources
+        base_templates = [setting_base_template] * len(md_apps)
+    else:
+        # Assume it's already a list
+        base_templates = setting_base_template
+        
+    return md_paths, md_apps, base_templates
 
 def validate_spellbook_settings():
     """
     Validate required settings and support multiple source-destination pairs.
     
     Returns:
-        Tuple[List[str], List[str], List[str]]: md_paths, md_apps, md_url_prefix.
+        Tuple[List[str], List[str], List[str], List[Optional[str]]]: md_paths, md_apps, md_url_prefix, base_templates.
     """
     # Get settings values with backward compatibility
     md_path = getattr(settings, 'SPELLBOOK_MD_PATH', None)
     md_app = getattr(settings, 'SPELLBOOK_MD_APP', None)
     md_url_prefix = getattr(settings, 'SPELLBOOK_MD_URL_PREFIX', None)
-    content_app = getattr(settings, 'SPELLBOOK_CONTENT_APP', None)
-    
-    # Prefer SPELLBOOK_MD_APP but fall back to SPELLBOOK_CONTENT_APP
-    app_setting = md_app if md_app is not None else content_app
-    
-    if md_app is None and content_app is not None:
-        logger.warning("SPELLBOOK_CONTENT_APP is deprecated, use SPELLBOOK_MD_APP instead.")
+    md_base_template = getattr(settings, 'SPELLBOOK_MD_BASE_TEMPLATE', None)
     
     # Normalize settings to lists
-    md_file_paths, content_apps = normalize_settings(md_path, app_setting)
+    md_file_paths, content_apps, base_templates = normalize_settings(md_path, md_app, md_base_template)
     
     # Normalize URL prefixes
     md_url_prefixes = normalize_url_prefixes(md_url_prefix)
@@ -61,12 +71,13 @@ def validate_spellbook_settings():
         else:
             # First app gets empty prefix, others use their app name as prefix
             md_url_prefixes = [''] + content_apps[1:]
-    # Validate settings
-    _validate_setting_values(md_file_paths, content_apps, md_url_prefixes)
     
-    return md_file_paths, content_apps, md_url_prefixes
+    # Validate settings
+    _validate_setting_values(md_file_paths, content_apps, md_url_prefixes, base_templates)
+    
+    return md_file_paths, content_apps, md_url_prefixes, base_templates
 
-def _validate_setting_values(md_file_paths: List[str], content_apps: List[str], md_url_prefix: List[str]):
+def _validate_setting_values(md_file_paths: List[str], content_apps: List[str], md_url_prefix: List[str], base_templates: List[Optional[str]]):
     """
     Validate setting values for correctness and compatibility.
     
@@ -74,6 +85,7 @@ def _validate_setting_values(md_file_paths: List[str], content_apps: List[str], 
         md_file_paths (List[str]): List of paths to markdown files.
         content_apps (List[str]): List of content app names.
         md_url_prefix (List[str]): List of URL prefixes for the content app.
+        base_templates (List[Optional[str]]): List of base templates.
         
     Raises:
         CommandError: If any settings are missing or invalid.
@@ -93,7 +105,8 @@ def _validate_setting_values(md_file_paths: List[str], content_apps: List[str], 
         raise CommandError("SPELLBOOK_MD_PATH and SPELLBOOK_MD_APP must have the same number of entries")
     if len(md_url_prefix) != len(content_apps):
         raise CommandError("SPELLBOOK_MD_URL_PREFIX and SPELLBOOK_MD_APP must have the same number of entries")
-    
+    if len(base_templates) != len(content_apps):
+        raise CommandError("SPELLBOOK_MD_BASE_TEMPLATE and SPELLBOOK_MD_APP must have the same number of entries")
     
     # Ensure each string is not empty
     for md_path in md_file_paths:
@@ -109,7 +122,7 @@ def _validate_setting_values(md_file_paths: List[str], content_apps: List[str], 
         if not app_setting:
             raise CommandError("SPELLBOOK_MD_APP must be a non-empty string.")
 
-    # Add to _validate_setting_values function
+    # Validate URL prefixes
     for prefix in md_url_prefix:
         # Check for dangerous patterns
         dangerous_patterns = ['..', '//', '<?', '%', '\x00']
@@ -120,7 +133,32 @@ def _validate_setting_values(md_file_paths: List[str], content_apps: List[str], 
         import re
         if prefix and not re.match(r'^[a-zA-Z0-9_\-]+$', prefix):
             logger.warning(f"URL prefix '{prefix}' contains characters that may cause issues with URL routing.")
-        
+    
+    # Validate base templates
+    for template in base_templates:
+        if template is not None:
+            if not isinstance(template, str):
+                raise CommandError(f"Base template '{template}' must be None or a string.")
+            
+            # Check for dangerous template path patterns
+            dangerous_patterns = [
+                '..', '//', '\\', '<', '>', '%', '\x00', 
+                ':', '&', ';', '$', '|', '?', '#', '*', '(', ')',
+                '`touch ', '`rm -rf /`'
+                ]
+            if any(pattern in template for pattern in dangerous_patterns):
+                raise CommandError(
+                    f"Base template path '{template}' contains potentially dangerous characters.\n"
+                    "Avoid path traversal sequences and special characters in template paths."
+                )
+            
+            # Verify the template path doesn't try to escape the template directory
+            normalized_path = os.path.normpath(template)
+            if normalized_path.startswith('..') or normalized_path.startswith('/'):
+                raise CommandError(
+                    f"Base template path '{template}' contains potentially dangerous characters.\n"
+                    "Template paths should be relative to the template directory without traversal."
+                )
 def setup_directory_structure(content_app: str, dirpath: str):
     """
     Set up the necessary directory structure for content processing.

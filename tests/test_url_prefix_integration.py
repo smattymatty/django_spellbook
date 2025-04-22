@@ -80,12 +80,26 @@ class TestURLPrefixEdgeCasesIntegration(TestCase):
         with self.settings(
             SPELLBOOK_MD_PATH='/test/path',
             SPELLBOOK_MD_APP='test_app',
-            SPELLBOOK_MD_URL_PREFIX='/prefix/'  # With leading and trailing slashes
+            SPELLBOOK_MD_URL_PREFIX='/prefix/',  # With leading and trailing slashes
+            SPELLBOOK_MD_BASE_TEMPLATE="template"
         ):
-            md_paths, content_apps, url_prefixes = validate_spellbook_settings()
+            md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
             
             # Prefix should have slashes removed
             self.assertEqual(url_prefixes, ['prefix'])
+            self.assertEqual(base_templates, ['template'])
+            
+    def test_normalize_base_templates_unequal_lengths(self):
+        """Test normalization of base templates with unequal lengths."""
+        with self.settings(
+            SPELLBOOK_MD_PATH='/test/path',
+            SPELLBOOK_MD_APP='test_app',
+            SPELLBOOK_MD_BASE_TEMPLATE=['template1', None, 'template2']  # None and empty strings
+        ):
+            with self.assertRaises(CommandError):
+                md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
+
+            
     
     def test_normalize_url_prefixes_multi_app(self):
         """Test URL prefix normalization for multiple apps."""
@@ -94,10 +108,23 @@ class TestURLPrefixEdgeCasesIntegration(TestCase):
             SPELLBOOK_MD_APP=['app1', 'app2', 'app3'],
             SPELLBOOK_MD_URL_PREFIX=['/prefix1/', '//prefix2//', '/prefix3']  # Various slash patterns
         ):
-            md_paths, content_apps, url_prefixes = validate_spellbook_settings()
+            md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
             
             # All prefixes should have slashes removed
             self.assertEqual(url_prefixes, ['prefix1', 'prefix2', 'prefix3'])
+            self.assertEqual(base_templates, [None, None, None])
+            
+    def test_string_base_template_for_multi_app(self):
+        """Test base template normalization for multiple apps."""
+        with self.settings(
+            SPELLBOOK_MD_PATH=['/path1', '/path2', '/path3'],
+            SPELLBOOK_MD_APP=['app1', 'app2', 'app3'],
+            SPELLBOOK_MD_BASE_TEMPLATE='template1'  # Single string for multiple apps
+        ):
+            md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
+            
+            # All templates should be strings
+            self.assertEqual(base_templates, ['template1', 'template1', 'template1'])
     
     def test_string_url_prefix_for_multi_app_error(self):
         """Test error when providing a string URL prefix for multiple apps."""
@@ -118,10 +145,11 @@ class TestURLPrefixEdgeCasesIntegration(TestCase):
             SPELLBOOK_MD_APP=['app1', 'app2'],
             SPELLBOOK_MD_URL_PREFIX=['', '']  # Empty prefixes
         ):
-            md_paths, content_apps, url_prefixes = validate_spellbook_settings()
+            md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
             
             # Empty prefixes should be preserved
             self.assertEqual(url_prefixes, ['', ''])
+            self.assertEqual(base_templates, [None, None])
 
 
 class TestURLPrefixDefaultsIntegration(TestCase):
@@ -134,7 +162,7 @@ class TestURLPrefixDefaultsIntegration(TestCase):
             SPELLBOOK_MD_APP='test_app'
             # No SPELLBOOK_MD_URL_PREFIX specified
         ):
-            md_paths, content_apps, url_prefixes = validate_spellbook_settings()
+            md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
             
             # Single app should get empty prefix by default
             self.assertEqual(url_prefixes, [''])
@@ -146,7 +174,7 @@ class TestURLPrefixDefaultsIntegration(TestCase):
             SPELLBOOK_MD_APP=['app1', 'app2', 'app3']
             # No SPELLBOOK_MD_URL_PREFIX specified
         ):
-            md_paths, content_apps, url_prefixes = validate_spellbook_settings()
+            md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
             
             # First app gets empty prefix, others get app name
             self.assertEqual(url_prefixes, ['', 'app2', 'app3'])

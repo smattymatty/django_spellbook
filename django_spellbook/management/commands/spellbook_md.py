@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
@@ -38,9 +38,10 @@ class Command(BaseCommand):
         try:
             self.discover_spellblocks()
             # Validate settings (Should all be List[str] of equal lengths)
-            md_file_paths, content_apps, md_url_prefix = self.validate_settings()
+            md_file_paths, content_apps, md_url_prefix, base_templates = self.validate_settings()
+            print(f"Base templates: {base_templates}")
             # Process each source-destination pair
-            pair_results: List[Tuple[str, str, bool, int]] = self.process_each_source_pair(md_file_paths, content_apps, md_url_prefix)
+            pair_results: List[Tuple[str, str, bool, int]] = self.process_each_source_pair(md_file_paths, content_apps, md_url_prefix, base_templates)
             # (md_path, content_app, success, processed_count)
             # Output Summary Report
             self.summary_report(pair_results)
@@ -51,7 +52,7 @@ class Command(BaseCommand):
             logger.error(f"Command failed: {str(e)}", exc_info=True)
             raise
 
-    def _process_source_destination_pair(self, md_path: Path, content_app: str, md_url_prefix: str):
+    def _process_source_destination_pair(self, md_path: Path, content_app: str, md_url_prefix: str, base_template: str):
         """
         Process all markdown files for a single source-destination pair.
         
@@ -59,6 +60,7 @@ class Command(BaseCommand):
             md_path (Path): Path to the source markdown directory
             content_app (str): Name of the content app
             md_url_prefix (str): URL prefix for the content app
+            base_template (str): Base template for the content app
             
         Raises:
             ContentDiscoveryError if no markdown files are found
@@ -106,7 +108,8 @@ class Command(BaseCommand):
                 source_path=md_path,
                 content_dir_path=content_dir_path,
                 template_dir=template_dir,
-                url_prefix=md_url_prefix
+                url_prefix=md_url_prefix,
+                base_template=base_template
             )
         except Exception as e:
             logger.error(f"Error initializing markdown processor: {str(e)}", exc_info=True)
@@ -205,18 +208,18 @@ class Command(BaseCommand):
             )
             logger.warning(f"Block discovery error: {str(e)}", exc_info=True)
             
-    def validate_settings(self) -> Tuple[List[Path], List[str], List[str]]:
+    def validate_settings(self) -> Tuple[List[Path], List[str], List[str], List[Optional[str]]]:
         '''
         Validate the Django settings required for spellbook markdown processing.
         
         returns:
-            Tuple[List[Path], List[str], List[str]]: md_paths, md_apps, md_url_prefix
+            Tuple[List[Path], List[str], List[str], List[Optional[str]]]: md_paths, md_apps, md_url_prefix, base_templates
             
         raises:
             ConfigurationError: If any settings are missing or invalid
         '''
         try:
-            md_file_paths, content_apps, md_url_prefix = validate_spellbook_settings()
+            md_file_paths, content_apps, md_url_prefix, base_templates = validate_spellbook_settings()
         except Exception as e:
             error_message = f"Configuration error: {str(e)}"
             self.stdout.write(self.style.ERROR(error_message))
@@ -227,14 +230,15 @@ class Command(BaseCommand):
             logger.error(f"Settings validation error: {str(e)}", exc_info=True)
             raise ConfigurationError(f"Settings validation failed: {str(e)}")
         
-        return md_file_paths, content_apps, md_url_prefix
+        return md_file_paths, content_apps, md_url_prefix, base_templates
     
     def process_each_source_pair(
         self, 
         md_file_paths: List[Path], 
         content_apps: List[str],
-        md_url_prefix: List[str]
-    ) -> List[Tuple[str, str, str, bool, int]]:
+        md_url_prefix: List[str],
+        base_templates: List[Optional[str]]
+    ) -> List[Tuple[str, str, str, str, bool, int]]:
         '''
         Process each source-destination pair.
         
@@ -242,16 +246,17 @@ class Command(BaseCommand):
             md_file_paths (List[Path]): List of paths to markdown files
             content_apps (List[str]): List of content app names
             md_url_prefix (List[str]): List of URL prefixes for the content app
+            base_templates (List[Optional[str]]): List of base templates
         
         returns:
-            List[Tuple[str, str, str, bool, int]]: List of tuples containing
-                (md_path, content_app, url_prefix, success, processed_count)
+            List[Tuple[str, str, str, str, bool, int]]: List of tuples containing
+                (md_path, content_app, url_prefix, base_template, success, processed_count)
                 
         raises:
             ProcessingError: If there is an error processing a source-destination pair
         '''
-        pair_results: List[Tuple[str, str, bool, int]] = []
-        for i, (md_path, content_app, url_prefix) in enumerate(zip(md_file_paths, content_apps, md_url_prefix)):
+        pair_results: List[Tuple[str, str, str, str, bool, int]] = []
+        for i, (md_path, content_app, url_prefix, base_template) in enumerate(zip(md_file_paths, content_apps, md_url_prefix, base_templates)):
             pair_name = f"pair {i+1}/{len(md_file_paths)}: {md_path} → {content_app}"
             
             # Use the original output format for backward compatibility with tests
@@ -261,9 +266,13 @@ class Command(BaseCommand):
             
             # Log the URL prefix separately for new functionality
             self.stdout.write(f"Using URL prefix: '{url_prefix}'")
+            base_template_doc_help_text = f"Using base template: '{base_template}'"
+            if base_template is None:
+                base_template_doc_help_text = "Default template will be used if not specified. Visit https://django-spellbook.org/docs/Commands/spellbook_md/ for more information."
+            self.stdout.write(f"{base_template_doc_help_text}")
                 
             try:
-                processed_count = self._process_source_destination_pair(md_path, content_app, url_prefix)
+                processed_count = self._process_source_destination_pair(md_path, content_app, url_prefix, base_template)
                 pair_results.append((md_path, content_app, url_prefix, True, processed_count))            
             except Exception as e:
                 error_message = f"Error processing {pair_name}: {str(e)}"

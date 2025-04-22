@@ -10,14 +10,23 @@ class TestTemplateGenerator(unittest.TestCase):
     def setUp(self):
         self.template_generator = TemplateGenerator(
             content_app='test_app',
-            template_dir='/test/templates'
+            template_dir='/test/templates',
+            base_template='custom_base.html'  # Now passed directly to constructor
         )
 
     def test_init(self):
         """Test TemplateGenerator initialization."""
         self.assertEqual(self.template_generator.content_app, 'test_app')
-        self.assertEqual(self.template_generator.template_dir,
-                         '/test/templates')
+        self.assertEqual(self.template_generator.template_dir, '/test/templates')
+        self.assertEqual(self.template_generator.base_template, 'custom_base.html')
+        
+        # Test initialization with None base_template
+        generator_no_base = TemplateGenerator(
+            content_app='test_app',
+            template_dir='/test/templates',
+            base_template=None
+        )
+        self.assertIsNone(generator_no_base.base_template)
 
     @patch('pathlib.Path.mkdir')
     def test_ensure_template_directory(self, mock_mkdir):
@@ -26,27 +35,28 @@ class TestTemplateGenerator(unittest.TestCase):
         self.template_generator._ensure_template_directory(template_path)
         mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
 
-    @override_settings(SPELLBOOK_MD_BASE_TEMPLATE='base.html')
     def test_prepare_template_content_with_base(self):
         """Test template content preparation with base template."""
         html_content = "<h1>Test</h1>"
-        result = self.template_generator._prepare_template_content(
-            html_content)
+        result = self.template_generator._prepare_template_content(html_content)
 
         expected = (
-            "{% extends 'base.html' %}\n\n"
+            "{% extends 'custom_base.html' %}\n\n"
             "{% block spellbook_md %}\n"
             "<h1>Test</h1>\n"
             "{% endblock %}"
         )
         self.assertEqual(result, expected)
 
-    @override_settings(SPELLBOOK_MD_BASE_TEMPLATE=None)
     def test_prepare_template_content_without_base(self):
         """Test template content preparation without base template."""
+        generator_no_base = TemplateGenerator(
+            content_app='test_app',
+            template_dir='/test/templates',
+            base_template=None
+        )
         html_content = "<h1>Test</h1>"
-        result = self.template_generator._prepare_template_content(
-            html_content)
+        result = generator_no_base._prepare_template_content(html_content)
         self.assertEqual(result, html_content)
 
     def test_get_template_path(self):
@@ -79,8 +89,7 @@ class TestTemplateGenerator(unittest.TestCase):
         html_content = "<h1>Test</h1>"
 
         with self.assertRaises(CommandError) as context:
-            self.template_generator.create_template(
-                template_path, html_content)
+            self.template_generator.create_template(template_path, html_content)
 
         self.assertIn("Could not create template", str(context.exception))
 
@@ -97,26 +106,28 @@ class TestTemplateGenerator(unittest.TestCase):
         result = self.template_generator._convert_filename(filename)
         self.assertEqual(result, "test.html")
 
-    @override_settings(SPELLBOOK_MD_BASE_TEMPLATE='base')
-    def test_get_base_template_without_extension(self):
-        """Test getting base template name when it doesn't end with .html"""
-        generator = TemplateGenerator('test_app', '/test/templates')
-        base_template = generator._get_base_template()
+    def test_get_base_template(self):
+        """Test getting base template name from the instance variable."""
+        base_template = self.template_generator._get_base_template()
+        self.assertEqual(base_template, 'custom_base.html')
+        
+        # Test with None
+        generator_no_base = TemplateGenerator(
+            content_app='test_app',
+            template_dir='/test/templates',
+            base_template=None
+        )
+        self.assertIsNone(generator_no_base._get_base_template())
 
-        self.assertEqual(base_template, 'base.html')
-
-    @override_settings(SPELLBOOK_MD_BASE_TEMPLATE='base.html')
-    def test_get_base_template_with_extension(self):
-        """Test getting base template name when it already ends with .html"""
-        generator = TemplateGenerator('test_app', '/test/templates')
-        base_template = generator._get_base_template()
-
-        self.assertEqual(base_template, 'base.html')
-
-    @override_settings(SPELLBOOK_MD_BASE_TEMPLATE=None)
-    def test_get_base_template_none(self):
-        """Test getting base template name when setting is None"""
-        generator = TemplateGenerator('test_app', '/test/templates')
-        base_template = generator._get_base_template()
-
-        self.assertIsNone(base_template)
+    def test_wrap_with_base_template(self):
+        """Test wrapping content with base template."""
+        html_content = "<h1>Test</h1>"
+        result = self.template_generator._wrap_with_base_template(html_content, 'base.html')
+        
+        expected = (
+            "{% extends 'base.html' %}\n\n"
+            "{% block spellbook_md %}\n"
+            "<h1>Test</h1>\n"
+            "{% endblock %}"
+        )
+        self.assertEqual(result, expected)
