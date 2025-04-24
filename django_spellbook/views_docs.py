@@ -6,13 +6,13 @@ TOC = {'title': 'root', 'url': '', 'children': {'intro': {'title': 'Documentatio
 
 
 def view_intro(request):
-    context = {'title': 'Documentation Intro', 'created_at': 'datetime.datetime(2025, 4, 24, 12, 36, 25, 483891)', 'updated_at': 'datetime.datetime(2025, 4, 24, 12, 36, 25, 483891)', 'url_path': 'intro', 'raw_content': '# Welcome to Docs\nThis is documentation.', 'is_public': True, 'tags': [], 'custom_meta': {}, 'next_page': None, 'prev_page': None}
+    context = {'title': 'Documentation Intro', 'created_at': 'datetime.datetime(2025, 4, 24, 12, 47, 37, 425296)', 'updated_at': 'datetime.datetime(2025, 4, 24, 12, 47, 37, 425296)', 'url_path': 'intro', 'raw_content': '# Welcome to Docs\nThis is documentation.', 'is_public': True, 'tags': [], 'custom_meta': {}, 'next_page': None, 'prev_page': None}
     context['toc'] = TOC 
     context['current_url'] = 'intro'
     context['metadata'] = {
         'title': 'Documentation Intro',
-        'created_at': datetime.datetime(2025, 4, 24, 12, 36, 25, 483891),
-        'updated_at': datetime.datetime(2025, 4, 24, 12, 36, 25, 483891),
+        'created_at': datetime.datetime(2025, 4, 24, 12, 47, 37, 425296),
+        'updated_at': datetime.datetime(2025, 4, 24, 12, 47, 37, 425296),
         'url_path': 'intro',
         'raw_content': '# Welcome to Docs\nThis is documentation.',
         'is_public': True,

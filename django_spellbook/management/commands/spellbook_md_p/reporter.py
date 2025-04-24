@@ -1,6 +1,7 @@
 from typing import List, Tuple, Optional, Any
 from io import StringIO
 from django.core.management.base import OutputWrapper
+from django.core.management.color import color_style
 
 class MarkdownReporter:
     """
@@ -10,31 +11,17 @@ class MarkdownReporter:
     providing consistent formatting and organization of command outputs.
     """
     
-    def __init__(self, stdout: Any):
+    def __init__(self, stdout: Any, style=None):
         """
         Initialize the MarkdownReporter.
         
         Args:
             stdout: An output stream object (OutputWrapper from Django or another IO-like object)
+            style: Django's style object from BaseCommand.style (if None, a default style will be created)
         """
         self.stdout = stdout
-        # Check if stdout has style attribute (Django's OutputWrapper does)
-        self.has_style = hasattr(self.stdout, 'style')
-        
-    def _styled_write(self, text: str, style_method: Optional[str] = None):
-        """
-        Write text with the specified style if available, otherwise write plain text.
-        
-        Args:
-            text: The text to write
-            style_method: Name of the style method to use (e.g., 'SUCCESS', 'ERROR')
-        """
-        if self.has_style and style_method:
-            style_func = getattr(self.stdout.style, style_method)
-            self.stdout.write(style_func(text))
-        else:
-            # Fallback for stdout objects without style attribute
-            self.stdout.write(text)
+        # Use provided style or create a default one
+        self.style = style or color_style()
         
     def generate_summary_report(self, pair_results: List[Tuple[str, str, str, bool, int]]):
         """
@@ -48,31 +35,26 @@ class MarkdownReporter:
                     - url_prefix (str): URL prefix used for this content
                     - success (bool): Whether processing was successful
                     - processed_count (int): Number of files successfully processed
-        
-        The report includes:
-            - Overall success/failure count
-            - Total number of processed files
-            - Details of any failed source-destination pairs
         """
         self.stdout.write("\nProcessing Summary:")
         success_count = sum(1 for _, _, _, success, _ in pair_results if success)
         total_processed = sum(count for _, _, _, success, count in pair_results if success)
         
         if success_count == len(pair_results):
-            self._styled_write(
-                f"All {len(pair_results)} source-destination pairs processed successfully. "
-                f"Total files processed: {total_processed}.",
-                "SUCCESS"
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"All {len(pair_results)} source-destination pairs processed successfully. "
+                    f"Total files processed: {total_processed}."
+                )
             )
         else:
-            # Use exactly the same format string as the original to pass tests
             failed_pairs = [(src, dst, prefix) for src, dst, prefix, success, _ in pair_results if not success]
             message = (
                 f"{success_count} of {len(pair_results)} pairs processed successfully. "
                 f"Total files processed: {total_processed}. "
                 f"Failed pairs: {', '.join(f'{src} → {dst} (prefix: {prefix})' for src, dst, prefix in failed_pairs)}"
             )
-            self._styled_write(message, "WARNING")
+            self.stdout.write(self.style.WARNING(message))
         
     def error(self, message: str):
         """
@@ -81,7 +63,7 @@ class MarkdownReporter:
         Args:
             message: The error message to display
         """
-        self._styled_write(message, "ERROR")
+        self.stdout.write(self.style.ERROR(message))
         
     def warning(self, message: str):
         """
@@ -90,7 +72,7 @@ class MarkdownReporter:
         Args:
             message: The warning message to display
         """
-        self._styled_write(message, "WARNING")
+        self.stdout.write(self.style.WARNING(message))
         
     def success(self, message: str):
         """
@@ -99,7 +81,7 @@ class MarkdownReporter:
         Args:
             message: The success message to display
         """
-        self._styled_write(message, "SUCCESS")
+        self.stdout.write(self.style.SUCCESS(message))
         
     def write(self, message: str):
         """
@@ -108,4 +90,4 @@ class MarkdownReporter:
         Args:
             message: The message to display
         """
-        self._styled_write(message)
+        self.stdout.write(message)

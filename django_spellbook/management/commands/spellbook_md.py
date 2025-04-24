@@ -38,7 +38,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Process markdown files from all configured source-destination pairs."""
         self.continue_on_error = options.get('continue_on_error', False)
-        self.reporter = MarkdownReporter(self.stdout)
+        self.reporter = MarkdownReporter(self.stdout, self.style)
         try:
             self.discover_spellblocks()
             # Validate settings (Should all be List[str] of equal lengths)
