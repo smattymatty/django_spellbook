@@ -4,9 +4,9 @@
 
 # What is Django Spellbook?
 
-Django Spellbook is a Library of helpful tools, functions, and commands that are designed to feel like they're part of Django, with a touch of magic added to your project. It includes components that make handling tasks like markdown parsing more powerful and flexible than standard Django utilities.
+Django Spellbook extends Django's templating and rendering capabilities with a focus on markdown-based content. It transforms markdown files into fully-rendered Django templates with auto-generated views and URLs, eliminating boilerplate code while maintaining Django's flexibility. 
 
-It's a collection of tools that I've found useful in my projects, and I hope that you will too.
+Django Spellbook integrates with your project by generating server-side code from markdown content.
 
 # Installation
 
@@ -103,8 +103,6 @@ To configure the paths and templates used by Django Spellbook, add the following
 SPELLBOOK_MD_PATH = BASE_DIR / 'markdown_files'
 SPELLBOOK_MD_APP = 'my_app'
 ```
-
-> **Note:** `SPELLBOOK_CONTENT_APP` is deprecated. Use `SPELLBOOK_MD_APP` instead.
 
 - `SPELLBOOK_MD_PATH`: Specifies the path where markdown files are stored.
 - `SPELLBOOK_MD_APP`: Sets the app where processed markdown files will be saved.
