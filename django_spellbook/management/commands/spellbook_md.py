@@ -17,6 +17,10 @@ from django_spellbook.management.commands.spellbook_md_p.discovery import (
 from django_spellbook.management.commands.spellbook_md_p.processor import (
     MarkdownProcessor
 )
+
+from django_spellbook.management.commands.spellbook_md_p.reporter import (
+    MarkdownReporter
+)
 from django_spellbook.management.commands.spellbook_md_p.exceptions import *
 
 logger = logging.getLogger(__name__)
@@ -34,7 +38,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Process markdown files from all configured source-destination pairs."""
         self.continue_on_error = options.get('continue_on_error', False)
-        
+        self.reporter = MarkdownReporter(self.stdout, self.style)
         try:
             self.discover_spellblocks()
             # Validate settings (Should all be List[str] of equal lengths)
@@ -48,7 +52,7 @@ class Command(BaseCommand):
                 
         except Exception as e:
             error_message = f"Command failed: {str(e)}"
-            self.stdout.write(self.style.ERROR(error_message))
+            self.reporter.error(error_message)
             logger.error(f"Command failed: {str(e)}", exc_info=True)
             raise
 
@@ -74,13 +78,13 @@ class Command(BaseCommand):
             
             if not markdown_files:
                 error_message = f"No markdown files found in {md_path}"
-                self.stdout.write(self.style.ERROR(error_message))
-                self.stdout.write(
+                self.reporter.error(error_message)
+                self.reporter.write(
                     f"Make sure the directory exists and contains .md files."
                 )
                 raise ContentDiscoveryError(error_message)
                 
-            self.stdout.write(f"Found {len(markdown_files)} markdown files to process")
+            self.reporter.write(f"Found {len(markdown_files)} markdown files to process")
             
         except ContentDiscoveryError:
             raise
@@ -94,8 +98,8 @@ class Command(BaseCommand):
             content_dir_path, template_dir = setup_directory_structure(content_app, first_dirpath)
         except Exception as e:
             error_message = f"Failed to set up directory structure: {str(e)}"
-            self.stdout.write(self.style.ERROR(f"Directory setup error: {str(e)}"))
-            self.stdout.write(
+            self.reporter.error(f"Directory setup error: {str(e)}")
+            self.reporter.write(
                 "Check that the content app exists and is correctly configured in your Django project."
             )
             logger.error(f"Directory setup error: {str(e)}", exc_info=True)
@@ -117,15 +121,13 @@ class Command(BaseCommand):
         
         # Build TOC
         try:
-            self.stdout.write("Building table of contents...")
+            self.reporter.write("Building table of contents...")
             complete_toc = processor.build_toc()
         except Exception as e:
-            self.stdout.write(
-                self.style.WARNING(
-                    f"Error building table of contents: {str(e)}. "
-                    "Processing will continue but navigation links may not work correctly."
+            self.reporter.warning(
+                f"Error building table of contents: {str(e)}. "
+                "Processing will continue but navigation links may not work correctly."
                 )
-            )
             logger.warning(f"TOC building error: {str(e)}", exc_info=True)
             complete_toc = {}
         
@@ -135,7 +137,7 @@ class Command(BaseCommand):
         
         for i, (dirpath, filename) in enumerate(markdown_files):
             file_path = os.path.join(dirpath, filename)
-            self.stdout.write(f"Processing file {i+1}/{len(markdown_files)}: {filename}")
+            self.reporter.write(f"Processing file {i+1}/{len(markdown_files)}: {filename}")
             
             try:
                 processed_file = processor.process_file(dirpath, filename, complete_toc)
@@ -144,48 +146,40 @@ class Command(BaseCommand):
                     processed_files.append(processed_file)
                 else:
                     error_files.append(file_path)
-                    self.stdout.write(
-                        self.style.WARNING(f"File not processed: {filename}")
-                    )
+                    self.reporter.warning(f"File not processed: {filename}")
                     
             except Exception as e:
                 error_files.append(file_path)
                 error_message = f"Error processing file {filename}: {str(e)}"
-                self.stdout.write(self.style.ERROR(error_message))
+                self.reporter.error(error_message)
                 logger.error(f"File processing error: {str(e)}", exc_info=True)
-                
                 if not self.continue_on_error:
                     raise ProcessingError(f"Failed to process file {filename}: {str(e)}")
         
         # Generate URLs and views
         if processed_files:
             try:
-                self.stdout.write("Generating URLs and views...")
+                self.reporter.write("Generating URLs and views...")
                 processor.generate_urls_and_views(processed_files, complete_toc)
             except Exception as e:
                 error_message = f"Error generating URLs and views: {str(e)}"
-                self.stdout.write(self.style.ERROR(error_message))
+                self.reporter.error(error_message)
                 logger.error(f"URL and view generation error: {str(e)}", exc_info=True)
                 raise OutputGenerationError(f"Failed to generate URLs and views: {str(e)}")
-            
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Successfully processed {len(processed_files)} files for {content_app}"
+            self.reporter.success(
+                f"Successfully processed {len(processed_files)} files for {content_app}"
                 )
-            )
             
             if error_files:
-                self.stdout.write(
-                    self.style.WARNING(
-                        f"Note: {len(error_files)} files could not be processed: "
-                        f"{', '.join(os.path.basename(f) for f in error_files[:5])}"
-                        f"{' and more...' if len(error_files) > 5 else ''}"
-                    )
+                self.reporter.warning(
+                    f"Note: {len(error_files)} files could not be processed: "
+                    f"{', '.join(os.path.basename(f) for f in error_files[:5])}"
+                    f"{' and more...' if len(error_files) > 5 else ''}"
                 )
         else:
             error_message = f"No markdown files were processed successfully for {content_app}"
-            self.stdout.write(self.style.ERROR(error_message))
-            self.stdout.write(
+            self.reporter.error(error_message)
+            self.reporter.write(
                 "Check the markdown syntax and structure of your files, and ensure all required SpellBlocks are available."
             )
             raise ProcessingError(error_message)
@@ -198,14 +192,12 @@ class Command(BaseCommand):
         '''
         try:
             block_count = discover_blocks(self.stdout)
-            self.stdout.write(f"Discovered {block_count} SpellBlocks")
+            self.reporter.write(f"Discovered {block_count} SpellBlocks")
         except Exception as e:
-            self.stdout.write(
-                self.style.WARNING(
-                    f"Error during block discovery: {str(e)}. "
-                    "Processing will continue but some content may not render correctly."
+            self.reporter.warning(
+                f"Error during block discovery: {str(e)}. "
+                "Processing will continue but some content may not render correctly."
                 )
-            )
             logger.warning(f"Block discovery error: {str(e)}", exc_info=True)
             
     def validate_settings(self) -> Tuple[List[Path], List[str], List[str], List[Optional[str]]]:
@@ -222,8 +214,8 @@ class Command(BaseCommand):
             md_file_paths, content_apps, md_url_prefix, base_templates = validate_spellbook_settings()
         except Exception as e:
             error_message = f"Configuration error: {str(e)}"
-            self.stdout.write(self.style.ERROR(error_message))
-            self.stdout.write(
+            self.reporter.error(error_message)
+            self.reporter.write(
                 "Please check your Django settings.py file and ensure "
                 "SPELLBOOK_MD_PATH and SPELLBOOK_MD_APP are correctly configured."
             )
@@ -255,34 +247,34 @@ class Command(BaseCommand):
         raises:
             ProcessingError: If there is an error processing a source-destination pair
         '''
+        # begin with an empty list of results
         pair_results: List[Tuple[str, str, str, str, bool, int]] = []
         for i, (md_path, content_app, url_prefix, base_template) in enumerate(zip(md_file_paths, content_apps, md_url_prefix, base_templates)):
             pair_name = f"pair {i+1}/{len(md_file_paths)}: {md_path} → {content_app}"
             
             # Use the original output format for backward compatibility with tests
-            self.stdout.write(
-                self.style.SUCCESS(f"Processing source-destination {pair_name}")
-            )
+            self.reporter.success(f"Processing source-destination {pair_name}")
+
             
             # Log the URL prefix separately for new functionality
-            self.stdout.write(f"Using URL prefix: '{url_prefix}'")
+            self.reporter.write(f"Using URL prefix: '{url_prefix}'")
             base_template_doc_help_text = f"Using base template: '{base_template}'"
             if base_template is None:
                 base_template_doc_help_text = "Default template will be used if not specified. Visit https://django-spellbook.org/docs/Commands/spellbook_md/ for more information."
-            self.stdout.write(f"{base_template_doc_help_text}")
+            self.reporter.write(f"{base_template_doc_help_text}")
                 
             try:
                 processed_count = self._process_source_destination_pair(md_path, content_app, url_prefix, base_template)
                 pair_results.append((md_path, content_app, url_prefix, True, processed_count))            
             except Exception as e:
                 error_message = f"Error processing {pair_name}: {str(e)}"
-                self.stdout.write(self.style.ERROR(error_message))
+                self.reporter.error(error_message)
                 # Always use 0 as the count for failed pairs to avoid None
                 pair_results.append((md_path, content_app, url_prefix, False, 0))
                 logger.error(f"Error processing {pair_name}: {str(e)}", exc_info=True)
                 
                 if len(md_file_paths) > 1:
-                    self.stdout.write("Continuing with next pair...")
+                    self.reporter.write("Continuing with next pair...")
                     continue
                 else:
                     raise
@@ -295,19 +287,4 @@ class Command(BaseCommand):
         Args:
             pair_results: List of tuples containing (md_path, content_app, url_prefix, success, processed_count)
         '''
-        self.stdout.write("\nProcessing Summary:")
-        success_count = sum(1 for _, _, _, success, _ in pair_results if success)
-        total_processed = sum(count for _, _, _, success, count in pair_results if success)
-        
-        if success_count == len(pair_results):
-            self.stdout.write(self.style.SUCCESS(
-                f"All {len(pair_results)} source-destination pairs processed successfully. "
-                f"Total files processed: {total_processed}."
-            ))
-        else:
-            failed_pairs = [(src, dst, prefix) for src, dst, prefix, success, _ in pair_results if not success]
-            self.stdout.write(self.style.WARNING(
-                f"{success_count} of {len(pair_results)} pairs processed successfully. "
-                f"Total files processed: {total_processed}. "
-                f"Failed pairs: {', '.join(f'{src} → {dst} (prefix: {prefix})' for src, dst, prefix in failed_pairs)}"
-            ))
+        self.reporter.generate_summary_report(pair_results)
