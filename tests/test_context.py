@@ -1,0 +1,72 @@
+import unittest
+from unittest.mock import patch, Mock, MagicMock
+import datetime
+from pathlib import Path
+from django.test import TestCase
+from django.core.management.base import CommandError
+
+from django_spellbook.markdown.context import SpellbookContext
+
+class TestSpellbookContext(TestCase):
+    """Tests for the SpellbookContext class."""
+    
+    def test_to_dict(self):
+        """Test to_dict method."""
+        context = SpellbookContext(
+            title="Test Page",
+            created_at="datetime.datetime(2023, 1, 1)",
+            updated_at="datetime.datetime(2023, 2, 1)",
+            url_path="test/page",
+            raw_content="Test content",
+            is_public=True,
+            tags=["test", "example"],
+            custom_meta={"key": "value"}
+        )
+        
+        result = context.to_dict()
+        
+        # Verify other keys are converted
+        self.assertIn('title', result)
+        self.assertIn('created_at', result)
+        self.assertIn('updated_at', result)
+        self.assertIn('url_path', result)
+        self.assertIn('raw_content', result)
+        self.assertIn('is_public', result)
+        self.assertIn('tags', result)
+        self.assertIn('custom_meta', result)
+        
+    
+        
+class TestSpellBookErrors(TestCase):
+    """Tests for error handling in the SpellbookContext class."""
+    
+    def test_to_dict_key_processing_exception(self):
+        """Test exception during individual key processing."""
+        context = SpellbookContext(
+            title="Test Page",
+            created_at=datetime.datetime(2023, 1, 1),
+            updated_at=datetime.datetime(2023, 2, 1),
+            url_path="test/page",
+            raw_content="Arbitrary Error String, Very Specific for Testing Purposes",
+        )
+
+        with self.assertRaises(RuntimeError):
+            context.to_dict()
+            
+    def test_validate_missing_required_field(self):
+        """Test validate method with missing required field."""
+        context = SpellbookContext(
+            title=None,
+            created_at=datetime.datetime(2023, 1, 1),
+            updated_at=None,
+            url_path="test/page",
+            raw_content="Test content",
+            is_public=True,
+            tags=["test", "example"],
+            custom_meta={"key": "value"}
+        )
+
+        errors = context.validate()
+        
+        self.assertIn("Missing required field: title", errors[0])
+        self.assertIn("Missing required field: updated_at", errors[1])

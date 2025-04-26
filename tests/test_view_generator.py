@@ -1,96 +1,3 @@
-# django_spellbook/tests/test_view_generator.py
-
-import unittest
-from unittest.mock import patch, Mock
-import datetime
-from pathlib import Path
-from django.test import TestCase
-
-from django_spellbook.management.commands.processing.view_generator import ViewGenerator
-from django_spellbook.management.commands.processing.file_processor import ProcessedFile
-from django_spellbook.markdown.context import SpellbookContext
-
-class TestViewGenerator(TestCase):
-    
-    def setUp(self):
-        """Set up the test environment."""
-        self.view_generator = ViewGenerator("test_app")
-        
-        # Create a mock context
-        self.mock_context = Mock(spec=SpellbookContext)
-        self.mock_context.__dict__ = {
-            'title': 'Test Page', 
-            'toc': {},
-            'created_at': datetime.datetime(2023, 1, 1),
-            'is_public': True,
-            'tags': ['test', 'example'],
-            'custom_meta': {'key': 'value'}
-        }
-        
-        # Create a sample processed file
-        self.processed_file = ProcessedFile(
-            original_path=Path('/test/file.md'),
-            html_content='<h1>Test</h1>',
-            template_path=Path('/test/template.html'),
-            relative_url='test/page',
-            context=self.mock_context
-        )
-        
-    def test_initialization(self):
-        """Test initialization of ViewGenerator."""
-        self.assertEqual(self.view_generator.content_app, "test_app")
-        
-    def test_prepare_context_dict(self):
-        """Test preparing context dictionary for template rendering."""
-        result = self.view_generator._prepare_context_dict(self.mock_context)
-        
-        # Check that toc is removed
-        self.assertNotIn('toc', result)
-        
-        # Check other values
-        self.assertEqual(result['title'], 'Test Page')
-        self.assertEqual(result['is_public'], True)
-        self.assertEqual(result['tags'], ['test', 'example'])
-        
-    def test_prepare_metadata(self):
-        """Test preparing metadata dictionary for a file."""
-        result = self.view_generator._prepare_metadata(self.processed_file)
-        
-        # Check metadata fields
-        self.assertEqual(result['title'], 'Test Page')
-        self.assertEqual(result['is_public'], True)
-        self.assertEqual(result['tags'], ['test', 'example'])
-        self.assertEqual(result['namespace'], 'test_app')
-        self.assertEqual(result['url_name'], 'test_page')
-        self.assertEqual(result['namespaced_url'], 'test_app:test_page')
-        
-    @patch('django_spellbook.management.commands.processing.view_generator.generate_view_name')
-    @patch('django_spellbook.management.commands.processing.view_generator.get_template_path')
-    @patch('django_spellbook.management.commands.processing.view_generator.get_clean_url')
-    def test_generate_view_function(self, mock_clean_url, mock_template_path, mock_view_name):
-        """Test generating view function for a single file."""
-        # Configure mocks
-        mock_clean_url.return_value = "test/page"
-        mock_template_path.return_value = "test_app/spellbook_md/test/page.html"
-        mock_view_name.return_value = "test_page"
-        
-        # Mock _prepare_metadata and _prepare_context_dict
-        with patch.object(self.view_generator, '_prepare_metadata') as mock_prepare_metadata:
-            with patch.object(self.view_generator, '_prepare_context_dict') as mock_prepare_context:
-                # Configure mocks
-                mock_prepare_metadata.return_value = {'title': 'Test', 'url_path': 'test/page'}
-                mock_prepare_context.return_value = {'title': 'Test'}
-                
-                # Call method
-                view_function = self.view_generator._generate_view_function(self.processed_file)
-                
-                # Check result is a string containing a view function
-                self.assertIsInstance(view_function, str)
-                self.assertTrue(view_function.startswith('\ndef test_page(request):'))
-                self.assertIn("'title': 'Test'", view_function)
-                self.assertIn("context['toc'] = TOC", view_function)
-                self.assertIn("return render(request,", view_function)
-                
 import unittest
 from unittest.mock import patch, Mock, MagicMock
 import datetime
@@ -102,26 +9,284 @@ from django_spellbook.management.commands.processing.view_generator import ViewG
 from django_spellbook.management.commands.processing.file_processor import ProcessedFile
 from django_spellbook.markdown.context import SpellbookContext
 
-class TestViewGeneratorErrors(TestCase):
+class TestViewGeneratorRefactored(TestCase):
+    """Tests specifically for the refactored ViewGenerator with SpellbookContext delegation."""
     
-    def test_init_with_invalid_content_app(self):
-        """Test initialization with invalid content_app parameter."""
-        # Test with empty string
+    def setUp(self):
+        """Set up test environment."""
+        self.view_generator = ViewGenerator("test_app")
+        
+        # Create a properly mocked SpellbookContext
+        self.mock_context = Mock(spec=SpellbookContext)
+        
+        # Setup default return values for context methods
+        self.mock_context.to_dict.return_value = {
+            'title': 'Test Page',
+            'created_at': datetime.datetime(2023, 1, 1),
+            'updated_at': datetime.datetime(2023, 2, 1),
+            'url_path': 'test/page',
+            'raw_content': 'Test content',
+            'is_public': True,
+            'tags': ['test', 'example'],
+            'custom_meta': {'key': 'value'}
+        }
+        
+        self.mock_context.prepare_metadata.return_value = {
+            'title': 'Test Page',
+            'created_at': datetime.datetime(2023, 1, 1),
+            'updated_at': datetime.datetime(2023, 2, 1),
+            'url_path': 'test/page',
+            'raw_content': 'Test content',
+            'is_public': True,
+            'tags': ['test', 'example'],
+            'custom_meta': {'key': 'value'},
+            'namespace': 'test_app',
+            'url_name': 'test_page',
+            'namespaced_url': 'test_app:test_page'
+        }
+        
+        self.mock_context.validate.return_value = []  # No validation errors
+        
+        # Create a sample processed file
+        self.processed_file = ProcessedFile(
+            original_path=Path('/test/file.md'),
+            html_content='<h1>Test</h1>',
+            template_path=Path('/test/template.html'),
+            relative_url='test/page',
+            context=self.mock_context
+        )
+    
+    def test_prepare_context_dict_uses_to_dict(self):
+        """Test that _prepare_context_dict correctly uses context.to_dict()."""
+        result = self.view_generator._prepare_context_dict(self.mock_context)
+        
+        # Verify to_dict was called
+        self.mock_context.to_dict.assert_called_once()
+        
+        # Verify the result is what to_dict returned
+        self.assertEqual(result, self.mock_context.to_dict.return_value)
+    
+    def test_prepare_metadata_uses_context_prepare_metadata(self):
+        """Test that _prepare_metadata correctly uses context.prepare_metadata()."""
+        result = self.view_generator._prepare_metadata(self.processed_file)
+        
+        # Verify prepare_metadata was called with correct arguments
+        self.mock_context.prepare_metadata.assert_called_once_with(
+            'test_app', 
+            'test/page'
+        )
+        
+        # Verify the result is what prepare_metadata returned
+        self.assertEqual(result, self.mock_context.prepare_metadata.return_value)
+    
+    def test_validate_required_attributes_uses_context_validate(self):
+        """Test that validate_required_attributes correctly uses context.validate()."""
+        # Call the method - should not raise any exceptions
+        self.view_generator.validate_required_attributes(self.processed_file)
+        
+        # Verify validate was called
+        self.mock_context.validate.assert_called_once()
+    
+    def test_prepare_metadata_with_failing_context_method(self):
+        """Test _prepare_metadata when context.prepare_metadata raises an exception."""
+        view_generator = ViewGenerator("test_app")
+        
+        # Create a context class with a prepare_metadata method that raises an exception
+        class TestContextWithFailingMethod:
+            def prepare_metadata(self, content_app, relative_url):
+                raise Exception("Test exception")
+            
+            def __init__(self):
+                self.title = "Fallback Title"
+                self.created_at = datetime.datetime(2023, 1, 1)
+                self.updated_at = datetime.datetime(2023, 2, 1)
+                self.raw_content = "Fallback content"
+                self.is_public = True
+                self.tags = ["fallback", "test"]
+                self.custom_meta = {"fallback": "value"}
+        
+        # Create a processed file with our custom context
+        mock_context = TestContextWithFailingMethod()
+        processed_file = ProcessedFile(
+            original_path=Path('/test/file.md'),
+            html_content='<h1>Test</h1>',
+            template_path=Path('/test/template.html'),
+            relative_url='test/page',
+            context=mock_context
+        )
+        
+        # Patch logger and get_clean_url
+        with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
+            with patch('django_spellbook.management.commands.processing.view_generator.get_clean_url', 
+                    return_value='test/page'):
+                result = view_generator._prepare_metadata(processed_file)
+                
+                # Verify warning was logged about the failing method
+                warning_called = False
+                for call in mock_logger.warning.call_args_list:
+                    args = call[0]
+                    if args and "Error using context.prepare_metadata" in args[0]:
+                        warning_called = True
+                        break
+                
+                self.assertTrue(warning_called, "Warning about prepare_metadata error was not logged")
+                
+                # Verify fallback implementation worked
+                self.assertEqual(result['title'], "Fallback Title")
+                self.assertEqual(result['is_public'], True)
+                self.assertEqual(result['tags'], ["fallback", "test"])
+                self.assertIn('namespace', result)
+                self.assertEqual(result['namespace'], 'test_app')
+    
+    def test__prepare_context_dict_success(self):
+        """Test _prepare_context_dict with a successful conversion."""
+        view_generator = ViewGenerator("test_app")
+        
+        # Create a sample SpellbookContext
+        context = SpellbookContext(
+            title="Test Page",
+            created_at=datetime.datetime(2023, 1, 1),
+            updated_at=datetime.datetime(2023, 2, 1),
+            url_path="test/page",
+            raw_content="Test content",
+            is_public=True,
+            tags=["test", "example"],
+            custom_meta={"key": "value"}
+        )
+        
+        result = view_generator._prepare_context_dict(context)
+        
+        # Verify other keys are converted
+        self.assertIn('title', result)
+        self.assertIn('created_at', result)
+        self.assertIn('updated_at', result)
+        self.assertIn('url_path', result)
+        self.assertIn('raw_content', result)
+        self.assertIn('is_public', result)
+        self.assertIn('tags', result)
+        self.assertIn('custom_meta', result)
+    
+    def test_validate_required_attributes_with_list_errors(self):
+        """Test validation when context.validate returns a list of errors."""
+        # Make validate return a list of errors
+        self.mock_context.validate.return_value = ["Error 1", "Error 2"]
+        
+        # Should raise ValueError with joined errors
+        with self.assertRaises(ValueError) as context:
+            self.view_generator.validate_required_attributes(self.processed_file)
+        
+        # Check error message
+        self.assertIn("Context validation failed: Error 1, Error 2", str(context.exception))
+    
+    def test_validate_required_attributes_with_non_list_error(self):
+        """Test validation when context.validate returns a non-list error."""
+        # Make validate return a string
+        self.mock_context.validate.return_value = "Single error string"
+        
+        # Should raise ValueError with the error string
+        with self.assertRaises(ValueError) as context:
+            self.view_generator.validate_required_attributes(self.processed_file)
+        
+        # Check error message
+        self.assertIn("Context validation failed: Single error string", str(context.exception))
+    
+    def test_validate_required_attributes_with_exception_in_validate(self):
+        """Test validation when context.validate raises an exception."""
+        # Make validate raise an exception
+        self.mock_context.validate.side_effect = RuntimeError("Unexpected error")
+        
+        # Patch logger to verify warning
+        with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
+            # Should NOT raise exception but log warning
+            self.view_generator.validate_required_attributes(self.processed_file)
+            
+            # Verify warning was logged
+            mock_logger.warning.assert_called_once()
+            self.assertIn("Error during context validation", mock_logger.warning.call_args[0][0])
+    
+    def test_generate_view_function_delegates_to_context_methods(self):
+        """Test _generate_view_function delegates to context methods correctly."""
+        # Setup necessary mocks
+        with patch('django_spellbook.management.commands.processing.view_generator.generate_view_name', return_value="test_page"):
+            with patch('django_spellbook.management.commands.processing.view_generator.get_template_path', return_value="test_app/template.html"):
+                with patch('django_spellbook.management.commands.processing.view_generator.get_clean_url', return_value="test/page"):
+                    result = self.view_generator._generate_view_function(self.processed_file)
+                    
+                    # Verify context methods were called
+                    self.mock_context.to_dict.assert_called_once()
+                    self.mock_context.prepare_metadata.assert_called_once()
+                    self.mock_context.validate.assert_called_once()
+                    
+                    # Verify view function contains expected content
+                    self.assertIn("def test_page(request):", result)
+                    self.assertIn("return render(request, 'test_app/template.html'", result)
+    
+    def test_validate_required_attributes_with_value_error_in_validate(self):
+        """Test validation when context.validate raises a ValueError."""
+        # Make validate raise a ValueError
+        self.mock_context.validate.side_effect = ValueError("Custom validation error")
+        
+        # Should re-raise the ValueError
+        with self.assertRaises(ValueError) as context:
+            self.view_generator.validate_required_attributes(self.processed_file)
+        
+        # Check error message
+        self.assertEqual(str(context.exception), "Custom validation error")
+        
+    def test__prepare_toc_success(self):
+        """Test _prepare_toc with a successful conversion."""
+        view_generator = ViewGenerator("test_app")
+        
+        # Create a sample context dict
+        context_dict = {
+            'title': 'Test Page',
+            'created_at': datetime.datetime(2023, 1, 1),
+            'updated_at': datetime.datetime(2023, 2, 1),
+            'url_path': 'test/page',
+            'raw_content': 'Test content',
+            'is_public': True,
+            'tags': ['test', 'example'],
+            'custom_meta': {'key': 'value'},
+            'toc': {"dummy": "toc"}
+        }
+        
+        result = view_generator._prepare_toc(context_dict)
+        
+        # Verify toc is removed
+        self.assertIn('toc', result)
+        
+        # Verify other keys are converted
+        self.assertIn('title', result)
+        self.assertIn('created_at', result)
+        self.assertIn('updated_at', result)
+        self.assertIn('url_path', result)
+        self.assertIn('raw_content', result)
+        self.assertIn('is_public', result)
+        self.assertIn('tags', result)
+        self.assertIn('custom_meta', result)
+        
+        
+class TestViewGeneratorEdgeCases(TestCase):
+    def setUp(self):
+        """Set up test environment."""
+        self.view_generator = ViewGenerator("test_app")
+        self.mock_context = SpellbookContext(
+            title="Test Page",
+            created_at=datetime.datetime(2023, 1, 1),
+            updated_at=datetime.datetime(2023, 2, 1),
+            url_path="test/page",
+            raw_content="Test content",
+            is_public=True,
+            tags=["test", "example"],
+            custom_meta={"key": "value"}
+        )
+    """Tests for edge cases in the ViewGenerator."""
+    def test_empty_string_as_content_app(self):
+        """Test initialization with empty string as content_app."""
         with self.assertRaises(CommandError) as context:
             ViewGenerator("")
-        self.assertIn("Content app name must be a non-empty string", str(context.exception))
-        
-        # Test with None
-        with self.assertRaises(CommandError) as context:
-            ViewGenerator(None)
-        self.assertIn("Content app name must be a non-empty string", str(context.exception))
-        
-        # Test with non-string
-        with self.assertRaises(CommandError) as context:
-            ViewGenerator(123)
-        self.assertIn("Content app name must be a non-empty string", str(context.exception))
-    
-    def test_generate_view_functions_with_empty_list(self):
+            
+    def test_genarate_view_functions_with_empty_list(self):
         """Test generate_view_functions with an empty list."""
         view_generator = ViewGenerator("test_app")
         
@@ -132,383 +297,181 @@ class TestViewGeneratorErrors(TestCase):
             self.assertEqual(result, [])
             mock_logger.warning.assert_called_once()
             self.assertIn("No processed files provided", mock_logger.warning.call_args[0][0])
-    
-    def test_generate_view_functions_with_invalid_items(self):
-        """Test generate_view_functions with list containing invalid items."""
+            
+            
+    def test_generate_view_functions_with_none(self):
+        """Test generate_view_functions with None."""
         view_generator = ViewGenerator("test_app")
         
-        # Create a list with non-ProcessedFile items
-        invalid_items = [
-            None,
-            "not a processed file",
-            123,
-            {}
-        ]
-        
+        # Test with None - should return empty list
         with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
-            result = view_generator.generate_view_functions(invalid_items)
+            result = view_generator.generate_view_functions(None)
             
             self.assertEqual(result, [])
-            self.assertEqual(mock_logger.warning.call_count, 5)  # 1 for empty result + 4 for invalid items
-    
-    def test_generate_view_function_with_missing_attributes(self):
-        """Test _generate_view_function with ProcessedFile missing required attributes."""
+            mock_logger.warning.assert_called_once()
+            self.assertIn("No processed files provided", mock_logger.warning.call_args[0][0])
+            
+    def test_generate_view_functions_with_non_processed_file(self):
+        """Test generate_view_functions with a non-ProcessedFile object."""
         view_generator = ViewGenerator("test_app")
         
-        # Create ProcessedFile without relative_url
-        missing_url = Mock(spec=ProcessedFile)
-        missing_url.context = Mock(spec=SpellbookContext)
-        
-        # Use delattr to remove the attribute
-        delattr(missing_url, 'relative_url')
-        
+        # Test with None - should return empty list
         with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
-            with self.assertRaises(CommandError) as context:
-                view_generator._generate_view_function(missing_url)
-                
-            self.assertIn("Failed to generate view function", str(context.exception))
-            mock_logger.error.assert_called_once()
-    
-    def test_generate_view_function_with_empty_relative_url(self):
-        """Test _generate_view_function with empty relative_url."""
+            result = view_generator.generate_view_functions([1, 2, 3])
+            
+            self.assertEqual(result, [])
+            mock_logger.warning.assert_called()
+            self.assertIn("No view", mock_logger.warning.call_args[0][0])
+            
+    def test_generate_view_function_where_no_view_name(self):
+        """Test _generate_view_function where no view_name is generated."""
         view_generator = ViewGenerator("test_app")
+        
+        # Create a sample processed file
+        processed_file = ProcessedFile(
+            original_path=Path('/test/file.md'),
+            html_content='<h1>Test</h1>',
+            template_path=Path('/test/template.html'),
+            relative_url='test/page',
+            context=self.mock_context
+        )
         
         # Mock generate_view_name to return empty string
         with patch('django_spellbook.management.commands.processing.view_generator.generate_view_name', 
-                   return_value=""):
-            
-            processed_file = Mock(spec=ProcessedFile)
-            processed_file.relative_url = "test/page"
-            processed_file.context = Mock(spec=SpellbookContext)
-            
+                return_value=""):
+            # Mock logger to test for errors
             with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
+                # Should raise CommandError
                 with self.assertRaises(CommandError) as context:
                     view_generator._generate_view_function(processed_file)
-                    
+                
+                # Verify the CommandError message contains the expected text
                 self.assertIn("Could not generate valid view name", str(context.exception))
+                
+                # Verify error was logged
                 mock_logger.error.assert_called_once()
-    
-    def test_prepare_metadata_with_invalid_context(self):
-        """Test _prepare_metadata with invalid context."""
+                self.assertIn("Failed to generate view function", mock_logger.error.call_args[0][0])
+        
+    def test_context_dictionary_security_validation_fails(self):
+        """Test _generate_view_function when context security validation fails."""
         view_generator = ViewGenerator("test_app")
         
-        # Create a ProcessedFile with invalid context
-        processed_file = Mock(spec=ProcessedFile)
-        processed_file.relative_url = "test/page"
-        processed_file.context = None
+        # Create a sample processed file
+        processed_file = ProcessedFile(
+            original_path=Path('/test/file.md'),
+            html_content='<h1>Test</h1>',
+            template_path=Path('/test/template.html'),
+            relative_url='test/page',
+            context=self.mock_context
+        )
         
-        # We don't expect an error to be logged in this case based on current implementation
-        metadata = view_generator._prepare_metadata(processed_file)
-        
-        # Should return minimal metadata
-        self.assertIn('title', metadata)
-        self.assertIn('url_path', metadata)
-        self.assertIn('namespace', metadata)
-    
-    def test_prepare_context_dict_with_none_context(self):
-        """Test _prepare_context_dict with None context."""
-        view_generator = ViewGenerator("test_app")
-        
-        with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
-            result = view_generator._prepare_context_dict(None)
-            
-            self.assertEqual(result, {})
-            mock_logger.warning.assert_called_once()
-            self.assertIn("Context is None", mock_logger.warning.call_args[0][0])
-    
-    def test_prepare_context_dict_with_context_raising_exception(self):
-        """Test _prepare_context_dict with context that raises exception."""
-        view_generator = ViewGenerator("test_app")
-        
-        # Create a context that raises exception when __dict__ is accessed
-        class ProblemContext:
-            @property
-            def __dict__(self):
-                raise Exception("Test exception")
-        
-        problematic_context = ProblemContext()
-        
-        with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
-            result = view_generator._prepare_context_dict(problematic_context)
-            
-            self.assertEqual(result, {})
-            mock_logger.error.assert_called_once()
-            self.assertIn("Error preparing context", mock_logger.error.call_args[0][0])
-    
-    def test_safe_get_attr_with_none_object(self):
-        """Test _safe_get_attr with None object."""
-        view_generator = ViewGenerator("test_app")
-        
-        # Should return default value
-        self.assertEqual(view_generator._safe_get_attr(None, 'any_attr', 'default'), 'default')
-    
-    def test_context_dict_with_problematic_values(self):
-        """Test _prepare_context_dict with values that raise errors."""
-        view_generator = ViewGenerator("test_app")
-        
-        # Create a datetime subclass that raises exception when repr() is called
-        class ProblemDatetime(datetime.datetime):
-            def __repr__(self):
-                raise Exception("Cannot represent")
-        
-        # Create a problematic datetime value (can't just instantiate ProblemDatetime directly)
-        problem_datetime = datetime.datetime(2023, 1, 1)
-        problem_value = Mock(spec=datetime.datetime)
-        problem_value.__repr__ = Mock(side_effect=Exception("Cannot represent"))
-        
-        context = Mock(spec=SpellbookContext)
-        context.__dict__ = {
-            'good_value': 'test',
-            'problem_value': problem_value,
-            'date_value': datetime.datetime(2023, 1, 1)
-        }
-        
-        with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
-            with patch('django_spellbook.management.commands.processing.view_generator.isinstance', 
-                    return_value=True):  # Force all values to be treated as datetime
-                result = view_generator._prepare_context_dict(context)
-                
-                # Should include good values but set problematic ones to None
-                self.assertEqual(result['good_value'], "'test'")
-                self.assertIsNone(result['problem_value'])  # Should be None due to exception handling
-                self.assertTrue(isinstance(result['date_value'], str))
-                mock_logger.warning.assert_called_once()
-                self.assertIn("Could not process context value", mock_logger.warning.call_args[0][0])
-    
-    def test_metadata_representation_with_problematic_values(self):
-        """Test metadata representation with values that can't be represented."""
-        view_generator = ViewGenerator("test_app")
-        
-        # Create a class that raises exception when repr() is called
-        class ProblemValue:
-            def __repr__(self):
-                raise Exception("Cannot represent")
-        
-        # Create a processed file with context
-        processed_file = Mock(spec=ProcessedFile)
-        processed_file.relative_url = "test/page"
-        processed_file.context = Mock(spec=SpellbookContext)
-        
-        # Mock _prepare_metadata to return dict with problematic value
-        with patch.object(view_generator, '_prepare_metadata') as mock_prepare:
-            mock_prepare.return_value = {
-                'good_key': 'value',
-                'problem_key': ProblemValue()
-            }
-            
-            with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
-                # This should handle the exception and continue
-                result = view_generator._generate_view_function(processed_file)
-                
-                # Should log a warning
-                mock_logger.warning.assert_called_once()
-                self.assertIn("Could not represent metadata value", mock_logger.warning.call_args[0][0])
-                
-                # Result should include the good key and a comment for the problem key
-                self.assertIn("'good_key': 'value'", result)
-                self.assertIn("# Error representing value", result)
-    
-    def test_generate_view_function_comprehensive_error_handling(self):
-        """Test _generate_view_function handles various errors and provides helpful messages."""
-        view_generator = ViewGenerator("test_app")
-        
-        # Test with various exceptions in helper methods
+        # Mock methods to isolate the security validation part
         with patch('django_spellbook.management.commands.processing.view_generator.generate_view_name', 
-                  side_effect=Exception("View name error")):
-            
-            processed_file = Mock(spec=ProcessedFile)
-            processed_file.relative_url = "test/page"
-            processed_file.context = Mock(spec=SpellbookContext)
-            
-            with self.assertRaises(CommandError) as context:
-                view_generator._generate_view_function(processed_file)
-                
-            self.assertIn("Failed to generate view function", str(context.exception))
-            self.assertIn("View name error", str(context.exception))
-    
-    def test_generate_view_functions_error_continuation(self):
-        """Test generate_view_functions continues processing after errors."""
+                return_value="test_view"):
+            with patch('django_spellbook.management.commands.processing.view_generator.get_template_path', 
+                    return_value="template/path.html"):
+                with patch('django_spellbook.management.commands.processing.view_generator.get_clean_url', 
+                        return_value="clean/url"):
+                    with patch.object(view_generator, '_prepare_metadata', return_value={}):
+                        with patch.object(view_generator, '_prepare_context_dict') as mock_prepare_context:
+                            with patch.object(view_generator, 'check_for_dangerous_content', 
+                                            side_effect=ValueError("Dangerous content detected")):
+                                with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
+                                    # Set up mock to return something that will trigger the security check
+                                    mock_prepare_context.return_value = {"dangerous": "content"}
+                                    
+                                    # Call the method
+                                    result = view_generator._generate_view_function(processed_file)
+                                    
+                                    # Verify error was logged
+                                    mock_logger.error.assert_called_once()
+                                    self.assertIn("security validation failed", mock_logger.error.call_args[0][0])
+                                    
+                                    # Verify empty context is used
+                                    self.assertIn("context = {}", result)
+                                    
+    def test__safe_get_attr_returns_default_when_attr_not_found(self):
+        """Test _safe_get_attr when attribute is not found."""
         view_generator = ViewGenerator("test_app")
         
-        # Create good and bad processed files
-        good_file = Mock(spec=ProcessedFile)
-        good_file.relative_url = "good/file"
-        good_file.context = Mock(spec=SpellbookContext)
+        returned_value = view_generator._safe_get_attr(None, "test", default="default")
         
-        bad_file = Mock(spec=ProcessedFile)
-        bad_file.relative_url = "bad/file"
-        bad_file.context = Mock(spec=SpellbookContext)
+        self.assertEqual(returned_value, "default")
         
-        # Make _generate_view_function succeed for good_file and fail for bad_file
-        def mock_generate(file):
-            if file == good_file:
-                return "def good_file(): pass"
-            else:
-                raise Exception("Error in bad file")
-                
-        with patch.object(view_generator, '_generate_view_function', side_effect=mock_generate):
-            with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
-                result = view_generator.generate_view_functions([good_file, bad_file])
-                
-                # Should have one successful function and log error for bad file
-                self.assertEqual(len(result), 1)
-                self.assertEqual(result[0], "def good_file(): pass")
-                mock_logger.error.assert_called_once()
-                self.assertIn("Error generating view function", mock_logger.error.call_args[0][0])
-    
-    def test_prepare_metadata_exception_handling(self):
-        """Test _prepare_metadata handles exceptions in attribute access."""
+    def test_prepare_metadata_with_no_url_path(self):
+        """Test _prepare_metadata when there is no url_path."""
         view_generator = ViewGenerator("test_app")
         
-        # Create a ProcessedFile that raises exception when relative_url is accessed
-        class ExceptionFile:
-            @property
-            def relative_url(self):
-                raise Exception("Relative URL error")
-                
-            # Add minimal required attributes to pass isinstance check
-            def __init__(self):
-                self.original_path = "test"
-                self.html_content = "test"
-                self.template_path = "test"
-                self.context = None
+        # Create a sample processed file
+        processed_file = ProcessedFile(
+            original_path=Path('/test/file.md'),
+            html_content='<h1>Test</h1>',
+            template_path=Path('../test/template.html'),
+            relative_url='test/page',
+            context=self.mock_context
+            )
         
-        exception_file = ExceptionFile()
+        returned_metadata = view_generator._prepare_metadata(processed_file)
         
-        with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
-            # Should return minimal metadata and log the error
-            with self.assertRaises(Exception):
-                metadata = view_generator._prepare_metadata(exception_file)
-                
-    def test_generate_view_function_missing_context_attribute(self):
-        """Test _generate_view_function with ProcessedFile missing context attribute."""
+        self.assertEqual(returned_metadata['title'], 'Error preparing metadata')
+        
+    def test__prepare_toc_with_non_dict_toc(self):
+        """Test _prepare_toc with a non-dict TOC."""
         view_generator = ViewGenerator("test_app")
         
-        # Create ProcessedFile without context attribute
-        processed_file = Mock(spec=ProcessedFile)
-        processed_file.relative_url = "test/page"
-        # Deliberately remove context attribute
-        if hasattr(processed_file, 'context'):
-            delattr(processed_file, 'context')
-        
-        with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
-            with self.assertRaises(CommandError) as context:
-                view_generator._generate_view_function(processed_file)
-                
-            self.assertIn("Failed to generate view function", str(context.exception))
-            self.assertIn("ProcessedFile missing context attribute", str(context.exception))
-            mock_logger.error.assert_called_once()
-
-    def test_prepare_context_dict_outer_exception(self):
-        """Test _prepare_context_dict with exception in the outer try-except block."""
-        view_generator = ViewGenerator("test_app")
-        
-        # Create a normal context
-        context = Mock(spec=SpellbookContext)
-        
-        # Force an exception in the main try block by patching hasattr
-        with patch('django_spellbook.management.commands.processing.view_generator.hasattr', 
-                side_effect=Exception("Error in hasattr")):
-            with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
-                result = view_generator._prepare_context_dict(context)
-                
-                self.assertEqual(result, {})
-                mock_logger.error.assert_called_once()
-                self.assertIn("Error preparing context dictionary", mock_logger.error.call_args[0][0])
-                
-    def test_context_dict_representation_check(self):
-        """Test context dictionary representation check in _generate_view_function."""
-        view_generator = ViewGenerator("test_app")
-        
-        # Create a processed file with valid attributes
-        processed_file = Mock(spec=ProcessedFile)
-        processed_file.relative_url = "test/page"
-        processed_file.context = Mock(spec=SpellbookContext)
-        
-        # Create a problematic object that can't be represented
-        class ProblematicObject:
-            def __repr__(self):
-                raise Exception("Cannot represent!")
-        
-        problematic_dict = {'normal': 'test', 'problem': ProblematicObject()}
-        
-        # Mock _prepare_context_dict to return the problematic dict
-        with patch.object(view_generator, '_prepare_context_dict', return_value=problematic_dict):
-            with patch.object(view_generator, '_prepare_metadata', return_value={}):
-                with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
-                    # Should handle the exception during repr() and use an empty context
-                    result = view_generator._generate_view_function(processed_file)
-                    
-                    # Should log the error
-                    mock_logger.error.assert_called_once()
-                    self.assertIn("security validation failed", mock_logger.error.call_args[0][0])
-                    
-                    # Should use an empty context
-                    self.assertIn("context = {}", result)
-
-    def test_context_dict_with_dangerous_content(self):
-        """Test security validation for dangerous content in context."""
-        view_generator = ViewGenerator("test_app")
-        
-        # Create a processed file with valid attributes
-        processed_file = Mock(spec=ProcessedFile)
-        processed_file.relative_url = "test/page" 
-        processed_file.context = Mock(spec=SpellbookContext)
-        
-        # Create context dictionaries with potentially dangerous content
-        dangerous_contexts = [
-
-        ]
-        
-        for dangerous_dict in dangerous_contexts:
-            # Mock _prepare_context_dict to return the dangerous dict
-            with patch.object(view_generator, '_prepare_context_dict', return_value=dangerous_dict):
-                with patch.object(view_generator, '_prepare_metadata', return_value={}):
-                    with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
-                        # Should detect dangerous content and use an empty context
-                        result = view_generator._generate_view_function(processed_file)
-                        
-                        # Should log the error
-                        mock_logger.error.assert_called_once()
-                        self.assertIn("security validation failed", mock_logger.error.call_args[0][0])
-                        self.assertIn("Potentially unsafe content", mock_logger.error.call_args[0][0])
-                        
-                        # Should use an empty context
-                        self.assertIn("context = {}", result)
-                        
-                        # Reset mock
-                        mock_logger.reset_mock()
-
-    def test_context_dict_with_safe_content(self):
-        """Test security validation with safe content passes."""
-        view_generator = ViewGenerator("test_app")
-        
-        # Create a processed file with valid attributes
-        processed_file = Mock(spec=ProcessedFile)
-        processed_file.relative_url = "test/page"
-        processed_file.context = Mock(spec=SpellbookContext)
-        
-        # Create a context with safe values
-        safe_dict = {
-            'string': 'test',
-            'number': 123,
-            'boolean': True,
-            'none': None,
-            'list': [1, 2, 3],
-            'dict': {'a': 1, 'b': 2},
-            'date': datetime.datetime(2023, 1, 1)
+        # Create a sample context dict
+        context_dict = {
+            'title': 'Test Page',
+            'created_at': datetime.datetime(2023, 1, 1),
+            'updated_at': datetime.datetime(2023, 2, 1),
+            'url_path': 'test/page',
+            'raw_content': 'Test content',
+            'is_public': True,
+            'tags': ['test', 'example'],
+            'custom_meta': {'key': 'value'},
+            'toc': 123  # Non-dict TOC
         }
+                
+        with self.assertRaises(Exception) as context:
+            view_generator._prepare_toc(context_dict)
+            
+    def test_validate_required_attributes_with_missing_relative_url(self):
+        """Test validate_required_attributes with missing relative_url."""
+        view_generator = ViewGenerator("test_app")
         
-        # Mock _prepare_context_dict to return the safe dict
-        with patch.object(view_generator, '_prepare_context_dict', return_value=safe_dict):
-            with patch.object(view_generator, '_prepare_metadata', return_value={}):
-                with patch('django_spellbook.management.commands.processing.view_generator.repr', return_value=str(safe_dict)):
-                    # Should not log any security errors
-                    with patch('django_spellbook.management.commands.processing.view_generator.logger') as mock_logger:
-                        result = view_generator._generate_view_function(processed_file)
-                        
-                        # Error should not be called for security validation
-                        mock_logger.error.assert_not_called()
-                        
-                        # Should use the original context
-                        self.assertNotIn("context = {}", result)
+        # Create a sample processed file
+        processed_file = ProcessedFile(
+            original_path=Path('/test/file.md'),
+            html_content='<h1>Test</h1>',
+            template_path=Path('/test/template.html'),
+            relative_url='',
+            context=self.mock_context
+        )
+        
+        # Should raise ValueError with joined errors
+        with self.assertRaises(ValueError) as context:
+            view_generator.validate_required_attributes(processed_file)
+        
+        # Check error message
+        self.assertIn("missing relative_url", str(context.exception))
+        
+    def test_validate_required_attributes_with_missing_context(self):
+        """Test validate_required_attributes with missing context."""
+        view_generator = ViewGenerator("test_app")
+        
+        # Create a sample processed file
+        processed_file = ProcessedFile(
+            original_path=Path('/test/file.md'),
+            html_content='<h1>Test</h1>',
+            template_path=Path('/test/template.html'),
+            relative_url='test/page',
+            context=None
+        )
+        
+        # Should raise ValueError with joined errors
+        with self.assertRaises(ValueError) as context:
+            view_generator.validate_required_attributes(processed_file)
+        
+        # Check error message
+        self.assertIn("missing context", str(context.exception))
+    

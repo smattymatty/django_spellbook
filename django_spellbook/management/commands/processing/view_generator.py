@@ -1,5 +1,3 @@
-# django_spellbook/management/commands/processing/view_generator.py
-
 import os
 import datetime
 import logging
@@ -121,6 +119,12 @@ def {view_name}(request):
             logger.debug(traceback.format_exc())
             raise CommandError(error_message)
     
+    def _safe_get_attr(self, obj, attr_name, default=None):
+        """Safely get attribute from an object with a default fallback."""
+        if obj is None:
+            return default
+        return getattr(obj, attr_name, default)
+    
     def _prepare_metadata(self, processed_file: ProcessedFile) -> Dict[str, Any]:
         """
         Prepare metadata dictionary for a file.
@@ -132,9 +136,25 @@ def {view_name}(request):
             Metadata dictionary
         """
         try:
+            if ".." in str(processed_file.template_path):
+                # If template path is outside of the app directory, raise an error
+                raise ValueError(f"Template path is outside of the app directory: {processed_file.template_path}")
             # Extract path parts for title fallback
             path_parts = processed_file.relative_url.split('/')
             url_name = processed_file.relative_url.replace('/', '_')
+            
+            # If context has prepare_metadata method (new implementation), use it
+            if (hasattr(processed_file, 'context') and processed_file.context and
+                hasattr(processed_file.context, 'prepare_metadata') and 
+                callable(processed_file.context.prepare_metadata)):
+                
+                try:
+                    return processed_file.context.prepare_metadata(
+                        self.content_app, 
+                        processed_file.relative_url
+                    )
+                except Exception as e:
+                    logger.warning(f"Error using context.prepare_metadata: {str(e)}, falling back to direct implementation")
             
             # Safely get context attributes with fallbacks
             context = processed_file.context if hasattr(processed_file, 'context') else None
@@ -165,12 +185,6 @@ def {view_name}(request):
                 'namespace': self.content_app
             }
     
-    def _safe_get_attr(self, obj, attr_name, default=None):
-        """Safely get attribute from an object with a default fallback."""
-        if obj is None:
-            return default
-        return getattr(obj, attr_name, default)
-    
     def _prepare_context_dict(self, context: SpellbookContext) -> Dict[str, Any]:
         """
         Prepare context dictionary for template rendering.
@@ -181,35 +195,9 @@ def {view_name}(request):
         Returns:
             Context dictionary
         """
-        if context is None:
-            logger.warning("Context is None, using empty context dictionary")
-            return {}
-            
-        try:
-            context_dict = context.__dict__.copy() if hasattr(context, '__dict__') else {}
-            
-            # Remove toc if it exists
-            if 'toc' in context_dict:
-                del context_dict['toc']  # Remove the existing toc
-            
-            # Safely convert datetime objects to their representation
-            result = {}
-            for k, v in context_dict.items():
-                try:
-                    if isinstance(v, (datetime.datetime, datetime.date)):
-                        result[k] = repr(v)
-                    else:
-                        result[k] = v
-                except Exception as e:
-                    logger.warning(f"Could not process context value for key '{k}': {str(e)}")
-                    result[k] = None
-                    
-            return result
-        except Exception as e:
-            logger.error(f"Error preparing context dictionary: {str(e)}")
-            logger.debug(traceback.format_exc())
-            return {}  # Return empty dict on error
-        
+        return context.to_dict()
+    
+    
     def check_for_dangerous_content(self, context_str: str):
         """
         Check for potentially dangerous patterns in context string.
@@ -229,8 +217,8 @@ def {view_name}(request):
             
     def validate_required_attributes(self, processed_file: ProcessedFile):
         """
-            Validate required attributes for a ProcessedFile object.
-            
+        Validate required attributes for a ProcessedFile object.
+        
         Args:
             processed_file: ProcessedFile object
             
@@ -240,9 +228,27 @@ def {view_name}(request):
         if not hasattr(processed_file, 'relative_url') or not processed_file.relative_url:
             raise ValueError("ProcessedFile missing relative_url attribute")
             
-        if not hasattr(processed_file, 'context'):
+        if not hasattr(processed_file, 'context') or not processed_file.context:
             raise ValueError("ProcessedFile missing context attribute")
             
+        # If context exists and has validate method, use it
+        if processed_file.context and hasattr(processed_file.context, 'validate') and callable(processed_file.context.validate):
+            try:
+                validation_errors = processed_file.context.validate()
+                # Explicitly check if validation_errors evaluates to True
+                if validation_errors:
+                    if isinstance(validation_errors, list) and len(validation_errors) > 0:
+                        # Convert all items to strings before joining
+                        errors_str = ', '.join(str(error) for error in validation_errors)
+                        raise ValueError(f"Context validation failed: {errors_str}")
+                    else:
+                        # Handle non-list error output
+                        raise ValueError(f"Context validation failed: {validation_errors}")
+            except Exception as e:
+                # Re-raise ValueError exceptions
+                if isinstance(e, ValueError):
+                    raise
+                logger.warning(f"Error during context validation: {str(e)}")
         
     def convert_metadata_to_string(self, metadata: Dict[str, Any]):
         """
@@ -256,11 +262,33 @@ def {view_name}(request):
         # Convert metadata to string representation for inclusion in the view
         metadata_repr = "{\n"
         for k, v in metadata.items():
-            try:
-                metadata_repr += f"        '{k}': {repr(v)},\n"
-            except Exception as e:
-                logger.warning(f"Could not represent metadata value for key '{k}': {str(e)}")
-                metadata_repr += f"        '{k}': None,  # Error representing value: {str(e)}\n"
+            metadata_repr += f"        '{k}': {repr(v)},\n"
         metadata_repr += "    }"
         
         return metadata_repr
+    
+    def _prepare_toc(self, context_dict: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Prepare TOC dictionary for template rendering.
+        
+        Args:
+            context_dict: Context dictionary
+        Returns:
+            TOC dictionary
+        """
+        # Safely convert datetime objects to their representation
+        result = {}
+        for k, v in context_dict.items():
+            try:
+                if isinstance(v, (datetime.datetime, datetime.date)):
+                    result[k] = repr(v)
+                # if the toc isn't the correct format, raise an error
+                elif k == 'toc' and not isinstance(v, dict):
+                    raise ValueError(f"TOC is not a dictionary: {v}")
+                else:
+                    result[k] = v
+            except ValueError:
+                result[k] = None
+                raise Exception(f"TOC is not a dictionary: {v}")
+                
+        return result
