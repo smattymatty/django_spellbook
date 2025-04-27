@@ -10,7 +10,8 @@ from django_spellbook.management.commands.processing.file_processor import Proce
 from django_spellbook.markdown.context import SpellbookContext
 
 class TestURLGenerator(TestCase):
-    
+    # TODO: BUG: whenever you have two apps properly configured but no URL_PREFIX set,
+    # the urls generated are incorrect, it ignores the first app only only includes the second
     def setUp(self):
         """Set up the test environment."""
         self.url_generator = URLGenerator("test_app")

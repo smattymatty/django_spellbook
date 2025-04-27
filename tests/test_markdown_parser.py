@@ -6,30 +6,33 @@ from django_spellbook.markdown.parser import MarkdownParser, BlockProcessor
 
 from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
 
+from io import StringIO
+
 class TestMarkdownParser(unittest.TestCase):
     """Test cases for the MarkdownParser class"""
 
     def setUp(self):
+        self.reporter = MarkdownReporter(StringIO())
         self.simple_markdown = "# Test\nThis is a test"
         self.block_markdown = """{~ test ~}This is a test block{~~}"""
 
     def test_initialization(self):
         """Test parser initialization and basic processing"""
-        parser = MarkdownParser(self.simple_markdown)
+        parser = MarkdownParser(self.simple_markdown, self.reporter)
         self.assertEqual(parser.markdown_text, self.simple_markdown)
         self.assertIsNotNone(parser.processed_text)
         self.assertIsNotNone(parser.html)
 
     def test_get_html(self):
         """Test HTML output generation"""
-        parser = MarkdownParser(self.simple_markdown)
+        parser = MarkdownParser(self.simple_markdown, self.reporter)
         html = parser.get_html()
         self.assertIn("<h1>Test</h1>", html)
         self.assertIn("<p>This is a test</p>", html)
 
     def test_get_markdown(self):
         """Test original markdown retrieval"""
-        parser = MarkdownParser(self.simple_markdown)
+        parser = MarkdownParser(self.simple_markdown, self.reporter)
         self.assertEqual(parser.get_markdown(), self.simple_markdown)
 
 
@@ -37,7 +40,7 @@ class TestBlockProcessor(unittest.TestCase):
     """Test cases for the BlockProcessor class"""
 
     def setUp(self):
-        self.processor = BlockProcessor("")
+        self.processor = BlockProcessor("", MarkdownReporter(StringIO()))
         self.mock_block_class = Mock()
         self.mock_block_instance = Mock()
         self.mock_block_class.return_value = self.mock_block_instance
@@ -46,7 +49,7 @@ class TestBlockProcessor(unittest.TestCase):
     def test_split_into_segments(self):
         """Test splitting content into code and non-code segments"""
         content = "Text\n```code\nblock\n```\nMore text"
-        processor = BlockProcessor(content)
+        processor = BlockProcessor(content, MarkdownReporter(StringIO()))
         segments = processor._split_into_segments()
 
         # Fix: Adjust expected segments to match actual output
@@ -65,7 +68,7 @@ class TestBlockProcessor(unittest.TestCase):
         with patch('django_spellbook.blocks.SpellBlockRegistry.get_block',
                    return_value=self.mock_block_class):
             content = "{~ test ~}content{~~}"
-            processor = BlockProcessor(content)
+            processor = BlockProcessor(content, MarkdownReporter(StringIO()))
             result = processor._process_spell_blocks(content)
 
             self.assertEqual(result, "<div>Rendered content</div>")
@@ -91,14 +94,14 @@ class TestBlockProcessor(unittest.TestCase):
         with patch('django_spellbook.blocks.SpellBlockRegistry.get_block',
                    return_value=None):
             content = "{~ nonexistent ~}content{~~}"
-            processor = BlockProcessor(content)
+            processor = BlockProcessor(content, MarkdownReporter(StringIO()))
             result = processor.process()
             self.assertIn("<!-- Block 'nonexistent' not found -->", result)
 
     def test_process_with_code_blocks(self):
         """Test processing content with code blocks"""
         content = "Text\n```\n{~ test ~}content{~~}\n```\nMore text"
-        processor = BlockProcessor(content)
+        processor = BlockProcessor(content, MarkdownReporter(StringIO()))
         result = processor.process()
 
         # Fix: Adjust expected output to include trailing newline
@@ -112,7 +115,7 @@ class TestBlockProcessor(unittest.TestCase):
         with patch('django_spellbook.blocks.SpellBlockRegistry.get_block',
                    return_value=self.mock_block_class):
             content = "{~ test ~}content{~~}"
-            processor = BlockProcessor(content)
+            processor = BlockProcessor(content, MarkdownReporter(StringIO()))
             result = processor._process_spell_blocks(content)
             self.assertIn(
                 "<!-- Error rendering block: Render error -->", result)
@@ -159,7 +162,7 @@ class TestBlockProcessorExceptions(unittest.TestCase):
     """Test cases for BlockProcessor exception handling"""
 
     def setUp(self):
-        self.processor = BlockProcessor("")
+        self.processor = BlockProcessor("", MarkdownReporter(StringIO()))
 
     def test_handle_block_match_exception(self, mock_logger):
         """Test exception handling in _handle_block_match"""

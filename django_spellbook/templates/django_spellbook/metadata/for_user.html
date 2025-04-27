@@ -1,0 +1,19 @@
+<div class="metadata-user">
+    {% if metadata.title %}<p><strong>Title:</strong> {{ metadata.title }}</p>{% endif %}
+    {% if metadata.created_at %}<p><strong>Created:</strong> {{ metadata.created_at }}</p>{% endif %}
+    {% if metadata.updated_at %}<p><strong>Updated:</strong> {{ metadata.updated_at }}</p>{% endif %}
+    {% if metadata.tags %}
+    <p><strong>Tags:</strong> 
+      {% for tag in metadata.tags %}
+        <span class="metadata-tag">{{ tag }}</span>
+      {% endfor %}
+    </p>
+    {% endif %}
+    {% if metadata.custom_meta %}
+      {% for key, value in metadata.custom_meta.items %}
+        <p><strong>{{ key|title }}:</strong> {{ value }}</p>
+      {% endfor %}
+    {% endif %}
+    {% if metadata.next_page %}<p><strong>Next:</strong> <a href="{{ metadata.next_page }}">Next Page</a></p>{% endif %}
+    {% if metadata.prev_page %}<p><strong>Previous:</strong> <a href="{{ metadata.prev_page }}">Previous Page</a></p>{% endif %}
+  </div>

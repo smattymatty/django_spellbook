@@ -26,7 +26,7 @@ class MarkdownProcessingError(Exception):
 
 
 class MarkdownFileProcessor:
-    def __init__(self, reporter: Optional[MarkdownReporter] = None):
+    def __init__(self, reporter: MarkdownReporter):
         self.parser = MarkdownParser
         self.parser.reporter = reporter
         self.current_source_path = None  # to store the current source path
@@ -77,7 +77,7 @@ class MarkdownFileProcessor:
             frontmatter = FrontMatterParser(md_text, file_path)
 
             # Parse markdown content
-            parser = self.parser(frontmatter.raw_content)
+            parser = self.parser(frontmatter.raw_content, self.reporter)
             html_content = parser.get_html()
 
             return html_content, frontmatter

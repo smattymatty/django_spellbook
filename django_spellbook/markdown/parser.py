@@ -24,7 +24,7 @@ class MarkdownParser:
         html (str): The final HTML output after all processing
     """
 
-    def __init__(self, markdown_text: str, reporter: Optional[MarkdownReporter] = None):
+    def __init__(self, markdown_text: str, reporter: MarkdownReporter):
         """
         Initialize the parser with markdown text.
 
@@ -46,7 +46,7 @@ class MarkdownParser:
                 'markdown.extensions.sane_lists',
             ],
         )
-        self.reporter = reporter
+        self.reporter: MarkdownReporter = reporter
 
     def get_html(self) -> str:
         """
@@ -81,7 +81,7 @@ class BlockProcessor:
         markdown_extensions (List[str]): List of markdown extensions to apply
     """
 
-    def __init__(self, content: str, reporter: Optional[MarkdownReporter] = None):
+    def __init__(self, content: str, reporter: MarkdownReporter):
         """
         Initialize the block processor.
 
@@ -98,7 +98,7 @@ class BlockProcessor:
             'markdown.extensions.sane_lists',
             DjangoLikeTagExtension()
         ]
-        self.reporter = reporter
+        self.reporter: MarkdownReporter = reporter
 
     def process(self) -> str:
         """

@@ -1,0 +1,37 @@
+<div class="metadata-dev">
+    <p><strong>Title:</strong> {{ metadata.title }}</p>
+    <p><strong>URL Path:</strong> {{ metadata.url_path }}</p>
+    <p><strong>Created At:</strong> {{ metadata.created_at }}</p>
+    <p><strong>Updated At:</strong> {{ metadata.updated_at }}</p>
+    <p><strong>Is Public:</strong> {{ metadata.is_public }}</p>
+    {% if metadata.namespace %}<p><strong>Namespace:</strong> {{ metadata.namespace }}</p>{% endif %}
+    {% if metadata.url_name %}<p><strong>URL Name:</strong> {{ metadata.url_name }}</p>{% endif %}
+    {% if metadata.namespaced_url %}<p><strong>Namespaced URL:</strong> {{ metadata.namespaced_url }}</p>{% endif %}
+    
+    {% if metadata.tags %}
+    <p><strong>Tags:</strong></p>
+    <ul>
+      {% for tag in metadata.tags %}
+        <li>{{ tag }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    
+    {% if metadata.custom_meta %}
+    <div class="metadata-custom">
+      <p><strong>Custom Metadata:</strong></p>
+      <ul>
+        {% for key, value in metadata.custom_meta.items %}
+          <li><strong>{{ key }}:</strong> {{ value }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    
+    {% if metadata.toc %}
+    <div class="metadata-toc">
+      <p><strong>Table of Contents:</strong></p>
+      <pre>{{ metadata.toc }}</pre>
+    </div>
+    {% endif %}
+  </div>
