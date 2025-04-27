@@ -1,3 +1,4 @@
+# django_spellbook/management/commands/spellbook_md.py
 import os
 import logging
 from typing import List, Dict, Tuple, Optional
@@ -34,11 +35,40 @@ class Command(BaseCommand):
             action='store_true',
             help='Continue processing files even if some fail'
         )
+        parser.add_argument(
+            '--report-level',
+            choices=['minimal', 'detailed', 'debug'],
+            default='detailed',
+            help='Level of detail in the report (minimal, detailed, or debug)'
+        )
+        parser.add_argument(
+            '--report-format',
+            choices=['text', 'json', 'none'],
+            default='text',
+            help='Format of the report (text, json, or none to suppress)'
+        )
+        parser.add_argument(
+            '--report-output',
+            type=str,
+            help='File path to save the report (default: print to stdout)'
+        )
 
     def handle(self, *args, **options):
         """Process markdown files from all configured source-destination pairs."""
         self.continue_on_error = options.get('continue_on_error', False)
-        self.reporter = MarkdownReporter(self.stdout, self.style)
+        
+        # Extract Reporting Options
+        self.report_level = options.get('report_level', 'detailed')
+        self.report_format = options.get('report_format', 'text')
+        self.report_output = options.get('report_output', None)
+        
+        self.reporter = MarkdownReporter(
+            self.stdout,
+            self.style,
+            report_level=self.report_level,
+            report_format=self.report_format,
+            report_output=self.report_output
+            )
         try:
             self.discover_spellblocks()
             # Validate settings (Should all be List[str] of equal lengths)
@@ -113,7 +143,8 @@ class Command(BaseCommand):
                 content_dir_path=content_dir_path,
                 template_dir=template_dir,
                 url_prefix=md_url_prefix,
-                base_template=base_template
+                base_template=base_template,
+                reporter=self.reporter
             )
         except Exception as e:
             logger.error(f"Error initializing markdown processor: {str(e)}", exc_info=True)
@@ -191,8 +222,7 @@ class Command(BaseCommand):
         Discover available spellblocks for use in markdown processing.
         '''
         try:
-            block_count = discover_blocks(self.stdout)
-            self.reporter.write(f"Discovered {block_count} SpellBlocks")
+            discover_blocks(self.reporter)
         except Exception as e:
             self.reporter.warning(
                 f"Error during block discovery: {str(e)}. "

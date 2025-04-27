@@ -7,6 +7,8 @@ from django_spellbook.markdown.parser import MarkdownParser
 from django_spellbook.markdown.context import SpellbookContext
 from django_spellbook.markdown.frontmatter import FrontMatterParser
 
+from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
+
 
 @dataclass
 class ProcessedFile:
@@ -24,9 +26,11 @@ class MarkdownProcessingError(Exception):
 
 
 class MarkdownFileProcessor:
-    def __init__(self):
+    def __init__(self, reporter: Optional[MarkdownReporter] = None):
         self.parser = MarkdownParser
+        self.parser.reporter = reporter
         self.current_source_path = None  # to store the current source path
+        self.reporter = reporter
 
     def process_file(self, file_path: Path, dirpath: str, filename: str, folders: List[str]) -> Optional[ProcessedFile]:
         """Main processing function that orchestrates the markdown processing"""

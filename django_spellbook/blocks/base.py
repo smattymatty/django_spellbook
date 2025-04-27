@@ -1,7 +1,10 @@
-from typing import Dict, Any, Set
+from typing import Dict, Any, Set, Optional
 from django.template.loader import render_to_string
 import markdown
 from logging import getLogger
+
+from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
+
 
 logger = getLogger(__name__)
 
@@ -11,13 +14,14 @@ class BasicSpellBlock:
     Now uses the custom MarkdownParser for more consistent processing.
     """
 
-    def __init__(self, content=None, **kwargs):
+    def __init__(self, reporter: MarkdownReporter, content=None, **kwargs):
         self.content = content
         self.kwargs = kwargs
         self.name = getattr(self, 'name', None)
         self.template = getattr(self, 'template', None)
         self.required_kwargs = getattr(self, 'required_kwargs', set())
         self.optional_kwargs = getattr(self, 'optional_kwargs', set())
+        self.reporter = reporter
 
     def get_context(self) -> Dict[str, Any]:
         """
@@ -49,4 +53,5 @@ class BasicSpellBlock:
             raise ValueError(f"No template specified for block {self.name}")
 
         context = self.get_context()
+        self.reporter.record_spellblock_usage(self.name, success=True)
         return render_to_string(self.template, context)

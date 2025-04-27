@@ -4,6 +4,11 @@ from django.test import TestCase
 from django.template.loader import render_to_string
 from django_spellbook.blocks import BasicSpellBlock
 
+from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
+from io import StringIO
+
+
+
 class TestQuoteBlock(TestCase):
     def setUp(self):
         """Set up test cases with a QuoteBlock instance."""
@@ -19,7 +24,7 @@ class TestQuoteBlock(TestCase):
 
     def test_initialization(self):
         """Test block initialization with various parameters."""
-        block = self.BlockClass(self.test_content, **self.test_kwargs)
+        block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content, **self.test_kwargs)
         self.assertEqual(block.content, self.test_content)
         self.assertEqual(block.kwargs, self.test_kwargs)
         self.assertEqual(block.name, 'quote')
@@ -28,7 +33,7 @@ class TestQuoteBlock(TestCase):
     def test_get_context(self):
         """Test context generation for template rendering."""
         # First update QuoteBlock to include the image parameter
-        block = self.BlockClass(self.test_content, **self.test_kwargs)
+        block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content, **self.test_kwargs)
         context = block.get_context()
 
         # Check if all expected parameters are in context
@@ -41,7 +46,7 @@ class TestQuoteBlock(TestCase):
     def test_render(self):
         """Test template rendering with context."""
         expected_output = '<blockquote>Rendered quote with image</blockquote>'
-        block = self.BlockClass(self.test_content, **self.test_kwargs)
+        block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content, **self.test_kwargs)
 
         # Create mocks for process_content and render_to_string
         with patch.object(block, 'process_content', return_value='<p>This is a quote</p>') as mock_process:
@@ -71,7 +76,7 @@ class TestQuoteBlock(TestCase):
 
         # Create block without image
         kwargs_without_image = {k: v for k, v in self.test_kwargs.items() if k != 'image'}
-        block = self.BlockClass(self.test_content, **kwargs_without_image)
+        block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content, **kwargs_without_image)
 
         # Create mocks for process_content and render_to_string
         with patch.object(block, 'process_content', return_value='<p>This is a quote</p>') as mock_process:
@@ -86,7 +91,7 @@ class TestQuoteBlock(TestCase):
 
     def test_default_values(self):
         """Test that default values are provided when kwargs are missing."""
-        block = self.BlockClass(self.test_content)
+        block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content)
         context = block.get_context()
         
         self.assertEqual(context['author'], '')
@@ -111,7 +116,7 @@ class TestPracticeBlock(TestCase):
 
     def test_initialization(self):
         """Test block initialization with various parameters."""
-        block = self.BlockClass(self.test_content, **self.test_kwargs)
+        block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content, **self.test_kwargs)
         self.assertEqual(block.content, self.test_content)
         self.assertEqual(block.kwargs, self.test_kwargs)
         self.assertEqual(block.name, 'practice')
@@ -119,7 +124,7 @@ class TestPracticeBlock(TestCase):
 
     def test_get_context(self):
         """Test context generation for template rendering."""
-        block = self.BlockClass(self.test_content, **self.test_kwargs)
+        block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content, **self.test_kwargs)
         context = block.get_context()
 
         # Check if all expected parameters are in context
@@ -133,7 +138,7 @@ class TestPracticeBlock(TestCase):
     def test_render(self):
         """Test template rendering with context."""
         expected_output = '<div class="practice-block">Rendered practice</div>'
-        block = self.BlockClass(self.test_content, **self.test_kwargs)
+        block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content, **self.test_kwargs)
 
         # Create mocks for process_content and render_to_string
         with patch.object(block, 'process_content', return_value='<p>Practice steps</p><ol><li>Step one</li><li>Step two</li></ol>') as mock_process:
@@ -157,7 +162,7 @@ class TestPracticeBlock(TestCase):
 
     def test_default_values(self):
         """Test that default values are provided when kwargs are missing."""
-        block = self.BlockClass(self.test_content)
+        block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content)
         context = block.get_context()
         
         self.assertEqual(context['difficulty'], 'Moderate')

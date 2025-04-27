@@ -13,11 +13,26 @@ from django.core.management.base import CommandError
 from django_spellbook.blocks import SpellBlockRegistry
 from django_spellbook.management.commands.command_utils import log_and_write
 
+from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
+
 logger = logging.getLogger(__name__)
+
+from dataclasses import dataclass
+
+@dataclass
+class SpellblockStatistics:
+    """Statistics for a single spellblock."""
+    name: str
+    # TODO: Add more stats like template, context, per-file usage, etc.
+    total_files: int
+    successful_files: int
+    failed_files: int
+    
+    
 
 
 @lru_cache(maxsize=1)
-def discover_blocks(stdout: Optional[IO] = None) -> int:
+def discover_blocks(reporter: MarkdownReporter) -> int:
     """
     Discover and register spell blocks from all installed apps.
     
@@ -25,7 +40,7 @@ def discover_blocks(stdout: Optional[IO] = None) -> int:
     Django app and register any spell blocks defined there.
     
     Args:
-        stdout: Optional output stream to write progress information
+        reporter: MarkdownReporter object for logging
         
     Raises:
         CommandError: If a critical error occurs during block discovery
@@ -33,27 +48,34 @@ def discover_blocks(stdout: Optional[IO] = None) -> int:
     Returns:
         Number of blocks discovered and registered
     """
-    log_and_write("Starting block discovery...", stdout=stdout)
+    reporter.write("Discovering blocks...", level='minimal')
     
+    # First discover blocks from all apps
     for app_config in apps.get_app_configs():
         try:
             # Try to import spellblocks.py from each app
             module_path = f"{app_config.name}.spellblocks"
-            log_and_write(f"Checking {module_path}...", 'debug', stdout)
+            reporter.write(f"Checking {module_path}...", level='debug')
 
             importlib.import_module(module_path)
-            log_and_write(f"Discovered blocks from {app_config.name}", stdout=stdout)
-
+            reporter.write(f"Discovered blocks from {app_config.name}", level='detailed')
+            
         except ImportError:
             # Skip if no spellblocks.py exists
-            log_and_write(f"No blocks found in {app_config.name}", 'debug', stdout)
+            reporter.write(f"No spellblocks.py found in {app_config.name}", level='debug')
             continue
         except Exception as e:
-            log_and_write(f"Error loading blocks from {app_config.name}: {str(e)}", 'error', stdout)
+            reporter.write(f"Error loading blocks from {app_config.name}: {str(e)}", level='debug')
             continue
 
+    # Now, get all registered blocks from the registry
     block_count = len(SpellBlockRegistry._registry)
-    log_and_write(f"Block discovery complete. Found {block_count} blocks.", stdout=stdout)
+    
+    # Create statistics objects for each registered block
+    for block_name in SpellBlockRegistry._registry:
+        reporter.spellblocks.append(build_new_spellblock_statistics(block_name))
+    
+    reporter.write(f"Block discovery complete. Found {block_count} blocks.", level='detailed')
     
     return block_count
 
@@ -101,3 +123,15 @@ def find_markdown_files(source_path: str,
         raise
         
     return markdown_files
+
+def build_new_spellblock_statistics(name: str) -> SpellblockStatistics:
+        """
+        Build a new SpellblockStatistics object for a given spellblock name.
+        
+        Args:
+            name: Name of the spellblock
+        
+        Returns:
+            SpellblockStatistics object
+        """
+        return SpellblockStatistics(name, 0, 0, 0)

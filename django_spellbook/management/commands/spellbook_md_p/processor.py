@@ -20,6 +20,8 @@ from django_spellbook.management.commands.command_utils import get_folder_list
 from django_spellbook.markdown.frontmatter import FrontMatterParser
 from django_spellbook.markdown.toc import TOCGenerator, TOCEntry
 
+from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
+
 logger = logging.getLogger(__name__)
 
 class MarkdownProcessorError(Exception):
@@ -49,6 +51,7 @@ class MarkdownProcessor:
         file_processor (MarkdownFileProcessor): Processor for individual markdown files
         template_generator (TemplateGenerator): Generator for HTML templates
         url_generator (URLViewGenerator): Generator for URLs and views
+        reporter (MarkdownReporter): Reporter for the command
     
     Args:
         content_app: Name of the content app
@@ -64,8 +67,9 @@ class MarkdownProcessor:
         source_path: Union[str, Path], 
         content_dir_path: Union[str, Path], 
         template_dir: Union[str, Path],
+        reporter: MarkdownReporter,
         url_prefix: str = '',
-        base_template: Optional[str] = None
+        base_template: Optional[str] = None,
     ):
         self.content_app: str = content_app
         self.source_path: Path = Path(source_path)
@@ -73,9 +77,10 @@ class MarkdownProcessor:
         self.template_dir: Path = Path(template_dir)
         self.url_prefix: str = url_prefix
         self.base_template: Optional[str] = base_template
+        self.reporter: MarkdownReporter = reporter
         
         # Initialize sub-processors
-        self.file_processor = MarkdownFileProcessor()
+        self.file_processor = MarkdownFileProcessor(self.reporter)
         self.file_processor.current_source_path = str(self.source_path)
         self.template_generator = TemplateGenerator(content_app, str(self.template_dir), self.base_template)
         self.url_generator = URLViewGenerator(

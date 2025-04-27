@@ -2,6 +2,7 @@ from .extensions.django_like import DjangoLikeTagExtension
 from ..blocks import SpellBlockRegistry
 from typing import Dict, Any, Optional, List, Tuple
 from django.template.loader import render_to_string
+from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
 import re
 
 import markdown
@@ -23,7 +24,7 @@ class MarkdownParser:
         html (str): The final HTML output after all processing
     """
 
-    def __init__(self, markdown_text: str):
+    def __init__(self, markdown_text: str, reporter: Optional[MarkdownReporter] = None):
         """
         Initialize the parser with markdown text.
 
@@ -32,7 +33,7 @@ class MarkdownParser:
         """
         self.markdown_text = markdown_text
         # First process the blocks
-        block_processor = BlockProcessor(self.markdown_text)
+        block_processor = BlockProcessor(self.markdown_text, reporter)
         self.processed_text = block_processor.process()
         # Then process the markdown with the processed blocks
         self.html = markdown.markdown(
@@ -45,6 +46,7 @@ class MarkdownParser:
                 'markdown.extensions.sane_lists',
             ],
         )
+        self.reporter = reporter
 
     def get_html(self) -> str:
         """
@@ -79,7 +81,7 @@ class BlockProcessor:
         markdown_extensions (List[str]): List of markdown extensions to apply
     """
 
-    def __init__(self, content: str):
+    def __init__(self, content: str, reporter: Optional[MarkdownReporter] = None):
         """
         Initialize the block processor.
 
@@ -96,6 +98,7 @@ class BlockProcessor:
             'markdown.extensions.sane_lists',
             DjangoLikeTagExtension()
         ]
+        self.reporter = reporter
 
     def process(self) -> str:
         """
@@ -189,11 +192,15 @@ class BlockProcessor:
             block_class = SpellBlockRegistry.get_block(block_name)
             if not block_class:
                 logger.warning(f"Block '{block_name}' not found in registry")
+
+                    
                 return f"<!-- Block '{block_name}' not found -->"
 
             return self._render_block(block_class, args_str, block_content)
         except Exception as e:
             logger.error(f"Error handling block match: {str(e)}")
+            
+            # We can't record a specific block name here since we don't know what it is
             return f"<!-- Error processing block: {str(e)} -->"
 
     def _render_block(self, block_class, args_str: str, block_content: str) -> str:
@@ -213,11 +220,15 @@ class BlockProcessor:
 
             block_instance = block_class(
                 content=block_content,
+                reporter=self.reporter,
                 **kwargs
             )
-
+            
+        
             return block_instance.render()
         except Exception as e:
+            if self.reporter:
+                self.reporter.record_spellblock_usage(block_class.name, success=False)
             logger.error(f"Error rendering block: {str(e)}")
             return f"<!-- Error rendering block: {str(e)} -->"
 
@@ -254,3 +265,4 @@ class BlockProcessor:
         except Exception as e:
             logger.error(f"Error parsing block arguments: {str(e)}")
             return {}
+

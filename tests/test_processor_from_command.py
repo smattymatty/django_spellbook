@@ -20,6 +20,8 @@ from django_spellbook.management.commands.processing.template_generator import T
 from django_spellbook.management.commands.processing.url_view_generator import URLGenerationError
 from django_spellbook.markdown.toc import TOCEntry
 
+from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
+
 class TestMarkdownProcessor(TestCase):
     """Test normal functionality of the MarkdownProcessor class."""
     
@@ -29,6 +31,7 @@ class TestMarkdownProcessor(TestCase):
         self.source_path = '/test/source'
         self.content_dir_path = '/test/app'
         self.template_dir = '/test/templates'
+        self.reporter = MarkdownReporter(StringIO())
         
         # Create MarkdownProcessor with mocked dependencies
         with patch('django_spellbook.management.commands.spellbook_md_p.processor.MarkdownFileProcessor'), \
@@ -38,7 +41,8 @@ class TestMarkdownProcessor(TestCase):
                 self.content_app,
                 self.source_path,
                 self.content_dir_path,
-                self.template_dir
+                self.template_dir,
+                self.reporter
             )
             
         # Set up mocks for the sub-processors
@@ -56,7 +60,8 @@ class TestMarkdownProcessor(TestCase):
                 'test_app',
                 '/test/source',
                 '/test/app',
-                '/test/templates'
+                '/test/templates',
+                self.reporter
             )
             self.assertEqual(processor.content_app, 'test_app')
             self.assertEqual(processor.source_path, Path('/test/source'))
@@ -71,7 +76,8 @@ class TestMarkdownProcessor(TestCase):
                 'test_app',
                 Path('/test/source'),
                 Path('/test/app'),
-                Path('/test/templates')
+                Path('/test/templates'),
+                self.reporter
             )
             self.assertEqual(processor.content_app, 'test_app')
             self.assertEqual(processor.source_path, Path('/test/source'))
@@ -205,6 +211,7 @@ class TestMarkdownProcessorExceptions(TestCase):
         self.source_path = '/test/source'
         self.content_dir_path = '/test/app'
         self.template_dir = '/test/templates'
+        self.reporter = MarkdownReporter(StringIO())
         
         # Create MarkdownProcessor with mocked dependencies
         with patch('django_spellbook.management.commands.spellbook_md_p.processor.MarkdownFileProcessor'), \
@@ -214,7 +221,8 @@ class TestMarkdownProcessorExceptions(TestCase):
                 self.content_app,
                 self.source_path,
                 self.content_dir_path,
-                self.template_dir
+                self.template_dir,
+                self.reporter
             )
             
         # Set up mocks for the sub-processors
