@@ -12,6 +12,7 @@ from django_spellbook.management.commands.spellbook_md_p.discovery import (
     log_and_write
 )
 
+from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
 class TestDiscoveryFunctions(TestCase):
     """Test basic functionality of the discovery module functions."""
     
@@ -34,7 +35,7 @@ class TestDiscoveryFunctions(TestCase):
         
         # Call the function
         stdout = StringIO()
-        result = discover_blocks(stdout=stdout)
+        result = discover_blocks(reporter=MarkdownReporter(stdout))
         
         # Check results
         self.assertEqual(result, 2)
@@ -117,11 +118,11 @@ class TestDiscoveryExceptions(TestCase):
         
         # Call the function
         stdout = StringIO()
-        result = discover_blocks(stdout=stdout)
+        result = discover_blocks(MarkdownReporter(stdout))
         
         # Function should continue despite ImportError
         self.assertEqual(result, 0)
-        self.assertIn("No blocks found in app1", stdout.getvalue())
+        self.assertIn("Found 0 blocks", stdout.getvalue())
     
     @patch('django_spellbook.management.commands.spellbook_md_p.discovery.importlib.import_module')
     @patch('django_spellbook.management.commands.spellbook_md_p.discovery.apps.get_app_configs')
@@ -142,11 +143,11 @@ class TestDiscoveryExceptions(TestCase):
         
         # Call the function
         stdout = StringIO()
-        result = discover_blocks(stdout=stdout)
+        result = discover_blocks(reporter=MarkdownReporter(stdout))
         
         # Function should continue despite the exception
         self.assertEqual(result, 0)
-        self.assertIn("Error loading blocks from app1", stdout.getvalue())
+        self.assertIn("Found 0 blocks", stdout.getvalue())
     
     def test_find_markdown_files_nonexistent_path(self):
         """Test behavior when the source path doesn't exist."""

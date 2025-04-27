@@ -5,6 +5,9 @@ from django.template.loader import render_to_string
 from django_spellbook.blocks.base import BasicSpellBlock
 from django_spellbook.markdown.extensions.django_like import DjangoLikeTagExtension
 
+from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
+from io import StringIO
+
 
 class TestBasicSpellBlock(TestCase):
     def setUp(self):
@@ -25,14 +28,14 @@ class TestBasicSpellBlock(TestCase):
     def test_initialization(self):
         """Test block initialization with various parameters."""
         # Test with content and kwargs
-        block = self.BlockClass(self.test_content, **self.test_kwargs)
+        block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content, **self.test_kwargs)
         self.assertEqual(block.content, self.test_content)
         self.assertEqual(block.kwargs, self.test_kwargs)
         self.assertEqual(block.name, 'test_block')
         self.assertEqual(block.template, 'test_template.html')
 
         # Test initialization with no content
-        block = self.BlockClass(**self.test_kwargs)
+        block = self.BlockClass(MarkdownReporter(StringIO()), **self.test_kwargs)
         self.assertIsNone(block.content)
 
         # Test initialization with no kwargs
@@ -54,7 +57,7 @@ class TestBasicSpellBlock(TestCase):
     def test_process_content(self, mock_markdown):
         """Test markdown content processing."""
         mock_markdown.return_value = '<h1>Test Header</h1>\n<p>Test content</p>'
-        block = self.BlockClass(self.test_content)
+        block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content)
         processed_content = block.process_content()
         
         # Get the actual call arguments
@@ -89,7 +92,7 @@ class TestBasicSpellBlock(TestCase):
         """Test template rendering with context."""
         expected_output = '<div>Rendered content</div>'
 
-        block = self.BlockClass(self.test_content, **self.test_kwargs)
+        block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content, **self.test_kwargs)
 
         # Create a mock for process_content
         with patch.object(block, 'process_content', return_value='<p>Processed content</p>') as mock_process:
@@ -146,7 +149,7 @@ class TestBasicSpellBlock(TestCase):
     @patch('markdown.markdown')
     def test_markdown_extensions(self, mock_markdown):
         """Test that markdown extensions are properly configured."""
-        block = self.BlockClass(self.test_content)
+        block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content)
         block.process_content()
 
         # Verify all required extensions are included

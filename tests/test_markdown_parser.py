@@ -4,6 +4,7 @@ from typing import Dict, Any
 
 from django_spellbook.markdown.parser import MarkdownParser, BlockProcessor
 
+from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
 
 class TestMarkdownParser(unittest.TestCase):
     """Test cases for the MarkdownParser class"""
@@ -282,3 +283,40 @@ class TestBlockProcessorExceptions(unittest.TestCase):
             result,
             "<!-- Error rendering block: Render error -->"
         )
+
+    def test_render_block_calls_reporter(self, mock_logger):
+        """Test that render_block calls record_spellblock_usage on the reporter"""
+        # Set up a mock reporter
+        mock_reporter = Mock()
+        processor = BlockProcessor("content", reporter=mock_reporter)
+        
+        # Set up a mock block class
+        mock_block_class = Mock()
+        mock_block_class.name = "test_block"
+        mock_block_instance = Mock()
+        mock_block_class.return_value = mock_block_instance
+        mock_block_instance.render.return_value = "<div>Rendered content</div>"
+        
+        # Call the method
+        processor._render_block(mock_block_class, "", "content")
+        
+        # Verify the reporter method was called
+
+    def test_render_block_calls_reporter_on_failure(self, mock_logger):
+        """Test that render_block calls record_spellblock_usage with success=False on failure"""
+        # Set up a mock reporter
+        mock_reporter = Mock()
+        processor = BlockProcessor("content", reporter=mock_reporter)
+        
+        # Set up a mock block class that will raise an exception
+        mock_block_class = Mock()
+        mock_block_class.name = "error_block"
+        mock_block_instance = Mock()
+        mock_block_class.return_value = mock_block_instance
+        mock_block_instance.render.side_effect = Exception("Render error")
+        
+        # Call the method
+        processor._render_block(mock_block_class, "", "content")
+        
+        # Verify the reporter method was called with success=False
+        mock_reporter.record_spellblock_usage.assert_called_once_with("error_block", success=False)

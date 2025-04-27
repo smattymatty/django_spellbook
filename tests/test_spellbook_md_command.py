@@ -28,7 +28,7 @@ class TestSpellbookMDCommand(TestCase):
         self.command.handle()
         
         # Verify blocks were discovered
-        mock_discover.assert_called_once_with(self.command.stdout)
+        mock_discover.assert_called_once_with(self.command.reporter)
         
         # Verify settings were validated
         mock_validate.assert_called_once()
@@ -158,6 +158,7 @@ class TestSpellbookMDCommand(TestCase):
             source_path='/test/path',
             content_dir_path='/content/dir/path',
             template_dir='/template/dir',
+            reporter=self.command.reporter,
             url_prefix='test_prefix',
             base_template=None
         )
@@ -482,6 +483,7 @@ class TestSpellbookMDExceptions(TestCase):
             source_path='/test/path',
             content_dir_path='/content/path',
             template_dir='/template/path',
+            reporter=self.command.reporter,
             url_prefix='test_prefix',
             base_template=None
         )
