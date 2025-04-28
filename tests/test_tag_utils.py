@@ -243,7 +243,7 @@ class TestTagUtils(TestCase):
             with self.assertLogs(level='WARNING') as logs:
                 result = get_installed_apps()
                 self.assertEqual(result, [])
-                self.assertTrue(any("SPELLBOOK_MD_APP is nffot set" in log for log in logs.output))
+                self.assertTrue(any("SPELLBOOK_MD_APP is not set" in log for log in logs.output))
         
         # Test case 4: SPELLBOOK_MD_APP setting doesn't exist
         # First save original SPELLBOOK_MD_APP if it exists

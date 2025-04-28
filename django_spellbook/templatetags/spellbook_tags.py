@@ -52,8 +52,11 @@ def show_metadata(context, display_type=None):
     if display_type not in ['for_user', 'for_dev']:
         return f"Error: show_metadata tag requires 'for_user' or 'for_dev', got '{display_type}'"
     
-    # Get metadata from context
-    metadata = context.get('metadata', {})
+    if context:
+        # Get metadata from context
+        metadata = context.get('metadata', {})
+    else:
+        metadata = {}
     
     # Get app index from context
     app_index = get_current_app_index(context)
@@ -74,6 +77,8 @@ def show_metadata(context, display_type=None):
         return render_to_string(template, template_context)
     except TemplateDoesNotExist:
         return f"Error: Metadata template '{template}' not found"
+    except Exception as e:
+        return f"Error: Failed to render metadata template '{template}': {str(e)}"
 
 
 @register.simple_tag
