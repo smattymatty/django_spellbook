@@ -19,6 +19,8 @@ def get_metadata_template(display_type: str, app_index: int = 0) -> str:
     Returns:
         str: Template path
     """
+    # if the app_index is out of bounds, use the default template
+    
     if display_type not in ['for_user', 'for_dev']:
         raise ValueError(f"Invalid display_type: {display_type}. Must be 'for_user' or 'for_dev'")
     
@@ -35,6 +37,7 @@ def get_metadata_template(display_type: str, app_index: int = 0) -> str:
     # If setting is not provided, use defaults
     if metadata_base_setting is None:
         return default_templates[display_type]
+    
     
     # If setting is a tuple, it applies to all apps
     if isinstance(metadata_base_setting, tuple) and len(metadata_base_setting) == 2:
@@ -91,7 +94,21 @@ def get_dev_metadata_template(app_index: int = 0) -> str:
     """
     return get_metadata_template('for_dev', app_index)
 
-def get_current_app_index(context) -> int:
+def get_installed_apps():
+    """Get the list of installed apps from settings."""
+    from django.conf import settings
+    try:
+        result = getattr(settings, 'SPELLBOOK_MD_APP', None)
+        if result is None:
+            logger.warning("SPELLBOOK_MD_APP is not set in settings. Using default template.")
+            return []
+        return result
+    except Exception as e:
+        logger.error(f"Error getting SPELLBOOK_MD_APP from settings: {str(e)}")
+        return []
+
+
+def get_current_app_index(context):
     """
     Determine the current app index from the context.
     
@@ -101,7 +118,30 @@ def get_current_app_index(context) -> int:
     Returns:
         int: App index (defaults to 0 if not determinable)
     """
-    # Try to get app index from context
-    # This assumes the context might have some app identification
-    # Implement based on how app information is stored in context
-    return getattr(context, 'app_index', 0)
+    if context is None:
+        return 0
+    # Try to get namespace from metadata
+    metadata = context.get('metadata', {})
+    # if metadata is not a dict, return 0
+    if not isinstance(metadata, dict):
+        return 0
+    namespace = metadata.get('namespace')
+    
+    if not namespace:
+        return 0
+    
+    # Get installed apps setting
+    installed_apps = get_installed_apps()
+    
+    # If SPELLBOOK_MD_APP is a string (single app configuration)
+    if isinstance(installed_apps, str):
+        return 0  # For single app, always return 0
+    # If installed_apps is None, return 0
+    if installed_apps is None:
+        return 0
+    # For list of apps, find the index
+    try:
+        return installed_apps.index(namespace)
+    except ValueError:
+        # If namespace is not in installed apps, return 0
+        return 0
