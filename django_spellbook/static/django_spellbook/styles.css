@@ -286,3 +286,118 @@
     width: 100%;
   }
 }
+
+/* Metadata Component */
+.sb-metadata {
+  position: relative;
+  margin-bottom: 1.5rem;
+  transition: all 0.2s ease-in-out;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sb-metadata:hover {
+  box-shadow: 0 0.25rem 0.5rem color-mix(in srgb, black 7.5%, transparent);
+}
+
+.sb-metadata-user {
+  border-color: color-mix(in srgb, var(--secondary-color) 25%, transparent);
+  background-color: color-mix(in srgb, var(--secondary-color) 5%, white);
+}
+
+.sb-metadata-dev {
+  border-color: color-mix(in srgb, var(--info-color) 25%, transparent);
+  background-color: color-mix(in srgb, var(--info-color) 5%, white);
+}
+
+.sb-metadata-title {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.sb-metadata-grid {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.sb-metadata-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sb-metadata-label {
+  font-weight: 600;
+  color: color-mix(in srgb, var(--secondary-color) 70%, black);
+  white-space: nowrap;
+}
+
+.sb-metadata-value {
+  word-break: break-word;
+}
+
+.sb-metadata-code {
+  font-family: monospace;
+  background-color: color-mix(in srgb, black 5%, transparent);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  word-break: break-all;
+}
+
+.sb-metadata-tags {
+  margin-top: 0.5rem;
+}
+
+.sb-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 9999px;
+  background-color: color-mix(in srgb, var(--primary-color) 10%, white);
+  color: color-mix(in srgb, var(--primary-color) 70%, black);
+  margin-right: 0.25rem;
+  margin-bottom: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.sb-tag:hover {
+  background-color: color-mix(in srgb, var(--primary-color) 15%, white);
+}
+
+.sb-metadata-navigation {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--secondary-color) 15%, transparent);
+  display: flex;
+  justify-content: space-between;
+}
+
+.sb-metadata-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.sb-metadata-nav-link:hover {
+  color: color-mix(in srgb, var(--primary-color) 70%, black);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .sb-metadata-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .sb-metadata-code {
+    width: 100%;
+    overflow-x: auto;
+  }
+}

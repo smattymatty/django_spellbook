@@ -39,7 +39,7 @@ class TestBlockProcessor(unittest.TestCase):
         with patch('django_spellbook.blocks.SpellBlockRegistry.get_block',
                    return_value=self.mock_block_class):
             content = "{~ test ~}content{~~}"
-            processor = BlockProcessor(content)
+            processor = BlockProcessor(content, MarkdownReporter(StringIO()))
             result = processor._process_spell_blocks(content)
 
             self.assertEqual(result, "<div>Rendered content</div>")
@@ -65,7 +65,7 @@ class TestBlockProcessor(unittest.TestCase):
         with patch('django_spellbook.blocks.SpellBlockRegistry.get_block',
                    return_value=None):
             content = "{~ nonexistent ~}content{~~}"
-            processor = BlockProcessor(content)
+            processor = BlockProcessor(content, MarkdownReporter(StringIO()))
             result = processor.process()
             self.assertIn("<!-- Block 'nonexistent' not found -->", result)
 
@@ -86,7 +86,7 @@ class TestBlockProcessor(unittest.TestCase):
         with patch('django_spellbook.blocks.SpellBlockRegistry.get_block',
                    return_value=self.mock_block_class):
             content = "{~ test ~}content{~~}"
-            processor = BlockProcessor(content)
+            processor = BlockProcessor(content, MarkdownReporter(StringIO()))
             result = processor._process_spell_blocks(content)
             self.assertIn(
                 "<!-- Error rendering block: Render error -->", result)

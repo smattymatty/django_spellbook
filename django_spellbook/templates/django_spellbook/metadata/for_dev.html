@@ -1,0 +1,40 @@
+<div class="sb-metadata sb-metadata-dev sb-rounded sb-border sb-border-info-25 sb-p-3 sb-my-4 sb-bg-info-25 sb-w-full">
+  <h3 class="sb-metadata-title sb-text-lg sb-mb-2 sb-font-bold sb-info">Developer Metadata</h3>
+  
+  <div class="sb-metadata-grid sb-grid sb-grid-cols-1 sb-gap-2">
+    {% if metadata.file_path %}
+    <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">File Path:</span>
+      <code class="sb-metadata-code sb-text-sm sb-bg-black-25 sb-px-1 sb-py-0.5 sb-rounded sb-font-mono">{{ metadata.file_path }}</code>
+    </div>
+    {% endif %}
+    
+    {% if metadata.rendered_at %}
+    <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">Rendered At:</span>
+      <span class="sb-metadata-value sb-text-sm">{{ metadata.rendered_at }}</span>
+    </div>
+    {% endif %}
+    
+    {% if metadata.template_path %}
+    <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">Template Path:</span>
+      <code class="sb-metadata-code sb-text-sm sb-bg-black-25 sb-px-1 sb-py-0.5 sb-rounded sb-font-mono">{{ metadata.template_path }}</code>
+    </div>
+    {% endif %}
+    
+    {% if metadata.url_path %}
+    <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">URL Path:</span>
+      <code class="sb-metadata-code sb-text-sm sb-bg-black-25 sb-px-1 sb-py-0.5 sb-rounded sb-font-mono">{{ metadata.url_path }}</code>
+    </div>
+    {% endif %}
+    
+    {% if metadata.app_name %}
+    <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">App Name:</span>
+      <span class="sb-metadata-value sb-text-sm">{{ metadata.app_name }}</span>
+    </div>
+    {% endif %}
+  </div>
+</div>

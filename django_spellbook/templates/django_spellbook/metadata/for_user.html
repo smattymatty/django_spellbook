@@ -1,0 +1,59 @@
+<div class="sb-metadata sb-metadata-user sb-rounded sb-border sb-p-3 sb-my-4 sb-bg-secondary-25 sb-w-full">
+  {% if metadata.title %}<h3 class="sb-metadata-title sb-text-lg sb-mb-2 sb-font-bold sb-primary">{{ metadata.title }}</h3>{% endif %}
+  
+  <div class="sb-metadata-grid sb-grid sb-grid-cols-1 sb-md:grid-cols-2 sb-gap-2">
+    {% if metadata.created_at %}
+    <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">Created:</span>
+      <span class="sb-metadata-value sb-text-sm">{{ metadata.created_at }}</span>
+    </div>
+    {% endif %}
+    
+    {% if metadata.updated_at %}
+    <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">Updated:</span>
+      <span class="sb-metadata-value sb-text-sm">{{ metadata.updated_at }}</span>
+    </div>
+    {% endif %}
+    
+    {% if metadata.tags %}
+    <div class="sb-metadata-tags sb-col-span-full sb-mt-2">
+      <div class="sb-flex sb-items-center sb-gap-1 sb-flex-wrap">
+        <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">Tags:</span>
+        {% for tag in metadata.tags %}
+          <span class="sb-tag sb-bg-primary-25 sb-text-primary sb-text-xs sb-px-2 sb-py-1 sb-rounded-full">{{ tag }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    
+    {% if metadata.custom_meta %}
+    <div class="sb-metadata-custom sb-col-span-full sb-mt-2">
+      {% for key, value in metadata.custom_meta.items %}
+        <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1 sb-mb-1">
+          <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">{{ key|title }}:</span>
+          <span class="sb-metadata-value sb-text-sm">{{ value }}</span>
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  
+  {% if metadata.prev_page or metadata.next_page %}
+  <div class="sb-metadata-navigation sb-flex sb-justify-between sb-mt-3 sb-pt-2 sb-border-t sb-border-secondary-25">
+    {% if metadata.prev_page %}
+    <a href="{{ metadata.prev_page }}" class="sb-metadata-nav-link sb-text-sm sb-flex sb-items-center sb-gap-1 sb-primary sb-hover:primary-75">
+      <span>←</span> Previous
+    </a>
+    {% else %}
+    <span></span>
+    {% endif %}
+    
+    {% if metadata.next_page %}
+    <a href="{{ metadata.next_page }}" class="sb-metadata-nav-link sb-text-sm sb-flex sb-items-center sb-gap-1 sb-primary sb-hover:primary-75">
+      Next <span>→</span>
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>

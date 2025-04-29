@@ -11,6 +11,10 @@ from django_spellbook.management.commands.processing.file_processor import (
     SpellbookContext,
 )
 
+from io import StringIO
+
+from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
+
 
 def setup_django_settings():
     from django.conf import settings
@@ -41,7 +45,8 @@ setup_django_settings()
 
 class TestMarkdownFileProcessor(unittest.TestCase):
     def setUp(self):
-        self.processor = MarkdownFileProcessor()
+        self.reporter = MarkdownReporter(StringIO())
+        self.processor = MarkdownFileProcessor(self.reporter)
 
     @override_settings(SPELLBOOK_MD_PATH='/fake/path')
     def test_validate_and_get_path(self):

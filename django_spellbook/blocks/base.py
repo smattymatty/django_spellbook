@@ -42,7 +42,7 @@ class BasicSpellBlock:
 
         from django_spellbook.markdown.parser import MarkdownParser
 
-        parser = MarkdownParser(self.content)
+        parser = MarkdownParser(self.content, self.reporter)
         return parser.get_html()
 
     def render(self) -> str:

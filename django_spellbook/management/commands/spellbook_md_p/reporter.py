@@ -113,9 +113,7 @@ class MarkdownReporter:
         if self.spellblocks:
             message += "\n\nSpellblock Usage:\n"
             for block in self.spellblocks:
-                message += f"- {block.name}: Used in {block.successful_files} files"
-                if block.failed_files > 0:
-                    message += f" (Failed in {block.failed_files} files)"
+                message += f"- {block.name} -"
                 message += "\n"
         else:
             message += "\nNo spellblocks were discovered during processing.\n"
@@ -170,6 +168,8 @@ class MarkdownReporter:
             report_data["spellblocks"] = [
                 {
                     "name": block.name,
+                    'total_uses': block.total_uses,
+                    'failed_uses': block.failed_uses
                 }
                 for block in self.spellblocks
             ]
@@ -233,9 +233,9 @@ class MarkdownReporter:
         for block in self.spellblocks:
             if block.name == block_name:
                 if success:
-                    block.successful_files += 1
+                    block.total_uses += 1
                 else:
-                    block.failed_files += 1
+                    block.failed_uses += 1
                 return
         
         # If we get here, the block wasn't found, so add it

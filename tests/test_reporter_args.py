@@ -286,9 +286,9 @@ class MarkdownReporterSpellblockTestCase(TestCase):
             report_output='test.json',
         )
         self.reporter.spellblocks = [
-            SpellblockStatistics('block1', 10, 5, 5),
-            SpellblockStatistics('block2', 20, 15, 5),
-            SpellblockStatistics('block3', 30, 25, 5),
+            SpellblockStatistics('block1', 10, 0),
+            SpellblockStatistics('block2', 20, 0),
+            SpellblockStatistics('block3', 30, 0),
             
         ]
     
@@ -304,20 +304,19 @@ class MarkdownReporterSpellblockTestCase(TestCase):
         # Verify the list was extended with a new block
         self.assertEqual(len(self.reporter.spellblocks), 4)
         self.assertEqual(self.reporter.spellblocks[3].name, 'block4')
-        self.assertEqual(self.reporter.spellblocks[3].total_files, 0)
-        self.assertEqual(self.reporter.spellblocks[3].successful_files, 0)
-        self.assertEqual(self.reporter.spellblocks[3].failed_files, 0)
+        self.assertEqual(self.reporter.spellblocks[3].total_uses, 0)
+
         
         # Test with a block that's already in the list
         self.reporter.record_spellblock_usage('block1')
         
         # Verify the existing block was updated
-        self.assertEqual(self.reporter.spellblocks[0].successful_files, 6)
+        self.assertEqual(self.reporter.spellblocks[0].total_uses, 11)
         
         self.reporter.record_spellblock_usage('block2', success=False)
         
         # Verify the existing block was updated
-        self.assertEqual(self.reporter.spellblocks[1].failed_files, 6)
+        self.assertEqual(self.reporter.spellblocks[1].failed_uses, 1)
         
     def test_generate_text_report_with_failing_spellblocks(self):
         """Test that the text report includes spellblock usage information."""
@@ -335,7 +334,7 @@ class MarkdownReporterSpellblockTestCase(TestCase):
         )
         
         # Verify the returned message includes the spellblock usage
-        self.assertIn("block3: Used in 25 files (Failed in 6 files)", message)
+        self.assertIn("block3", message)
         
     def test_generate_json_report_with_failing_spellblocks(self):
         """Test that the JSON report includes spellblock usage information."""
@@ -357,5 +356,5 @@ class MarkdownReporterSpellblockTestCase(TestCase):
         #self.assertIn({"name": "block3", "total_files": 30, "successful_files": 25, "failed_files": 6}, json_dict["spellblocks"])
         #self.assertIn({"name": "block4", "total_files": 0, "successful_files": 0, "failed_files": 0}, json_dict["spellblocks"])
 
-        self.assertIn({"name": "block3"}, json_dict["spellblocks"])
-        self.assertIn({"name": "block4"}, json_dict["spellblocks"])
+        self.assertIn({'name': 'block3', 'total_uses': 30, 'failed_uses': 1}, json_dict["spellblocks"])
+        self.assertIn({'name': 'block4', 'total_uses': 0, 'failed_uses': 0}, json_dict["spellblocks"])

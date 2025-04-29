@@ -24,9 +24,8 @@ class SpellblockStatistics:
     """Statistics for a single spellblock."""
     name: str
     # TODO: Add more stats like template, context, per-file usage, etc.
-    total_files: int
-    successful_files: int
-    failed_files: int
+    total_uses: int
+    failed_uses: int
     
     
 
@@ -134,4 +133,4 @@ def build_new_spellblock_statistics(name: str) -> SpellblockStatistics:
         Returns:
             SpellblockStatistics object
         """
-        return SpellblockStatistics(name, 0, 0, 0)
+        return SpellblockStatistics(name, 0, 0)
