@@ -1,7 +1,10 @@
+# django_spellbook/markdown/context.py
 from dataclasses import dataclass, field
 from datetime import datetime
 import logging
 from typing import Dict, List, Optional, Any
+
+from .content_metrics import get_word_count, get_reading_time_minutes
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +24,11 @@ class SpellbookContext:
     toc: Dict[str, Dict] = field(default_factory=dict)
     next_page: Optional[str] = None
     prev_page: Optional[str] = None
+    
+    # Content Metrics (calculated dynamically)
+    word_count: int = 0
+    reading_time_minutes: int = 0
+
     
     def get_safe_attr(self, attr_name: str, default: Any = None) -> Any:
         """Safely get attribute with a default fallback."""
@@ -54,7 +62,10 @@ class SpellbookContext:
     def prepare_metadata(self, content_app: str, relative_url: str) -> Dict[str, Any]:
         """Prepare metadata dictionary with content app and URL info."""
         from django_spellbook.management.commands.processing.generator_utils import get_clean_url
-        
+        if self.raw_content:
+            self.calculate_metrics()
+        else:
+            raise ValueError("Raw content is empty")
         path_parts = relative_url.split('/')
         url_name = relative_url.replace('/', '_')
         
@@ -69,7 +80,9 @@ class SpellbookContext:
             'custom_meta': self.get_safe_attr('custom_meta', {}),
             'namespace': content_app,
             'url_name': url_name,
-            'namespaced_url': f"{content_app}:{url_name}"
+            'namespaced_url': f"{content_app}:{url_name}",
+            'word_count': self.word_count,
+            'reading_time_minutes': self.reading_time_minutes
         }
         
         return metadata
@@ -83,3 +96,10 @@ class SpellbookContext:
             if not hasattr(self, field) or getattr(self, field) is None:
                 errors.append(f"Missing required field: {field}")
         return errors
+    
+    def calculate_metrics(self):
+        """Calculate content metrics"""
+        self.word_count = get_word_count(self.raw_content)
+        self.reading_time_minutes = get_reading_time_minutes(self.raw_content)
+        
+        

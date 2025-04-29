@@ -38,6 +38,20 @@
     </div>
     {% endif %}
   </div>
+
+  {% if metadata.word_count %}
+  <div class="sb-metadata-item">
+    <span class="sb-metadata-label">Word count:</span>
+    <span class="sb-metadata-value">{{ metadata.word_count }}</span>
+  </div>
+  {% endif %}
+
+  {% if metadata.reading_time_minutes %}
+  <div class="sb-metadata-item">
+    <span class="sb-metadata-label">Reading time:</span>
+    <span class="sb-metadata-value">{{ metadata.reading_time_minutes|floatformat:0 }} min read</span>
+  </div>
+  {% endif %}
   
   {% if metadata.prev_page or metadata.next_page %}
   <div class="sb-metadata-navigation sb-flex sb-justify-between sb-mt-3 sb-pt-2 sb-border-t sb-border-secondary-25">
