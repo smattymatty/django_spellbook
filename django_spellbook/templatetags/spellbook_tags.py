@@ -38,7 +38,7 @@ def sidebar_toc(context) -> Dict:
 
 
 @register.simple_tag(takes_context=True)
-def show_metadata(context, display_type=None):
+def show_metadata(context, display_type="for_user"):
     """
     Display metadata in a formatted way.
     
