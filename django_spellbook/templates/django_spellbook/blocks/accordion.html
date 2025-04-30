@@ -1,0 +1,19 @@
+<div class="sb-accordion {% if kwargs.class %}{{ kwargs.class }}{% endif %}">
+    <button class="sb-accordion-toggle" aria-expanded="{% if open %}true{% else %}false{% endif %}" onclick="this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');">
+        <span class="sb-accordion-title">{{ title }}</span>
+        <span class="sb-accordion-icon">
+            <svg class="sb-icon-plus" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <svg class="sb-icon-minus" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+        </span>
+    </button>
+    <div class="sb-accordion-content" aria-hidden="{% if open %}false{% else %}true{% endif %}">
+        <div class="sb-accordion-body">
+            {{ content|safe }}
+        </div>
+    </div>
+</div>

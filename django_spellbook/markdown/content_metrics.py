@@ -7,7 +7,8 @@ def get_word_count(content: str) -> int:
 
 def get_reading_time_minutes(content: str) -> int:
     """Get reading time in minutes of content"""
-    result = len(content.split()) / 215
+    result: int = len(content.split()) / 215
     if result < 1:
         return 1
-    return result
+    return round(result)
+

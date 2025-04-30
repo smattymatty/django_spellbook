@@ -74,3 +74,16 @@ class PracticeBlock(BasicSpellBlock):
         # Additional styling classes
         context['class'] = self.kwargs.get('class', '')
         return context
+    
+    
+@SpellBlockRegistry.register()
+class AccordionBlock(BasicSpellBlock):
+    name = 'accordion'
+    template = 'django_spellbook/blocks/accordion.html'
+
+    def get_context(self):
+        context = super().get_context()
+        # Add your custom context here via self.kwargs.get('name', '')
+        context['title'] = self.kwargs.get('title', '')
+        context['open'] = self.kwargs.get('open', False)
+        return context
