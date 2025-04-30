@@ -4,15 +4,29 @@
   <div class="sb-metadata-grid sb-grid sb-grid-cols-1 sb-md:grid-cols-2 sb-gap-2">
     {% if metadata.created_at %}
     <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
-      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">Created:</span>
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">Updated:</span>
       <span class="sb-metadata-value sb-text-sm">{{ metadata.created_at }}</span>
     </div>
     {% endif %}
     
-    {% if metadata.updated_at %}
+    <!-- {% if metadata.updated_at and metadata.updated_at != metadata.created_at %}
     <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
       <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">Updated:</span>
       <span class="sb-metadata-value sb-text-sm">{{ metadata.updated_at }}</span>
+    </div>
+    {% endif %} -->
+
+    {% if metadata.word_count %}
+    <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">Word count:</span>
+      <span class="sb-metadata-value sb-text-sm">{{ metadata.word_count }}</span>
+    </div>
+    {% endif %}
+
+    {% if metadata.reading_time_minutes %}
+    <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">Reading time:</span>
+      <span class="sb-metadata-value sb-text-sm">{{ metadata.reading_time_minutes|floatformat:0 }} min read</span>
     </div>
     {% endif %}
     
@@ -38,20 +52,6 @@
     </div>
     {% endif %}
   </div>
-
-  {% if metadata.word_count %}
-  <div class="sb-metadata-item">
-    <span class="sb-metadata-label">Word count:</span>
-    <span class="sb-metadata-value">{{ metadata.word_count }}</span>
-  </div>
-  {% endif %}
-
-  {% if metadata.reading_time_minutes %}
-  <div class="sb-metadata-item">
-    <span class="sb-metadata-label">Reading time:</span>
-    <span class="sb-metadata-value">{{ metadata.reading_time_minutes|floatformat:0 }} min read</span>
-  </div>
-  {% endif %}
   
   {% if metadata.prev_page or metadata.next_page %}
   <div class="sb-metadata-navigation sb-flex sb-justify-between sb-mt-3 sb-pt-2 sb-border-t sb-border-secondary-25">

@@ -62,10 +62,7 @@ class SpellbookContext:
     def prepare_metadata(self, content_app: str, relative_url: str) -> Dict[str, Any]:
         """Prepare metadata dictionary with content app and URL info."""
         from django_spellbook.management.commands.processing.generator_utils import get_clean_url
-        if self.raw_content:
-            self.calculate_metrics()
-        else:
-            raise ValueError("Raw content is empty")
+        self._ensure_metadata_required_fields()
         path_parts = relative_url.split('/')
         url_name = relative_url.replace('/', '_')
         
@@ -86,6 +83,14 @@ class SpellbookContext:
         }
         
         return metadata
+    
+    def _ensure_metadata_required_fields(self):
+        '''Ensure required metadata fields are set.'''
+        if self.raw_content:
+            # word_count and reading_time_minutes are calculated dynamically
+            self.calculate_metrics()
+        else:
+            raise ValueError("Raw content is empty")
 
 
     def validate(self) -> List[str]:

@@ -70,3 +70,22 @@ class TestSpellBookErrors(TestCase):
         
         self.assertIn("Missing required field: title", errors[0])
         self.assertIn("Missing required field: updated_at", errors[1])
+        
+    def test_prepare_metadata_missing_raw_content(self):
+        """Test prepare_metadata method with missing raw_content."""
+        context = SpellbookContext(
+            title="Test Page",
+            created_at=datetime.datetime(2023, 1, 1),
+            updated_at=datetime.datetime(2023, 2, 1),
+            url_path="test/page",
+            raw_content=None,
+            is_public=True,
+            tags=["test", "example"],
+            custom_meta={"key": "value"}
+        )
+        
+        with self.assertRaises(ValueError) as cm:
+            context.prepare_metadata("test_app", "test/page")
+            
+        self.assertIn("Raw content is empty", str(cm.exception))
+        

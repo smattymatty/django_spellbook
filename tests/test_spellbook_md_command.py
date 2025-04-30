@@ -152,7 +152,7 @@ class TestSpellbookMDCommand(TestCase):
         # Execute
         self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix', None)
         
-        # Verify processor was initialized correctly
+        # Verify processor was initialized correctly!
         mock_processor_class.assert_called_once_with(
             content_app='test_app',
             source_path='/test/path',

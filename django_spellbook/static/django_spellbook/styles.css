@@ -401,3 +401,98 @@
     overflow-x: auto;
   }
 }
+
+/* Accordion Block */
+.sb-accordion {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 90%;
+  margin: auto;
+  margin-bottom: 1.5rem;
+  background-color: white;
+  border: 1px solid color-mix(in srgb, var(--neutral-color) 15%, transparent);
+  border-radius: 0.375rem;
+  transition: all 0.5s ease-in-out;
+  box-shadow: 0 0.125rem 0.25rem color-mix(in srgb, black 7.5%, transparent);
+  overflow: hidden;
+}
+
+.sb-accordion:hover {
+  box-shadow: 0 0.25rem 0.5rem color-mix(in srgb, black 10%, transparent);
+}
+
+.sb-accordion-toggle {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--neutral-color) 90%, black);
+  text-align: left;
+  background-color: color-mix(in srgb, var(--neutral-color) 5%, white);
+  border: none;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.sb-accordion-toggle:hover {
+  background-color: color-mix(in srgb, var(--neutral-color) 10%, white);
+}
+
+.sb-accordion-toggle[aria-expanded="true"] {
+  background-color: color-mix(in srgb, var(--neutral-color) 15%, white);
+  border-bottom: 1px solid color-mix(in srgb, var(--neutral-color) 15%, transparent);
+}
+
+.sb-accordion-title {
+  font-weight: 500;
+}
+
+.sb-accordion-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sb-accordion-icon .sb-icon-plus {
+  display: block;
+}
+
+.sb-accordion-icon .sb-icon-minus {
+  display: none;
+}
+
+.sb-accordion-toggle[aria-expanded="true"] .sb-icon-plus {
+  display: none;
+}
+
+.sb-accordion-toggle[aria-expanded="true"] .sb-icon-minus {
+  display: block;
+}
+
+.sb-accordion-content {
+  max-height: 0;
+  overflow: scroll;
+  transition: max-height 0.7s ease-in-out;
+}
+
+.sb-accordion-toggle[aria-expanded="true"] + .sb-accordion-content {
+  /* max-height: dynamically set based on content height */
+  max-height: 32rem;
+}
+
+@media (max-width: 768px) {
+  .sb-accordion-toggle[aria-expanded="true"] + .sb-accordion-content {
+    /* max-height: dynamically set based on content height */
+    max-height: 24rem;
+  }
+}
+
+.sb-accordion-body {
+  padding: 1rem;
+}
