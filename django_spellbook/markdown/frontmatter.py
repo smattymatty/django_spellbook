@@ -1,19 +1,31 @@
 # django_spellbook/markdown/frontmatter.py
 import yaml
-from datetime import datetime
+from datetime import datetime, date # Added 'date'
 from pathlib import Path
+from typing import Optional, List, Dict, Any # Added more types
 
 from django_spellbook.utils import remove_leading_dash, titlefy
-
+# Assuming SpellbookContext is now defined as described above
 from .context import SpellbookContext
 
+# --- Define potential keys for dates ---
+# Order matters: first found key will be used.
+PUBLISHED_KEYS = ['published', 'published_at', 'date', 'created', 'created_at']
+MODIFIED_KEYS = ['modified', 'modified_at', 'updated', 'updated_at']
+
+# --- Keys to exclude from custom_meta ---
+# Includes standard keys and the date aliases we might consume
+RESERVED_META_KEYS = ['title', 'is_public', 'tags'] + PUBLISHED_KEYS + MODIFIED_KEYS
+# Make the check case-insensitive later for robustness
+LOWERCASE_RESERVED_META_KEYS = [k.lower() for k in RESERVED_META_KEYS]
 
 class FrontMatterParser:
     def __init__(self, content: str, file_path: Path):
         self.content = content
         self.file_path = file_path
         self.raw_content = ""
-        self.metadata = {}
+        # Ensure metadata is always a dict initially
+        self.metadata: Dict[str, Any] = {}
         self._parse()
 
     def _parse(self):
@@ -22,54 +34,105 @@ class FrontMatterParser:
             parts = self.content.split('---', 2)
             if len(parts) >= 3:
                 try:
-                    # Use safe_load with explicit encoding handling
-                    yaml_content = parts[1].encode('utf-8').decode('utf-8')
-                    self.metadata = yaml.safe_load(yaml_content) or {}
-                    if not isinstance(self.metadata, dict):
-                        self.metadata = {}
+                    yaml_content = parts[1] # No need for encode/decode dance if source is utf-8
+                    loaded_meta = yaml.safe_load(yaml_content)
+                    # Ensure metadata is always a dict, even if YAML is null/empty
+                    self.metadata = loaded_meta if isinstance(loaded_meta, dict) else {}
                     self.raw_content = parts[2].strip()
-                except (yaml.YAMLError, AttributeError, UnicodeError):
+                except (yaml.YAMLError, AttributeError) as e:
+                    print(f"Warning: Could not parse YAML frontmatter in {self.file_path}: {e}. Treating as no frontmatter.")
+                    # Fallback: keep metadata empty, use entire content
                     self.metadata = {}
                     self.raw_content = self.content
-            else:
+            else: # Less than 3 parts means invalid frontmatter format
+                print(f"Warning: Invalid frontmatter format (not enough '---') in {self.file_path}. Treating as no frontmatter.")
                 self.metadata = {}
                 self.raw_content = self.content
-        else:
+        else: # No starting '---'
             self.metadata = {}
             self.raw_content = self.content
 
+    def _parse_date_from_metadata(self, keys_to_check: List[str]) -> Optional[datetime]:
+        """
+        Attempts to find and parse a date from metadata using a list of keys.
+        Returns the first valid datetime found, or None.
+        """
+        for key in keys_to_check:
+            value = self.metadata.get(key)
+            if value:
+                # Handle datetime objects directly (parsed by PyYAML)
+                if isinstance(value, datetime):
+                    return value
+                # Handle date objects (parsed by PyYAML), convert to datetime
+                if isinstance(value, date):
+                    return datetime.combine(value, datetime.min.time())
+                # Attempt to parse from string (e.g., ISO format YYYY-MM-DD)
+                if isinstance(value, str):
+                    try:
+                        # Be relatively strict first with ISO format
+                        return datetime.fromisoformat(value.strip())
+                    except ValueError:
+                        # Try a common format as fallback
+                        try:
+                            return datetime.strptime(value.strip(), '%Y-%m-%d')
+                        except ValueError:
+                            print(f"Warning: Could not parse date string '{value}' for key '{key}' in {self.file_path}. Supported formats: ISO (YYYY-MM-DDTHH:MM:SS), YYYY-MM-DD.")
+                            continue # Try next key
+
+                # Log if value is present but not a recognizable type
+                print(f"Warning: Unexpected type '{type(value)}' for date key '{key}' in {self.file_path}. Skipping.")
+
+
+        return None # Return None if no valid date found across all keys
+
+
     def get_context(self, url_path: str) -> SpellbookContext:
         split_path = url_path.split('/')
-        clean_path = []
-        for i, part in enumerate(split_path):
-            clean_path.append(remove_leading_dash(part))
-
+        clean_path = [remove_leading_dash(part) for part in split_path]
         clean_url = "/".join(clean_path)
-        stats = self.file_path.stat()
+
+        # --- Get dates from frontmatter ---
+        published_date = self._parse_date_from_metadata(PUBLISHED_KEYS)
+        modified_date = self._parse_date_from_metadata(MODIFIED_KEYS)
+
+        # --- Populate custom_meta ---
+        # Exclude standard keys and any keys successfully used for dates
+        custom_meta_data = {
+            k: v for k, v in self.metadata.items()
+            # Check against lowercase reserved keys for case-insensitivity
+            if k.lower() not in LOWERCASE_RESERVED_META_KEYS
+        }
+
+        # --- Create context ---
         return SpellbookContext(
             title=titlefy(remove_leading_dash(
-                self.metadata.get('title', self.file_path.stem))
+                self.metadata.get('title', self.file_path.stem)) # Keep fallback title
             ),
-            created_at=datetime.fromtimestamp(stats.st_ctime),
-            updated_at=datetime.fromtimestamp(stats.st_mtime),
+            # Use the parsed dates, defaults to None if not found/parsed
+            published=published_date,
+            modified=modified_date,
             url_path=clean_url,
             raw_content=self.raw_content,
+            # Use multi_bool for flexibility in is_public
             is_public=multi_bool(self.metadata.get('is_public', True)),
-            tags=self.metadata.get('tags', []),
-            custom_meta={k: v for k, v in self.metadata.items()
-                         if k not in ['title', 'is_public', 'tags']},  # Fixed 'public' to 'is_public'
-            toc={},  # This will be filled by the command
-            next_page=None,
-            prev_page=None
+            # Ensure tags is always a list
+            tags=self.metadata.get('tags', []) if isinstance(self.metadata.get('tags'), list) else [],
+            custom_meta=custom_meta_data,
+            toc={},  # This will be filled by the command later
+            next_page=None, # Filled later
+            prev_page=None  # Filled later
         )
 
-
+# multi_bool function remains the same
 def multi_bool(value):
     """Allow string false or False or boolean False to be False
     or string true or True or boolean True to be True"""
     if isinstance(value, str):
-        if value.lower() in ['false', 'f', 'no', 'n', '0']:
+        # Make comparison case-insensitive and strip whitespace
+        val_lower = value.strip().lower()
+        if val_lower in ['false', 'f', 'no', 'n', '0']:
             return False
-        elif value.lower() in ['true', 't', 'yes', 'y', '1']:
+        elif val_lower in ['true', 't', 'yes', 'y', '1']:
             return True
+    # Fallback to standard Python boolean conversion for other types (int, bool)
     return bool(value)

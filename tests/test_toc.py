@@ -265,8 +265,8 @@ class TOCIntegrationTest(TestCase):
         # Create a mock context for processed files
         self.context = SpellbookContext(
             title='Test',
-            created_at=datetime.datetime(2024, 11, 10, 3, 29, 58, 8432),
-            updated_at=datetime.datetime(2024, 11, 10, 3, 29, 58, 8432),
+            published=datetime.datetime(2024, 11, 10, 3, 29, 58, 8432),
+            modified=datetime.datetime(2024, 11, 10, 3, 29, 58, 8432),
             url_path='test',
             raw_content='# Test\nThis is a test',
         )
