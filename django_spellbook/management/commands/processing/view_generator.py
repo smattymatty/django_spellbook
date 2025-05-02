@@ -162,8 +162,8 @@ def {view_name}(request):
             # Build comprehensive metadata including namespace information
             metadata = {
                 'title': self._safe_get_attr(context, 'title', path_parts[-1].replace('-', ' ').title()),
-                'created_at': self._safe_get_attr(context, 'created_at', None),
-                'updated_at': self._safe_get_attr(context, 'updated_at', None),
+                'published': self._safe_get_attr(context, 'published', None),
+                'modified': self._safe_get_attr(context, 'modified', None),
                 'url_path': get_clean_url(processed_file.relative_url),
                 'raw_content': self._safe_get_attr(context, 'raw_content', ''),
                 'is_public': self._safe_get_attr(context, 'is_public', True),

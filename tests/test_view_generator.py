@@ -98,8 +98,8 @@ class TestViewGeneratorRefactored(TestCase):
             
             def __init__(self):
                 self.title = "Fallback Title"
-                self.created_at = datetime.datetime(2023, 1, 1)
-                self.updated_at = datetime.datetime(2023, 2, 1)
+                self.published = datetime.datetime(2023, 1, 1)
+                self.modified = datetime.datetime(2023, 2, 1)
                 self.raw_content = "Fallback content"
                 self.is_public = True
                 self.tags = ["fallback", "test"]
@@ -145,8 +145,8 @@ class TestViewGeneratorRefactored(TestCase):
         # Create a sample SpellbookContext
         context = SpellbookContext(
             title="Test Page",
-            created_at=datetime.datetime(2023, 1, 1),
-            updated_at=datetime.datetime(2023, 2, 1),
+            published=datetime.datetime(2023, 1, 1),
+            modified=datetime.datetime(2023, 2, 1),
             url_path="test/page",
             raw_content="Test content",
             is_public=True,
@@ -158,8 +158,8 @@ class TestViewGeneratorRefactored(TestCase):
         
         # Verify other keys are converted
         self.assertIn('title', result)
-        self.assertIn('created_at', result)
-        self.assertIn('updated_at', result)
+        self.assertIn('published', result)
+        self.assertIn('modified', result)
         self.assertIn('url_path', result)
         self.assertIn('raw_content', result)
         self.assertIn('is_public', result)
@@ -240,8 +240,8 @@ class TestViewGeneratorRefactored(TestCase):
         # Create a sample context dict
         context_dict = {
             'title': 'Test Page',
-            'created_at': datetime.datetime(2023, 1, 1),
-            'updated_at': datetime.datetime(2023, 2, 1),
+            'published': datetime.datetime(2023, 1, 1),
+            'modified': datetime.datetime(2023, 2, 1),
             'url_path': 'test/page',
             'raw_content': 'Test content',
             'is_public': True,
@@ -257,8 +257,8 @@ class TestViewGeneratorRefactored(TestCase):
         
         # Verify other keys are converted
         self.assertIn('title', result)
-        self.assertIn('created_at', result)
-        self.assertIn('updated_at', result)
+        self.assertIn('published', result)
+        self.assertIn('modified', result)
         self.assertIn('url_path', result)
         self.assertIn('raw_content', result)
         self.assertIn('is_public', result)
@@ -272,8 +272,8 @@ class TestViewGeneratorEdgeCases(TestCase):
         self.view_generator = ViewGenerator("test_app")
         self.mock_context = SpellbookContext(
             title="Test Page",
-            created_at=datetime.datetime(2023, 1, 1),
-            updated_at=datetime.datetime(2023, 2, 1),
+            published=datetime.datetime(2023, 1, 1),
+            modified=datetime.datetime(2023, 2, 1),
             url_path="test/page",
             raw_content="Test content",
             is_public=True,

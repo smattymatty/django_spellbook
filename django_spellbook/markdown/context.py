@@ -12,12 +12,12 @@ logger = logging.getLogger(__name__)
 class SpellbookContext:
     # Required fields
     title: str
-    created_at: datetime
-    updated_at: datetime
     url_path: str
     raw_content: str
 
     # Optional fields
+    published: Optional[datetime] = None
+    modified: Optional[datetime] = None
     is_public: bool = True
     tags: List[str] = field(default_factory=list)
     custom_meta: Dict[str, any] = field(default_factory=dict)
@@ -68,8 +68,8 @@ class SpellbookContext:
         
         metadata = {
             'title': self.get_safe_attr('title', path_parts[-1].replace('-', ' ').title()),
-            'created_at': self.get_safe_attr('created_at', None),
-            'updated_at': self.get_safe_attr('updated_at', None),
+            'published': self.get_safe_attr('published', None),
+            'modified': self.get_safe_attr('modified', None),
             'url_path': get_clean_url(relative_url),
             'raw_content': self.get_safe_attr('raw_content', ''),
             'is_public': self.get_safe_attr('is_public', True),
@@ -96,7 +96,7 @@ class SpellbookContext:
     def validate(self) -> List[str]:
         """Validate required context attributes."""
         errors = []
-        required_fields = ['title', 'created_at', 'updated_at', 'url_path', 'raw_content']
+        required_fields = ['title', 'url_path', 'raw_content']
         for field in required_fields:
             if not hasattr(self, field) or getattr(self, field) is None:
                 errors.append(f"Missing required field: {field}")

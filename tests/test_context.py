@@ -14,8 +14,8 @@ class TestSpellbookContext(TestCase):
         """Test to_dict method."""
         context = SpellbookContext(
             title="Test Page",
-            created_at="datetime.datetime(2023, 1, 1)",
-            updated_at="datetime.datetime(2023, 2, 1)",
+            published="datetime.datetime(2023, 1, 1)",
+            modified="datetime.datetime(2023, 2, 1)",
             url_path="test/page",
             raw_content="Test content",
             is_public=True,
@@ -27,8 +27,8 @@ class TestSpellbookContext(TestCase):
         
         # Verify other keys are converted
         self.assertIn('title', result)
-        self.assertIn('created_at', result)
-        self.assertIn('updated_at', result)
+        self.assertIn('published', result)
+        self.assertIn('modified', result)
         self.assertIn('url_path', result)
         self.assertIn('raw_content', result)
         self.assertIn('is_public', result)
@@ -44,8 +44,8 @@ class TestSpellBookErrors(TestCase):
         """Test exception during individual key processing."""
         context = SpellbookContext(
             title="Test Page",
-            created_at=datetime.datetime(2023, 1, 1),
-            updated_at=datetime.datetime(2023, 2, 1),
+            published=datetime.datetime(2023, 1, 1),
+            modified=datetime.datetime(2023, 2, 1),
             url_path="test/page",
             raw_content="Arbitrary Error String, Very Specific for Testing Purposes",
         )
@@ -57,8 +57,6 @@ class TestSpellBookErrors(TestCase):
         """Test validate method with missing required field."""
         context = SpellbookContext(
             title=None,
-            created_at=datetime.datetime(2023, 1, 1),
-            updated_at=None,
             url_path="test/page",
             raw_content="Test content",
             is_public=True,
@@ -69,14 +67,13 @@ class TestSpellBookErrors(TestCase):
         errors = context.validate()
         
         self.assertIn("Missing required field: title", errors[0])
-        self.assertIn("Missing required field: updated_at", errors[1])
         
     def test_prepare_metadata_missing_raw_content(self):
         """Test prepare_metadata method with missing raw_content."""
         context = SpellbookContext(
             title="Test Page",
-            created_at=datetime.datetime(2023, 1, 1),
-            updated_at=datetime.datetime(2023, 2, 1),
+            published=datetime.datetime(2023, 1, 1),
+            modified=datetime.datetime(2023, 2, 1),
             url_path="test/page",
             raw_content=None,
             is_public=True,

@@ -483,7 +483,7 @@
 
 .sb-accordion-toggle[aria-expanded="true"] + .sb-accordion-content {
   /* max-height: dynamically set based on content height */
-  max-height: 32rem;
+  max-height: 30rem;
 }
 
 @media (max-width: 768px) {
