@@ -68,7 +68,7 @@ Warning: This is an important notice!
 
 Be sure to include the `{% spellbook_styles %}` tag in your base template if you want to use the built-in styles.
 
-IMAGE INCOMING
+![Example of alert spellblocks](https://i.imgur.com/wRzMKZv.png)
 
 ```markdown
 {~ card title="Getting Started" footer="Last updated: 2024" ~}
@@ -82,7 +82,7 @@ This is the main content of the card.
 {~~}
 ```
 
-IMAGE INCOMING
+![Example of card spellblocks](https://i.imgur.com/dzNUgjQ.png)
 
 Those are two examples of built-in Spellblocks. You can also create your own custom Spellblocks by extending the `BasicSpellBlock` class and registering them with the `SpellBlockRegistry`. See the [documentation on Spellblocks](https://django-spellbook.org/docs/Markdown/spellblocks) for more information.
 

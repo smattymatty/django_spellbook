@@ -1,11 +1,10 @@
 # django_spellbook/markdown/frontmatter.py
 import yaml
-from datetime import datetime, date # Added 'date'
+from datetime import datetime, date
 from pathlib import Path
-from typing import Optional, List, Dict, Any # Added more types
+from typing import Optional, List, Dict, Any
 
 from django_spellbook.utils import remove_leading_dash, titlefy
-# Assuming SpellbookContext is now defined as described above
 from .context import SpellbookContext
 
 # --- Define potential keys for dates ---
@@ -123,7 +122,6 @@ class FrontMatterParser:
             prev_page=None  # Filled later
         )
 
-# multi_bool function remains the same
 def multi_bool(value):
     """Allow string false or False or boolean False to be False
     or string true or True or boolean True to be True"""
