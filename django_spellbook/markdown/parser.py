@@ -92,11 +92,11 @@ class BlockProcessor:
         self.pattern = re.compile(
             r'{~\s*(\w+)(?:\s+([^~]*?))?\s*~}(.*?){~~}', re.DOTALL)
         self.markdown_extensions = [
+            DjangoLikeTagExtension(),
             'markdown.extensions.fenced_code',
             'markdown.extensions.tables',
             'markdown.extensions.nl2br',
             'markdown.extensions.sane_lists',
-            DjangoLikeTagExtension()
         ]
         self.reporter: MarkdownReporter = reporter
 
