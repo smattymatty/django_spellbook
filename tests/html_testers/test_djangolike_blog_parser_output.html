@@ -43,14 +43,13 @@ print(&quot;Hello from inside a custom tag&quot;)
 <else><p>This content is for anonymous users. Please </p><django-tag>{% url 'login' %}</django-tag><p>or </p><django-tag>{% url 'signup' %}</django-tag><p>.</p></else><django-tag>{% endif %}</django-tag><h2>Nesting and Mixing</h2>
 <p>Let's try nesting our custom tags and mixing them with Django tags.</p>
 <article id="post-body">
-<p>## Sub-heading Inside Article<br />
-  This is the main article content.<br />
+<h2>Sub-heading Inside Article</h2>
+<p>This is the main article content.<br />
   More <em>article</em> <strong>text</strong> here. Now for an aside:<br />
 </p>
 <aside class="pull-quote">
-<pre><code>This is an aside (pull quote) nested within the article.
-It might contain *simple* formatting.
-</code></pre>
+<p>This is an aside (pull quote) nested within the article.<br />
+    It might contain <em>simple</em> formatting.</p>
 </aside>
 <p>Final paragraph of the article.</p>
 </article>

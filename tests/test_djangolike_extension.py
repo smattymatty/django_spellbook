@@ -6,7 +6,10 @@ from django.test import TestCase
 from django_spellbook.markdown.extensions.django_like import (
     DjangoLikeTagProcessor,
     DjangoLikeTagExtension,
-    makeExtension, NestedTagError
+    makeExtension
+)
+from django_spellbook.markdown.extensions.custom_tag_parser import (
+    NestedTagError
 )
 
 import logging
@@ -65,7 +68,7 @@ class TestDjangoLikeTagProcessor(TestCase):
         html = self.md.convert(text)
         self.assertIn('<div class="outer">', html)
         self.assertIn(
-            '<div class="outer">\n<pre><code>\n</code></pre>\n<span class="inner"><p>nested content</p></span></div>', html)
+            '<div class="outer"><span class="inner"><p>nested content</p></span></div>', html)
 
     def test_django_static_tag(self):
         """Test preservation of Django static tag"""
