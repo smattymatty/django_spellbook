@@ -1,0 +1,59 @@
+<h1>My Awesome Blog Post - Test Drive</h1>
+<p>Welcome to this test post! We're going to put our <strong>Django-like tag processor</strong> through its paces.</p>
+<h2>Basic Custom Tags</h2>
+<p>Here's a simple div:</p>
+<div>
+<p>This is paragraph text inside a basic div tag.</p>
+</div>
+<p>Now with some attributes:</p>
+<div class="container mt-4" data-testid="maindiv" id="main-content">
+<p>This div has several attributes applied directly. It should render with <code>class="container mt-4"</code>, <code>id="main-content"</code>, and <code>data-testid="maindiv"</code>.</p>
+</div>
+<ul>
+<li>This list should render as a bulleted list.</li>
+<li>Item two.</li>
+</ul>
+<ol>
+<li>This list should render as a numbered list.</li>
+<li>Item two.</li>
+</ol>
+<p>Let's try the shortcuts:</p>
+<section class="hero" id="hero-section">
+<p>This section uses the <code>.classname</code> and <code>#idname</code> shortcuts.<br />
+It should have <code>class="hero"</code> and <code>id="hero-section"</code>.<br />
+<strong>Markdown</strong> content like <em>bold</em> and <em>italic</em> should work perfectly fine inside these custom tags.<br />
+- As should lists.<br />
+- Item two.</p>
+<pre><code class="language-python"># And code blocks too! (Using double backticks)
+print(&quot;Hello from inside a custom tag&quot;)
+</code></pre>
+<p>This section also spans multiple paragraphs (Markdown blocks).</p>
+</section>
+<h2>Preserving Django Tags</h2>
+<p>We need to make sure standard Django tags are left alone for the Django template engine.</p>
+<h3>Inline Tags</h3>
+<p><code>Let's link to a static asset</code>: </p>
+<django-tag>{% static 'css/blog_styles.css' %}</django-tag><p><code>And here's a dynamic URL:</code> </p>
+<django-tag>{% url 'post_detail' slug='test-drive-post' %}</django-tag><p>We can even include another template snippet: </p>
+<django-tag>{% include 'includes/sidebar.html' %}</django-tag><p>These should appear wrapped in <code>&lt;django-tag&gt;</code> elements.</p>
+<h3>Block Tags</h3>
+<p>Django block tags like <code>if</code> and <code>for</code> should also be preserved.</p>
+<django-tag>{% if user.is_authenticated %}</django-tag><p>This content is only shown to logged-in users.<br />
+</p>
+<else><p>This content is for anonymous users. Please </p><django-tag>{% url 'login' %}</django-tag><p>or </p><django-tag>{% url 'signup' %}</django-tag><p>.</p></else><django-tag>{% endif %}</django-tag><h2>Nesting and Mixing</h2>
+<p>Let's try nesting our custom tags and mixing them with Django tags.</p>
+<article id="post-body">
+<p>## Sub-heading Inside Article<br />
+  This is the main article content.<br />
+  More <em>article</em> <strong>text</strong> here. Now for an aside:<br />
+</p>
+<aside class="pull-quote">
+<pre><code>This is an aside (pull quote) nested within the article.
+It might contain *simple* formatting.
+</code></pre>
+</aside>
+<p>Final paragraph of the article.</p>
+</article>
+<p>This concludes our test document. Let's see how it renders!</p>
+<hr />
+<p>Final bit of text after all tags.</p>
