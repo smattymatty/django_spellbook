@@ -103,7 +103,6 @@ class TestDjangoLikeIntegrationWithParser(TestCase):
         # Also assert the incorrect rendering is NOT present
         self.assertNotIn("- As should lists.<br />", section_content, "List appears to be rendering literally inside section.")
 
-    @unittest.expectedFailure
     def test_no_paragraph_splitting_around_inline_django_tags(self):
         """
         BUG CHECK: Asserts paragraphs are NOT split incorrectly around inline django tags.

@@ -3,6 +3,9 @@ from unittest.mock import Mock, patch
 import io
 import re
 from typing import List
+from django_spellbook.markdown.extensions.django_like import DjangoLikeTagProcessor
+from markdown.blockparser import BlockParser
+from markdown.core import Markdown
 
 # Classes/functions/exception from the module being tested
 from django_spellbook.markdown.extensions.custom_tag_parser import (
@@ -25,12 +28,8 @@ RE_END_TEST = re.compile(r'{%\s*end(\w+)\s*%}')
 
 def create_mock_processor():
     """Creates a mock processor with compiled regex attributes."""
-    mock_processor = Mock()
-    mock_processor.RE_START = RE_START_TEST
-    mock_processor.RE_END = RE_END_TEST
-    # Add other attributes like parser if needed by functions being tested
-    # mock_processor.parser = Mock()
-    return mock_processor
+    mock_processor = DjangoLikeTagProcessor(BlockParser(Markdown()))
+    return mock_processor # Return the processor instance
 
 # --- Test Classes ---
 
@@ -91,25 +90,27 @@ class TestHandleNestedStartTag(unittest.TestCase):
     """Tests the handle_nested_start_tag helper function."""
 
     def test_increments_level_and_appends_valid_start_tag(self):
+        processor = DjangoLikeTagProcessor(BlockParser(Markdown()))
         state = TagProcessingState("initial", [])
         state.nested_level = 1 # Start at level 1
         # Simulate a FoundTagInfo for a start tag
         match = RE_START_TEST.search("{% div class='foo' %}")
         tag_info = FoundTagInfo(match, True, "div", "{% div class='foo' %}")
 
-        handle_nested_start_tag(tag_info, state)
+        handle_nested_start_tag(processor, tag_info, state)
 
         self.assertEqual(state.nested_level, 2) # Level incremented
         self.assertEqual(state.collected_parts, ["{% div class='foo' %}"]) # Tag added
 
     def test_ignores_start_tag_named_end(self):
         """Should ignore tags like {% endcustom %} if accidentally matched by RE_START."""
+        processor = DjangoLikeTagProcessor(BlockParser(Markdown()))
         state = TagProcessingState("initial", [])
         state.nested_level = 1
         match = RE_START_TEST.search("{% enddiv %}") # RE_START *can* match this
         tag_info = FoundTagInfo(match, True, "enddiv", "{% enddiv %}") # is_start=True, name starts with 'end'
 
-        handle_nested_start_tag(tag_info, state)
+        handle_nested_start_tag(processor, tag_info, state)
 
         self.assertEqual(state.nested_level, 1) # Level NOT incremented
         self.assertEqual(state.collected_parts, []) # Tag NOT added
