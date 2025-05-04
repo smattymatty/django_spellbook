@@ -121,7 +121,6 @@ class TestDjangoLikeIntegrationWithParser(TestCase):
         optimal_inline_block = "<p><code>Let's link to a static asset</code>: <django-tag>{% static 'css/blog_styles.css' %}</django-tag><br />\n<code>And here's a dynamic URL:</code> <django-tag>{% url 'post_detail' slug='test-drive-post' %}</django-tag><br />\nWe can even include another template snippet: <django-tag>{% include 'includes/sidebar.html' %}</django-tag></p>"
         self.assertIn(optimal_inline_block, self.html_output, "Inline django tags and text not rendering correctly in single paragraph.")
 
-    @unittest.expectedFailure
     def test_django_else_tag_preservation(self):
         """
         BUG CHECK: Asserts '{% else %}' is preserved via <django-tag>, not converted to <else>.
@@ -132,6 +131,17 @@ class TestDjangoLikeIntegrationWithParser(TestCase):
         self.assertNotIn('</else>', self.html_output, "Found unexpected </else> tag.")
         # Assert that the correct <django-tag> wrapper IS present
         self.assertIn('<django-tag>{% else %}</django-tag>', self.html_output, "Expected <django-tag>{% else %}</django-tag> not found.")
+
+    def test_elif_tag_preservation(self):
+        """
+        BUG CHECK: Asserts '{% elif %}' is preserved via <django-tag>, not converted to <elif>.
+        (Currently fails - renders as <elif>...</elif>).
+        """
+        # Assert that the incorrect <elif> tag is NOT present
+        self.assertNotIn('<elif>', self.html_output, "Found unexpected <elif> tag.")
+        self.assertNotIn('</elif>', self.html_output, "Found unexpected </elif> tag.")
+        # Assert that the correct <django-tag> wrapper IS present
+        self.assertIn('<django-tag>{% elif ', self.html_output, "Expected <django-tag>{% elif %}</django-tag> not found.")
 
     def test_custom_end_tags_are_consumed(self):
         """
