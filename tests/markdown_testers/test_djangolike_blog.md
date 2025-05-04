@@ -59,6 +59,8 @@ Django block tags like `if` and `for` should also be preserved.
 
 {% if user.is_authenticated %}
 This content is only shown to logged-in users.
+{% elif user.is_anonymous %}  
+This content is for anonymous users.
 {% else %}
 This content is for anonymous users. Please {% url 'login' %} or {% url 'signup' %}.
 {% endif %}

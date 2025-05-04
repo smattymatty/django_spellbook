@@ -40,7 +40,12 @@ print(&quot;Hello from inside a custom tag&quot;)
 <p>Django block tags like <code>if</code> and <code>for</code> should also be preserved.</p>
 <django-tag>{% if user.is_authenticated %}</django-tag><p>This content is only shown to logged-in users.<br />
 </p>
-<else><p>This content is for anonymous users. Please </p><django-tag>{% url 'login' %}</django-tag><p>or </p><django-tag>{% url 'signup' %}</django-tag><p>.</p></else><django-tag>{% endif %}</django-tag><h2>Nesting and Mixing</h2>
+<django-tag>{% elif user.is_anonymous %}</django-tag><p>This content is for anonymous users.<br />
+</p>
+<django-tag>{% else %}</django-tag><p>This content is for anonymous users. Please </p>
+<django-tag>{% url 'login' %}</django-tag><p>or </p>
+<django-tag>{% url 'signup' %}</django-tag><p>.</p>
+<django-tag>{% endif %}</django-tag><h2>Nesting and Mixing</h2>
 <p>Let's try nesting our custom tags and mixing them with Django tags.</p>
 <article id="post-body">
 <h2>Sub-heading Inside Article</h2>

@@ -40,7 +40,7 @@ class DjangoLikeTagProcessor(BlockProcessor):
     """
 
     DJANGO_BUILT_INS = {
-        'static', 'url', 'include', 'if', 'for', 'block',
+        'static', 'url', 'include', 'if', 'for', 'block', 'else', 'elif',
         'extends', 'load', 'with', 'csrf_token'
     }
 
