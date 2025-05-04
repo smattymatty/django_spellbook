@@ -131,11 +131,13 @@ Test nested custom elements
 {% span %}nested{% endspan %}
 {% enddiv %}'''
         html = self.md.convert(text)
+        self.assertIn('<django-tag>{% static "style.css" %}</django-tag>', html)
+        self.assertIn("<django-tag>{% if condition %}</django-tag>", html)
         self.assertIn('<h1>Heading</h1>', html)
         self.assertIn('<div class="content">', html)
         self.assertIn('<strong>Bold text</strong>', html)
         self.assertIn('{% static "style.css" %}', html)
-        self.assertIn('<span><p>nested</p></span>', html)
+        self.assertIn('</django-tag>\n<span><p>nested</p></span>', html)
 
     def test_error_handling(self):
         """Test error handling in attribute parsing"""
