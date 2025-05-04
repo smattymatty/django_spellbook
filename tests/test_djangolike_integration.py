@@ -161,7 +161,6 @@ class TestDjangoLikeIntegrationWithParser(TestCase):
         self.assertIn('<p>## Sub-heading Inside Article<br />', article_content, "H2 seems to be rendering literally inside <p> tag.")
 
 
-    @unittest.expectedFailure
     def test_aside_content_is_paragraph(self):
         """
         ISSUE CHECK: Asserts that indented content inside <aside> renders as <p>, not <pre><code>.
