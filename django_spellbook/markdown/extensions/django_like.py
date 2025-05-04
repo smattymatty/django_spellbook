@@ -2,8 +2,9 @@
 import re
 from markdown.blockprocessors import BlockProcessor
 from markdown.extensions import Extension
+from markdown.inlinepatterns import InlineProcessor
 from xml.etree import ElementTree
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Any
 
 from django_spellbook.markdown.extensions.tag_stats import (
     NestedContentResult
@@ -12,11 +13,30 @@ from django_spellbook.markdown.extensions.tag_stats import (
 from django_spellbook.markdown.attribute_parser import parse_attributes
 
 from django_spellbook.markdown.extensions.django_builtin_tag_helpers import (
-    handle_django_block_tag
+    handle_django_block_tag, add_blank_lines_before_tags
 )
 from django_spellbook.markdown.extensions.custom_tag_parser import (
     process_nested_content
 )
+
+# --- Define the set of tags handled by the Inline Processor ---
+DJANGO_INLINE_TAGS = {
+    'static', 'url', 'include', 'load', 'csrf_token'
+}
+DJANGO_INLINE_TAG_REGEX = r'({%\s*(\b(?:' + '|'.join(DJANGO_INLINE_TAGS) + r')\b)\s*.*?\s*%})'
+
+class DjangoLikeTagInlineProcessor(InlineProcessor):
+    """ Handles inline Django tags like {% static 'path' %} or {% url 'name' %}. """
+    def __init__(self, pattern: str, md: Optional[Any] = None):
+        super().__init__(pattern)
+        self.markdown = md
+
+    def handleMatch(self, m: re.Match, data: str) -> Tuple[Optional[ElementTree.Element], Optional[int], Optional[int]]:
+        """ Process a match found by the regex. """
+        full_tag_text = m.group(1)
+        el = ElementTree.Element('django-tag')
+        el.text = full_tag_text
+        return el, m.start(0), m.end(0)
 
 class DjangoLikeTagProcessor(BlockProcessor):
     """
@@ -50,6 +70,8 @@ class DjangoLikeTagProcessor(BlockProcessor):
         'block': 'endblock',
         'with': 'endwith',
     }
+    
+    DJANGO_INLINE_TAGS = DJANGO_INLINE_TAGS
 
     # Regex for start and end tags remain
     RE_START = re.compile(r'{%\s*(?!end)(\w+)([\s\S]*?)%}') # Capture tag name and everything else
@@ -74,93 +96,35 @@ class DjangoLikeTagProcessor(BlockProcessor):
         return bool(match and not match.group(1).startswith('end'))
 
     def run(self, parent: ElementTree.Element, blocks: List[str]) -> bool:
-        """
-        Process the block and handle Django-like tags.
-        This is a required method for the extension to be registered.
-        
-        This method is called by the Markdown parser when it encounters a block
-        that contains a Django-like tag. It handles the tag and any content
-        before or after it.
-        
-        Args:
-            parent: Parent XML element. This is the root element of the rendered HTML.
-            blocks: List of text blocks to process. This is the list of markdown blocks
-                    that have been split into individual lines by the parser.
-                    
-                    The first block is the original block that contained the Django-like tag.
-                    Subsequent blocks are the content that came before and after the tag.
-                    
-                    Example: ['{% div %}', 'This is the content before the tag.', '{% enddiv %}']
-                    
-        Returns:
-            True if processing was successful, False otherwise. If False, the original
-            block is added back to the list and processing stops.
-        """
-        extraction_result: Optional[
-            Tuple[str, str, str, str, re.Match]
-            ] = self._find_and_extract_opening_tag(blocks)
-
-        if extraction_result is None:
-            # No valid tag found, or block list was empty.
-            # We didn't pop anything if no tag was found.
-            return False
-
-        tag, attrs_string, before_content, remaining_content_in_block, match = extraction_result
-
-        # Process 'before' content if it exists
-        if before_content:
-            self.parser.parseBlocks(parent, [before_content])
-
-        # --- Dispatch based on tag type ---
-        if tag in self.DJANGO_BUILT_INS:
-            return self._handle_django_tag(parent, blocks, remaining_content_in_block, match)
-        else:
-            return self._handle_custom_element(parent, blocks, remaining_content_in_block, tag, attrs_string)
-
-    # -- Initial Tag Extraction Helper --
-    def _find_and_extract_opening_tag(self, blocks: List[str]) -> Optional[Tuple[str, str, str, str, re.Match]]:
-        """
-        Finds the first opening tag, extracts info, and handles 'before' content.
-        For use by run()
-        Pops the first block from the list if a valid tag is found.
-        
-        Args:
-            blocks: List of text blocks to process. This is the list of markdown blocks
-                    that have been split into individual lines by the parser.
-                    
-                    The first block is the original block that contained the Django-like tag.
-                    Subsequent blocks are the content that came before and after the tag.
-                    
-                    Example: ['{% div %}', 'This is the content before the tag.', '{% enddiv %}']
-                    
-        Returns:
-            A tuple containing:
-            - The tag name (e.g., 'div', 'span')
-            - The raw string containing tag attributes (e.g., 'class="my-class"')
-            - The content before the tag (e.g., 'This is the content before the tag.')
-            - The content after the tag (e.g., 'This is the content after the tag.')
-            - The regex match object for the opening tag (e.g., re.Match object)
-            
-            - None if no valid tag is found
-        """
-        if not blocks:
-            return None # pragma: no cover
-
-        original_block = blocks[0] # Peek, don't pop yet
+        """ Process the block and handle Django-like tags. """
+        # --- Test the tag type BEFORE popping or processing ---
+        original_block = blocks[0]
         match = self.RE_START.search(original_block)
 
         if not match or match.group(1).startswith('end'):
-            return None # No valid opening tag found
-
-        # Now we know we'll process it, so pop it
-        blocks.pop(0)
+            return False # Not a tag we handle / end tag
 
         tag = match.group(1)
+
+        # --- If it's an INLINE tag, bail out IMMEDIATELY ---
+        if tag in DJANGO_INLINE_TAGS:
+            return False # Signal block NOT handled by this processor
+
+        # --- If we are here, it's a block/custom tag, so proceed ---
+        blocks.pop(0) # Pop the block *only* if we are handling it
         attrs_string = match.group(2).strip()
         before_content = original_block[:match.start()]
         remaining_content_in_block = original_block[match.end():]
 
-        return tag, attrs_string, before_content, remaining_content_in_block, match
+        # Process 'before' content *only* if we are handling the block/custom tag
+        if before_content:
+            self.parser.parseBlocks(parent, [before_content])
+
+        # --- Dispatch (only block/custom tags reach here) ---
+        if tag in self.DJANGO_BUILT_INS: # Must be block built-in (if, for, else...)
+            return self._handle_django_tag(parent, blocks, remaining_content_in_block, match)
+        else: # Custom elements
+            return self._handle_custom_element(parent, blocks, remaining_content_in_block, tag, attrs_string)
 
     # -- Handlers for Different Tag Types --
     def _handle_django_tag(
@@ -168,84 +132,82 @@ class DjangoLikeTagProcessor(BlockProcessor):
         blocks: List[str], first_content_chunk: str,
         match: re.Match
         ) -> bool:
-        """
-        Handle built-in Django template tags (single or block).
-        For use by run() if the tag is in self.DJANGO_BUILT_INS.
-        {% if condition %} or {% for item in items %} is handled by this method.
-
-        Args:
-            parent: Parent XML element.
-            blocks: List of subsequent text blocks (passed from run).
-            first_content_chunk: The portion of the original block after the opening tag.
-            match: Regex match object for the opening tag.
-
-        Returns:
-            True if processing was successful.
-        """
+        """ Handle built-in Django template tags (block tags, else/elif). """
         tag: str = match.group(1)
-        full_opening_tag: str = match.group(0) # The complete {% ... %} tag text
+        full_opening_tag: str = match.group(0)
 
         # Handle block-level Django tags ({% if %}, {% for %}, etc.)
         if tag in self.DJANGO_BLOCK_TAGS:
-            # Pass the blocks list as received
+            # This helper might need similar preprocessing if it uses parseBlocks internally
             return handle_django_block_tag(self, parent, blocks, first_content_chunk, tag, full_opening_tag)
 
-        # Handle single Django tags ({% url %}, {% static %}, etc.)
+        # Handle OTHER built-in tags (else, elif - treated as block boundaries)
         tag_element: ElementTree.Element = ElementTree.SubElement(parent, 'django-tag')
         tag_element.text = full_opening_tag
 
-        # Put the remaining content from the original block back at the
-        # beginning of the blocks list for standard parsing.
         if first_content_chunk:
             blocks.insert(0, first_content_chunk)
 
         return True
-
     
     def _handle_custom_element(
         self, parent: ElementTree.Element,
         blocks: List[str], first_content_chunk: str,
         tag: str, attrs_string: str
         ) -> bool:
-        """
-        Handle custom HTML-like elements {% tag ... %}content{% endtag %}.
-
-        Args:
-            parent: Parent XML element.
-            blocks: List of subsequent text blocks (passed from run).
-            first_content_chunk: The portion of the original block after the opening tag.
-            tag: The tag name (e.g., 'div').
-            attrs_string: The raw attribute string from the opening tag.
-
-        Returns:
-            True if processing was successful.
-        """
-        # Create the element *first*
-        element = ElementTree.SubElement(parent, tag) # Use tag name as element name
-        # Parse and set attributes
+        """ Handle custom HTML-like elements {% tag ... %}content{% endtag %}. """
+        element = ElementTree.SubElement(parent, tag)
         self._parse_attributes(element, attrs_string)
 
-        # --- Process nested content using the NEW refactored method ---
-        # This call now uses the state class and helpers internally
         content_result: NestedContentResult = process_nested_content(
             self, tag, first_content_chunk, blocks
         )
 
-        # Parse the extracted inner content recursively
         if content_result.inner_content:
-            # Use the robust parsing method with a temporary parent
+            inner_content = content_result.inner_content
+            modified_content = ""
+            last_pos = 0
+
+            # --- Insert blank lines before non-inline block tags ---
+            # Iterate through potential start tags within the inner content
+            for match in self.RE_START.finditer(inner_content):
+                tag_name = match.group(1)
+                # Check if it's a block tag (Django built-in or custom/unknown)
+                # AND not already preceded by two+ newlines
+                is_block_tag_for_splitting = (
+                    tag_name not in self.DJANGO_INLINE_TAGS and
+                    not tag_name.startswith('end')
+                )
+                start_pos = match.start()
+
+                if is_block_tag_for_splitting:
+                    preceding_text = inner_content[last_pos:start_pos]
+                    # Add preceding text. Add extra newline if needed to ensure separation.
+                    modified_content += preceding_text
+                    if not preceding_text.endswith('\n\n') and preceding_text.strip():
+                        # Add a blank line if there isn't one already and it's not just whitespace
+                        if not preceding_text.endswith('\n'):
+                            modified_content += '\n' # Ensure at least one newline before the blank one
+                        modified_content += '\n'
+
+                    modified_content += match.group(0) # Add the tag itself
+                    last_pos = match.end()
+                # If it's an inline tag, we don't add blank lines; it will be handled by appending the rest later
+
+            modified_content += inner_content[last_pos:] # Add the remainder
+
+            split_blocks = modified_content.split('\n\n') # Split by blank lines
+
+            # Use temporary parent for safety
             temp_parent = ElementTree.Element('div')
-            self.parser.parseBlocks(temp_parent, content_result.inner_content.split('\n\n'))
-            # Transfer children and text/tail from temp_parent
-            if temp_parent.text and temp_parent.text.strip():
-                element.text = (element.text or "") + temp_parent.text # pragma: no cover
+            self.parser.parseBlocks(temp_parent, split_blocks) # Use parseBlocks with the split list
+
+            # Transfer children
             for child in list(temp_parent):
-                element.append(child) # Moves child including its text and tail
+                element.append(child)
 
-        # Update the main blocks list with remaining blocks
         blocks[:] = content_result.remaining_blocks
-
-        return True # Assume processed
+        return True
 
     # --- Attribute Parsing Helper ---
     def _parse_attributes(self, element: ElementTree.Element, attrs_string: str) -> None:
@@ -261,7 +223,14 @@ class DjangoLikeTagExtension(Extension):
     """ Markdown extension for handling Django-like template tags. """
     def extendMarkdown(self, md) -> None:
         md.parser.blockprocessors.register(
-            DjangoLikeTagProcessor(md.parser), 'django_like_tag', 175
+            DjangoLikeTagProcessor(md.parser), 
+            'django_like_tag', 
+            175
+        )
+        md.inlinePatterns.register(
+            DjangoLikeTagInlineProcessor(DJANGO_INLINE_TAG_REGEX, md), 
+            'django_inline', 
+            170
         )
 
 def makeExtension(**kwargs) -> DjangoLikeTagExtension:

@@ -103,7 +103,6 @@ class TestDjangoLikeIntegrationWithParser(TestCase):
         # Also assert the incorrect rendering is NOT present
         self.assertNotIn("- As should lists.<br />", section_content, "List appears to be rendering literally inside section.")
 
-    @unittest.expectedFailure
     def test_no_paragraph_splitting_around_inline_django_tags(self):
         """
         BUG CHECK: Asserts paragraphs are NOT split incorrectly around inline django tags.
@@ -123,7 +122,7 @@ class TestDjangoLikeIntegrationWithParser(TestCase):
 
     def test_django_else_tag_preservation(self):
         """
-        BUG CHECK: Asserts '{% else %}' is preserved via <django-tag>, not converted to <else>.
+        Asserts '{% else %}' is preserved via <django-tag>, not converted to <else>.
         (Currently fails - renders as <else>...</else>).
         """
         # Assert that the incorrect <else> tag is NOT present
@@ -134,7 +133,7 @@ class TestDjangoLikeIntegrationWithParser(TestCase):
 
     def test_elif_tag_preservation(self):
         """
-        BUG CHECK: Asserts '{% elif %}' is preserved via <django-tag>, not converted to <elif>.
+        Asserts '{% elif %}' is preserved via <django-tag>, not converted to <elif>.
         (Currently fails - renders as <elif>...</elif>).
         """
         # Assert that the incorrect <elif> tag is NOT present
@@ -145,7 +144,7 @@ class TestDjangoLikeIntegrationWithParser(TestCase):
 
     def test_custom_end_tags_are_consumed(self):
         """
-        BUG CHECK: Asserts that custom end tags are REMOVED from the final output.
+        Asserts that custom end tags are REMOVED from the final output.
         (This *should* pass now for section/article based on the latest HTML).
         We removed the complex div case where it failed before. Add specific failing cases if needed.
         """
@@ -158,7 +157,7 @@ class TestDjangoLikeIntegrationWithParser(TestCase):
     @unittest.expectedFailure
     def test_heading_inside_custom_tag(self):
         """
-        ISSUE CHECK: Asserts H2 renders correctly inside the article tag.
+        BUG CHECK: Asserts H2 renders correctly inside the article tag.
         (Currently fails - renders as literal '##' inside <p>).
         """
         article_regex = r'<article\s+.*?id="post-body".*?>(.*?)<\/article>'

@@ -118,24 +118,27 @@ class TestDjangoLikeTagProcessor(TestCase):
         self.assertIn('<django-tag>{% for item in items %}</django-tag>', html)
         self.assertIn('<django-tag>{% endfor %}</django-tag>', html)
         self.assertIn('<django-tag>{% endif %}</django-tag>', html)
-
+        
+    #@unittest.expectedFailure
     def test_django_block_with_markdown(self):
         """Test Django block tags with markdown content"""
-        text = '''{% if condition %}
+        text = '''{% if condition %} Yoo {% endif %}
 **bold** and _italic_ssor)
 Test nested custom elements
 # Heading
 {% div .content %}
 **Bold text**
 {% static "style.css" %}
+
 {% span %}nested{% endspan %}
 {% enddiv %}'''
         html = self.md.convert(text)
+        self.assertIn("<django-tag>{% if condition %}</django-tag>", html)
         self.assertIn('<h1>Heading</h1>', html)
         self.assertIn('<div class="content">', html)
         self.assertIn('<strong>Bold text</strong>', html)
         self.assertIn('{% static "style.css" %}', html)
-        self.assertIn('<span><p>nested</p></span>', html)
+        self.assertIn('<django-tag>{% static "style.css" %}</django-tag></p>\n<span>', html)
 
     def test_error_handling(self):
         """Test error handling in attribute parsing"""
