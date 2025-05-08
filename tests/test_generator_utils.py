@@ -42,8 +42,8 @@ class TestGeneratorUtils(TestCase):
         
     def test_generate_view_name_with_numeric_paths(self):
         """Test that generate_view_name properly handles numeric paths."""
-        self.assertEqual(generate_view_name("0.1.0-release"), "view_0-1-0_release")
-        self.assertEqual(generate_view_name("1.0/docs"), "view_1-0_docs")
+        self.assertEqual(generate_view_name("0.1.0-release"), "view__0_1_0_release")
+        self.assertEqual(generate_view_name("1.0/docs"), "view__1_0_docs")
         self.assertEqual(generate_view_name("normal-path"), "view_normal_path")
         
     def test_get_template_path(self):
@@ -99,3 +99,46 @@ class TestGeneratorUtils(TestCase):
         mock_makedirs.assert_called_once_with(os.path.dirname("/path/file.py"), exist_ok=True)
         mock_file.assert_called_once_with("/path/file.py", 'w')
         mock_file().write.assert_called_once_with("content")
+        
+        
+class TestGenerateViewName(TestCase):
+    """Tests for the generate_view_name function."""
+
+    def test_generate_view_name_basic(self):
+        self.assertEqual(generate_view_name("test/page"), "view_test_page")
+
+    def test_generate_view_name_with_dashes(self):
+        self.assertEqual(generate_view_name("--test/--page"), "view_test_page")
+        self.assertEqual(generate_view_name("test-page"), "view_test_page")
+
+    def test_generate_view_name_with_underscores(self):
+        self.assertEqual(generate_view_name("test_page"), "view_test_page")
+
+    def test_generate_view_name_with_numeric_paths(self):
+        self.assertEqual(generate_view_name("0.1.0-release"), "view__0_1_0_release")
+        self.assertEqual(generate_view_name("1.0/docs"), "view__1_0_docs")
+
+    def test_generate_view_name_with_spaces(self):
+        """Test handling view names with spaces (the reported bug)."""
+        self.assertEqual(
+            generate_view_name("notes/Textbook/02 - Intro to C Programming"),
+            "view_notes_Textbook_02_Intro_to_C_Programming"
+        )
+        self.assertEqual(
+            generate_view_name("my very long path/with spaces"),
+            "view_my_very_long_path_with_spaces"
+        )
+
+    def test_generate_view_name_with_mixed_invalid_chars(self):
+        """Test handling a mix of invalid characters."""
+        self.assertEqual(
+            generate_view_name("path with spaces-and-dashes/and.dots"),
+            "view_path_with_spaces_and_dashes_and_dots"
+        )
+
+    def test_generate_view_name_edge_cases(self):
+        """Test edge cases like empty strings or paths with only invalid chars."""
+        self.assertEqual(generate_view_name(""), "view_")
+        self.assertEqual(generate_view_name("---"), "view_")
+        self.assertEqual(generate_view_name("!@#$/%^"), "view_")  # Only invalid chars
+        self.assertEqual(generate_view_name("valid/!!!invalid!!!/valid"), "view_valid_invalid_valid")

@@ -19,24 +19,41 @@ def get_clean_url(url_pattern: str) -> str:
     return '/'.join(clean_parts)
 
 def generate_view_name(url_pattern: str) -> str:
-    """Generate a valid Python identifier for a view name from a URL pattern."""
-    # Split by slashes first to handle each path component separately
-    parts = url_pattern.split('/')
-    
-    # Process each part to clean dashes
-    cleaned_parts = []
-    for part in parts:
-        # Remove leading dashes and replace internal dashes with underscores
-        cleaned_part = part.lstrip('-')
-        cleaned_part = cleaned_part.replace('-', '_')
-        cleaned_parts.append(cleaned_part)
-    
-    # Join with underscores (replacing slashes with underscores)
-    view_name = '_'.join(cleaned_parts)
+    """
+    Generates a valid Python identifier for a view name from a URL pattern.
+
+    Args:
+        url_pattern: The URL pattern string.
+
+    Returns:
+        A valid Python identifier for the view name.
+    """
+    if not url_pattern: # should not happen
+        print(f"Warning: Empty URL pattern detected. Returning 'view_'.")
+        return "view_"
+    # Replace slashes, hyphens, spaces, and periods with underscores
+    view_name = re.sub(r"[/\s\-.]+", "_", url_pattern)
+
+    # Remove any remaining characters that are not alphanumeric or underscore
+    view_name = re.sub(r"[^\w]+", "", view_name)
+
+    # Remove leading/trailing underscores
+    view_name = view_name.strip("_")
+
     view_name = f"view_{view_name}"
-    view_name = view_name.replace('.', '-')
-    
-    return view_name
+    return _alter_first_digit(view_name)
+
+def _alter_first_digit(text: str) -> str:
+    """Alter the first digit found of a view_name, for use in generate_view_name."""
+    # Ensure no leading digits (after prefixing) - crucial!
+    try:
+        if text[5].isdigit():  # Check the character *after* "view_"
+            return f"view__{text[5:]}" # Add an extra underscore if it starts with a digit
+        else:
+            return text
+    except IndexError: # if the string is too short, just return it
+        print(f"Warning: view_name '{text}' is too short to be altered.")
+        return text
 
 def get_template_path(content_app: str, relative_url: str) -> str:
     """Generate template path from relative URL."""
