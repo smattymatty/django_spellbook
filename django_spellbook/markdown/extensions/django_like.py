@@ -13,7 +13,7 @@ from django_spellbook.markdown.extensions.tag_stats import (
 from django_spellbook.markdown.attribute_parser import parse_attributes
 
 from django_spellbook.markdown.extensions.django_builtin_tag_helpers import (
-    handle_django_block_tag, add_blank_lines_before_tags
+    handle_django_block_tag
 )
 from django_spellbook.markdown.extensions.custom_tag_parser import (
     process_nested_content

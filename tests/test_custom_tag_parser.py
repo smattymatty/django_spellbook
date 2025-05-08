@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, MagicMock
 import io
 import re
 from typing import List
@@ -244,5 +244,114 @@ class TestProcessNestedContentIntegration(unittest.TestCase):
 
 
 
+
+# --- Test Class ---
+
+class TestHandleNestedStartTagTagTypes(unittest.TestCase):
+    """
+    Tests focusing on tag type determination within handle_nested_start_tag.
+    """
+
+    def setUp(self):
+        """Set up a processor instance and initial state for each test."""
+        # Use the real processor to get access to its class-level tag sets
+        self.processor = DjangoLikeTagProcessor(BlockParser(Markdown()))
+        self.initial_level = 1
+        self.state = TagProcessingState("dummy content", [])
+        self.state.nested_level = self.initial_level
+
+    def test_handles_django_block_tag_correctly(self):
+        """
+        Verify DJANGO_BLOCK type: 'if' tag should increment level and append text.
+        """
+        tag_name = 'if' # Example from DJANGO_BLOCK_TAGS
+        self.assertIn(tag_name, self.processor.DJANGO_BLOCK_TAGS) # Sanity check test setup
+        full_tag_text = '{% if user.is_authenticated %}'
+        # Simulate FoundTagInfo as it would come from find_next_tag_in_chunk
+        tag_info = FoundTagInfo(MagicMock(), True, tag_name, full_tag_text) # is_start=True
+
+        handle_nested_start_tag(self.processor, tag_info, self.state)
+
+        # Check expectations for DJANGO_BLOCK type
+        self.assertEqual(self.state.nested_level, self.initial_level + 1,
+                         f"'{tag_name}' (DJANGO_BLOCK) should increment nesting level.")
+        self.assertEqual(self.state.collected_parts, [full_tag_text],
+                         "Tag text should be appended.")
+
+    def test_handles_django_other_builtin_tag_correctly(self):
+        """
+        Verify DJANGO_OTHER_BUILTIN type: 'else' tag should NOT increment level but append text.
+        """
+        tag_name = 'else' # Example built-in not in BLOCK_TAGS or INLINE_TAGS
+        self.assertNotIn(tag_name, self.processor.DJANGO_BLOCK_TAGS)
+        self.assertNotIn(tag_name, self.processor.DJANGO_INLINE_TAGS)
+        self.assertIn(tag_name, self.processor.DJANGO_BUILT_INS) # Sanity checks
+        full_tag_text = '{% else %}'
+        tag_info = FoundTagInfo(MagicMock(), True, tag_name, full_tag_text) # is_start=True
+
+        handle_nested_start_tag(self.processor, tag_info, self.state)
+
+        # Check expectations for DJANGO_OTHER_BUILTIN type
+        self.assertEqual(self.state.nested_level, self.initial_level,
+                         f"'{tag_name}' (DJANGO_OTHER_BUILTIN) should NOT increment nesting level.")
+        self.assertEqual(self.state.collected_parts, [full_tag_text],
+                         "Tag text should still be appended.")
+
+    def test_handles_django_inline_tag_correctly(self):
+        """
+        Verify DJANGO_INLINE type: 'static' tag should NOT increment level but append text.
+        (Added for completeness)
+        """
+        tag_name = 'static' # Example from DJANGO_INLINE_TAGS
+        self.assertIn(tag_name, self.processor.DJANGO_INLINE_TAGS) # Sanity check
+        full_tag_text = '{% static "style.css" %}'
+        tag_info = FoundTagInfo(MagicMock(), True, tag_name, full_tag_text) # is_start=True
+
+        handle_nested_start_tag(self.processor, tag_info, self.state)
+
+        # Check expectations for DJANGO_INLINE type
+        self.assertEqual(self.state.nested_level, self.initial_level,
+                         f"'{tag_name}' (DJANGO_INLINE) should NOT increment nesting level.")
+        self.assertEqual(self.state.collected_parts, [full_tag_text],
+                         "Tag text should be appended.")
+
+    def test_handles_custom_block_tag_correctly(self):
+        """
+        Verify CUSTOM_BLOCK type: 'div' tag should increment level and append text.
+        (Added for completeness)
+        """
+        tag_name = 'div' # Example custom tag (not in any DJANGO_* sets)
+        self.assertNotIn(tag_name, self.processor.DJANGO_BUILT_INS) # Sanity check
+        full_tag_text = '{% div class="foo" %}'
+        tag_info = FoundTagInfo(MagicMock(), True, tag_name, full_tag_text) # is_start=True
+
+        handle_nested_start_tag(self.processor, tag_info, self.state)
+
+        # Check expectations for CUSTOM_BLOCK type
+        self.assertEqual(self.state.nested_level, self.initial_level + 1,
+                         f"'{tag_name}' (CUSTOM_BLOCK) should increment nesting level.")
+        self.assertEqual(self.state.collected_parts, [full_tag_text],
+                         "Tag text should be appended.")
+
+    def test_ignores_tag_starting_with_end(self):
+        """
+        Verify explicit check: '{% enddiv %}' should NOT increment level and NOT append text.
+        (Verifies the fix for the previous test failure)
+        """
+        tag_name = 'enddiv' # Starts with 'end'
+        full_tag_text = '{% enddiv %}'
+        tag_info = FoundTagInfo(MagicMock(), True, tag_name, full_tag_text) # is_start=True
+
+        handle_nested_start_tag(self.processor, tag_info, self.state)
+
+        # Check expectations for tags starting with 'end'
+        self.assertEqual(self.state.nested_level, self.initial_level,
+                         f"'{tag_name}' (starts with 'end') should NOT increment nesting level.")
+        self.assertEqual(self.state.collected_parts, [], # Should be empty now
+                         "Tag text should NOT be appended.")
+        
+        
+
 if __name__ == '__main__':
     unittest.main()
+    

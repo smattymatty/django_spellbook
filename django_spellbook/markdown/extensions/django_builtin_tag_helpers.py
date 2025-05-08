@@ -146,35 +146,3 @@ def update_blocks_after_processing(
         original_blocks.insert(0, after_end_tag_content)
         
         
-def add_blank_lines_before_tags(processor: 'DjangoLikeTagProcessor', text: str, DJANGO_INLINE_TAGS: list[str]) -> str:
-        """
-        Pre-processes text to add blank lines before lines starting with
-        known block/custom tags, aiding parseBlocks.
-        """
-        lines = text.splitlines()
-        processed_lines = []
-        for i, line in enumerate(lines):
-            # Preserve leading whitespace for indentation checks later if needed
-            stripped_line_for_check = line.lstrip()
-            match = processor.RE_START.search(stripped_line_for_check)
-            needs_blank_line = False
-
-            # Check if line starts with a tag pattern
-            if match and match.start() == 0:
-                tag_name = match.group(1)
-                # Check if it's a tag the BlockProcessor should handle recursively
-                if tag_name in processor.DJANGO_BLOCK_TAGS or \
-                   (tag_name not in processor.DJANGO_BUILT_INS and tag_name not in DJANGO_INLINE_TAGS):
-                    # Check if the previous line added wasn't already blank
-                    if i > 0 and processed_lines and processed_lines[-1].strip() == "":
-                        pass # Already preceded by a blank line
-                    elif i > 0: # Check if previous line exists
-                         needs_blank_line = True
-                    # If i == 0, it's the first line, no preceding blank needed
-
-            if needs_blank_line:
-                processed_lines.append("") # Add blank line
-
-            processed_lines.append(line) # Add the original line
-
-        return "\n".join(processed_lines)

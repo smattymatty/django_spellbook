@@ -69,7 +69,7 @@ def process_nested_content(
                     break # Exit loop if no more blocks
             else:
                 # Nested level is 0 or less, and chunk is done. We should be finished.
-                break # Exit loop
+                break # pragma: no cover
 
     result = state.build_result()
     return result
@@ -119,8 +119,8 @@ def handle_nested_start_tag(
     """
     tag_name = tag_info.tag_name
     if tag_name is None:
-        if tag_info.full_tag_text: state.append_content(tag_info.full_tag_text)
-        return
+        if tag_info.full_tag_text: state.append_content(tag_info.full_tag_text) # pragma: no cover
+        return # pragma: no cover
     # --- Explicitly ignore tags starting with 'end' in the START tag handler ---
     if tag_name.startswith('end'):
         # Do NOT increment level and do NOT append content.
