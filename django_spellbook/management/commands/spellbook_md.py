@@ -58,7 +58,7 @@ class Command(BaseCommand):
         self.continue_on_error = options.get('continue_on_error', False)
         
         # Extract Reporting Options
-        self.report_level = options.get('report_level', 'detailed')
+        self.report_level = options.get('report_level', 'debug')
         self.report_format = options.get('report_format', 'text')
         self.report_output = options.get('report_output', None)
         
@@ -89,23 +89,23 @@ class Command(BaseCommand):
     def _process_source_destination_pair(self, md_path: Path, content_app: str, md_url_prefix: str, base_template: str):
         """
         Process all markdown files for a single source-destination pair.
-        
+
         Args:
             md_path (Path): Path to the source markdown directory
             content_app (str): Name of the content app
             md_url_prefix (str): URL prefix for the content app
             base_template (str): Base template for the content app
-            
+
         Raises:
             ContentDiscoveryError if no markdown files are found
-            
+
         Returns:
             Length of the processed files list
         """
         # Find markdown files
         try:
             markdown_files = find_markdown_files(md_path)
-            
+
             if not markdown_files:
                 error_message = f"No markdown files found in {md_path}"
                 self.reporter.error(error_message)
@@ -113,19 +113,21 @@ class Command(BaseCommand):
                     f"Make sure the directory exists and contains .md files."
                 )
                 raise ContentDiscoveryError(error_message)
-                
+
             self.reporter.write(f"Found {len(markdown_files)} markdown files to process")
-            
+
         except ContentDiscoveryError:
             raise
         except Exception as e:
             logger.error(f"Error discovering markdown files: {str(e)}", exc_info=True)
             raise ContentDiscoveryError(f"Failed to discover markdown files: {str(e)}")
-        
+
         # Set up directory structure
         try:
             first_dirpath = markdown_files[0][0]
+            print(f"DEBUG: setup_directory_structure called with content_app={content_app}, first_dirpath={first_dirpath}") 
             content_dir_path, template_dir = setup_directory_structure(content_app, first_dirpath)
+            print(f"DEBUG: setup_directory_structure returned content_dir_path={content_dir_path}, template_dir={template_dir}") 
         except Exception as e:
             error_message = f"Failed to set up directory structure: {str(e)}"
             self.reporter.error(f"Directory setup error: {str(e)}")
@@ -134,7 +136,7 @@ class Command(BaseCommand):
             )
             logger.error(f"Directory setup error: {str(e)}", exc_info=True)
             raise ConfigurationError(error_message)
-        
+
         # Initialize processor
         try:
             processor = MarkdownProcessor(
@@ -149,7 +151,7 @@ class Command(BaseCommand):
         except Exception as e:
             logger.error(f"Error initializing markdown processor: {str(e)}", exc_info=True)
             raise ProcessingError(f"Failed to initialize markdown processor: {str(e)}")
-        
+
         # Build TOC
         try:
             self.reporter.write("Building table of contents...")
@@ -158,27 +160,27 @@ class Command(BaseCommand):
             self.reporter.warning(
                 f"Error building table of contents: {str(e)}. "
                 "Processing will continue but navigation links may not work correctly."
-                )
+            )
             logger.warning(f"TOC building error: {str(e)}", exc_info=True)
             complete_toc = {}
-        
+
         # Process each file
         processed_files = []
         error_files = []
-        
+
         for i, (dirpath, filename) in enumerate(markdown_files):
             file_path = os.path.join(dirpath, filename)
             self.reporter.write(f"Processing file {i+1}/{len(markdown_files)}: {filename}")
-            
+
             try:
                 processed_file = processor.process_file(dirpath, filename, complete_toc)
-                
+
                 if processed_file:
                     processed_files.append(processed_file)
                 else:
                     error_files.append(file_path)
                     self.reporter.warning(f"File not processed: {filename}")
-                    
+
             except Exception as e:
                 error_files.append(file_path)
                 error_message = f"Error processing file {filename}: {str(e)}"
@@ -186,7 +188,7 @@ class Command(BaseCommand):
                 logger.error(f"File processing error: {str(e)}", exc_info=True)
                 if not self.continue_on_error:
                     raise ProcessingError(f"Failed to process file {filename}: {str(e)}")
-        
+
         # Generate URLs and views
         if processed_files:
             try:
@@ -199,8 +201,8 @@ class Command(BaseCommand):
                 raise OutputGenerationError(f"Failed to generate URLs and views: {str(e)}")
             self.reporter.success(
                 f"Successfully processed {len(processed_files)} files for {content_app}"
-                )
-            
+            )
+
             if error_files:
                 self.reporter.warning(
                     f"Note: {len(error_files)} files could not be processed: "
@@ -214,7 +216,7 @@ class Command(BaseCommand):
                 "Check the markdown syntax and structure of your files, and ensure all required SpellBlocks are available."
             )
             raise ProcessingError(error_message)
-        
+
         return len(processed_files)
     
     def discover_spellblocks(self) -> int:

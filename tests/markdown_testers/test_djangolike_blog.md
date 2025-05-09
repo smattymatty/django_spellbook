@@ -28,7 +28,7 @@ Let's try the shortcuts:
 This section uses the `.classname` and `#idname` shortcuts.
 It should have `class="hero"` and `id="hero-section"`.
 
-**Markdown** content like *bold* and _italic_ should work perfectly fine inside these custom tags.
+**Markdown** content like *bold* and *italic* should work perfectly fine inside these custom tags.
 
 - As should lists.
 - Item two.
@@ -65,13 +65,13 @@ This content is for anonymous users.
 This content is for anonymous users. Please {% url 'login' %} or {% url 'signup' %}.
 {% endif %}
 
-
 ## Nesting and Mixing
 
 Let's try nesting our custom tags and mixing them with Django tags.
 
 {% article #post-body %}
-  ## Sub-heading Inside Article
+
+## Sub-heading Inside Article
 
   This is the main article content.
 
@@ -84,7 +84,6 @@ Let's try nesting our custom tags and mixing them with Django tags.
 
   Final paragraph of the article.
 {% endarticle %}
-
 
 This concludes our test document. Let's see how it renders!
 
