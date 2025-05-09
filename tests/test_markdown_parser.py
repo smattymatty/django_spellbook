@@ -322,4 +322,4 @@ class TestBlockProcessorExceptions(unittest.TestCase):
         processor._render_block(mock_block_class, "", "content")
         
         # Verify the reporter method was called with success=False
-        mock_reporter.record_spellblock_usage.assert_called_once_with("error_block", success=False)
+        mock_reporter.record_spellblock_usage.assert_called_once_with("error_block", success=False, params={})

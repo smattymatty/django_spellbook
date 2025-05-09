@@ -222,28 +222,56 @@ class MarkdownReporter:
             return
         self.stdout.write(message)
         
-    def record_spellblock_usage(self, block_name: str, success: bool = True):
+    def record_spellblock_usage(
+        self,
+        block_name: str,
+        success: bool = True,
+        params: Optional[Dict[str, Any]] = None
+        ):
         """
-        Record usage of a spellblock in a file.
-        
+        Record usage of a spellblock.
+
         Args:
-            block_name: Name of the spellblock
-            success: Whether the spellblock was used successfully
+            block_name: Name of the spellblock.
+            success: Whether the spellblock was used successfully.
+            params: Optional list of parameter names used by the block.
         """
-        for block in self.spellblocks:
-            if block.name == block_name:
-                if success:
-                    block.total_uses += 1
-                else:
-                    block.failed_uses += 1
-                return
+        # Ensure self.spellblocks is initialized if it wasn't in __init__
+        # Though your __init__ does initialize it.
+        from django_spellbook.management.commands.spellbook_md_p.discovery import SpellblockStatistics, build_new_spellblock_statistics
+        if not hasattr(self, 'spellblocks'):
+            self.spellblocks: List[SpellblockStatistics] = []
+
+        found_block_stat = None
+        for block_stat in self.spellblocks:
+            if block_stat.name == block_name:
+                found_block_stat = block_stat
+                break
         
-        # If we get here, the block wasn't found, so add it
-        from django_spellbook.management.commands.spellbook_md_p.discovery import build_new_spellblock_statistics
-        new_block = build_new_spellblock_statistics(block_name)
-        new_block.total_files = 0
+        if not found_block_stat:
+            # If we get here, the block wasn't found in existing stats, so add it
+            # This implies discover_blocks or initial population might not have caught it,
+            # or it's a block used before discovery.
+            new_block_stat = build_new_spellblock_statistics(block_name) # This function needs to return a SpellblockStatistics compatible object
+            # Initialize counts if build_new_spellblock_statistics doesn't
+            if not hasattr(new_block_stat, 'total_uses'): new_block_stat.total_uses = 0
+            if not hasattr(new_block_stat, 'failed_uses'): new_block_stat.failed_uses = 0
+            # You might want to add params to your SpellblockStatistics object too if you plan to report them
+            # if params and hasattr(new_block_stat, 'parameters_used'):
+            #    new_block_stat.parameters_used.update(params) # Example
+            
+            self.spellblocks.append(new_block_stat)
+            found_block_stat = new_block_stat
+
+        # Now update the found or newly created statistics object
         if success:
-            new_block.successful_files = 0
+            found_block_stat.total_uses += 1
+            # If SpellblockStatistics has successful_files, failed_files, total_files,
+            # you might want to reconsider how these are updated.
+            # 'total_uses' seems more appropriate for individual block rendering success/failure.
         else:
-            new_block.failed_files = 0
-        self.spellblocks.append(new_block)
+            found_block_stat.failed_uses += 1
+            
+        # For debugging, you can log the params if needed
+        if params:
+            self.write(f"Spellblock '{block_name}' used with params: {params}", level='debug')

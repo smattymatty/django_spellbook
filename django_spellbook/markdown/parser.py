@@ -230,7 +230,7 @@ class BlockProcessor:
             return block_instance.render()
         except Exception as e:
             if self.reporter:
-                self.reporter.record_spellblock_usage(block_class.name, success=False)
+                self.reporter.record_spellblock_usage(block_class.name, success=False, params=kwargs)
             logger.error(f"Error rendering block: {str(e)}")
             return f"<!-- Error rendering block: {str(e)} -->"
 

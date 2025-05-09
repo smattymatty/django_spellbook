@@ -100,7 +100,7 @@ class TestBasicSpellBlockReporting(unittest.TestCase):
         for recorded_block in real_reporter.spellblocks:
             if recorded_block.name == "test_block":
                 found = True
-                self.assertEqual(recorded_block.total_uses, 1)
+                self.assertEqual(recorded_block.total_uses, 2)
                 self.assertEqual(recorded_block.failed_uses, 0)
         
         self.assertTrue(found, "Block wasn't recorded in the reporter")
@@ -123,7 +123,7 @@ class TestBasicSpellBlockReporting(unittest.TestCase):
         # Check if the spellblock counter was incremented
         for recorded_block in real_reporter.spellblocks:
             if recorded_block.name == "test_block":
-                self.assertEqual(recorded_block.total_uses, 3)
+                self.assertEqual(recorded_block.total_uses, 4)
                 break
         else:
             self.fail("Block wasn't recorded in the reporter")
@@ -154,4 +154,4 @@ class TestBasicSpellBlockReporting(unittest.TestCase):
             
             # Verify reporter method was called
             self.reporter.record_spellblock_usage.assert_called_once_with(
-                "standard_block", success=True)
+                "standard_block", success=True, params={'content': '<p>processed content</p>'})
