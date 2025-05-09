@@ -1,3 +1,5 @@
+# django_spellbook/markdown/parser.py
+
 from .extensions.django_like import DjangoLikeTagExtension
 from ..blocks import SpellBlockRegistry
 from typing import Dict, Any, Optional, List, Tuple
