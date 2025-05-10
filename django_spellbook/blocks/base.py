@@ -42,10 +42,12 @@ class BasicSpellBlock:
         if self.content is None:
             return ''
 
-        from django_spellbook.markdown.parser import MarkdownParser
-
-        parser = MarkdownParser(self.content, self.reporter)
-        return parser.get_html()
+        from django_spellbook.parsers import render_spellbook_markdown_to_html
+        return render_spellbook_markdown_to_html(
+            self.content, 
+            self.reporter, 
+            self.spellbook_parser
+            )
 
     def render(self) -> str:
         """

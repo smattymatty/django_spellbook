@@ -1,8 +1,10 @@
 # django_spellbook/markdown/engine.py
+import textwrap
 from django.conf import settings
 import markdown
 import logging
 import re
+from re import Match
 from typing import List, Tuple, Dict, Any, Optional, Type
 #StringIO
 from io import StringIO
@@ -14,6 +16,7 @@ from django_spellbook.blocks import SpellBlockRegistry, BasicSpellBlock
 from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
 from django_spellbook.markdown.extensions.django_like import DjangoLikeTagExtension
 from django_spellbook.management.commands.spellbook_md_p.discovery import discover_blocks
+from django_spellbook.markdown.attribute_parser import parse_spellblock_style_attributes
 
 
 logger = logging.getLogger(__name__) # Standard Python logger
@@ -139,65 +142,18 @@ class SpellbookMarkdownEngine:
 
     def _parse_spellblock_arguments(self, raw_args_str: str) -> Dict[str, str]:
         """
-        Parses a raw string of SpellBlock arguments into a dictionary.
-
-        Example: `type="info" title='My Title' flag` becomes
-        `{'type': 'info', 'title': 'My Title', 'flag': 'flag'}`.
-        Boolean-like flags (attributes without values) are assigned their own name as value.
-
-        Args:
-            raw_args_str (str): The raw argument string from the SpellBlock tag.
-                                e.g., `type="info" title="My Title" featured`
-
-        Returns:
-            Dict[str, str]: A dictionary of parsed arguments.
-                            Returns an empty dict if raw_args_str is empty or malformed.
-        
-        Note:
-            This is a foundational argument parser. More advanced features like
-            type coercion (to int, bool, list), default values, and validation against
-            a SpellBlock's declared parameters will be built upon this in a dedicated
-            argument parsing module/class (`argument_parser.py`).
+        Parses a raw string of SpellBlock arguments into a dictionary using a utility function.
         """
-        kwargs: Dict[str, str] = {}
-        if not raw_args_str or not raw_args_str.strip():
-            return kwargs
+        # The core parsing logic is now delegated.
+        # You can pass self.reporter if the utility function is designed to use it for warnings.
+        kwargs = parse_spellblock_style_attributes(raw_args_str, self.reporter)
+        
+        # The detailed debug prints for specific regex groups (like your old match.group(3), etc.)
+        # would now live inside the parse_spellblock_style_attributes function if you need them.
+        # The key-specific debug prints for "empty_val_arg" (which I've included an example of
+        # in the util function) will be handled there.
 
-        # Regex to find key="value", key='value', key=value, or just key (flag)
-        # It's made more robust to handle various spacing and quote types.
-        pattern = re.compile(
-            r"""
-            (?P<key>[a-zA-Z_][\w-]*)\s*=\s* # Key part (e.g., name=)
-            (?:
-                (?P<d_quote>"([^"]*?)") | # Value in double quotes
-                (?P<s_quote>'([^']*?)') | # Value in single quotes
-                (?P<no_quote>[^\s"'=<>`]+)  # Value without quotes
-            ) |
-            (?P<flag_key>[a-zA-Z_][\w-]*)  # Standalone flag key
-            """,
-            re.VERBOSE
-        )
-
-        for match in pattern.finditer(raw_args_str):
-            if match.group("key"): # It's a key=value pair
-                key = match.group("key")
-                self.reporter.write(f"--MATCHING PATTERN-- key: {key}")
-                # Extract value from appropriate quote group or no_quote group
-                val = match.group("d_quote") or match.group("s_quote") or match.group("no_quote")
-                if val is not None:
-                    kwargs[key] = val
-                else: # Should not happen if regex is correct, but as a fallback
-                    self.reporter.warning(f"Argument parsing issue for key '{key}' in '{raw_args_str}'. Found no value.")
-            elif match.group("flag_key"): # It's a standalone flag
-                flag_key = match.group("flag_key")
-                kwargs[flag_key] = flag_key # Store flag as key=key (common practice for HTML boolean attributes)
-            
-        if not kwargs and raw_args_str.strip(): # If parsing failed to extract anything from a non-empty string
-             self.reporter.warning(f"Could not parse arguments from string: '{raw_args_str}'. Please check syntax (e.g., key=\"value\" or key=value).")
-             logger.warning(f"Argument parsing produced no kwargs from non-empty string: '{raw_args_str}'")
-
-
-        logger.debug(f"Parsed arguments from '{raw_args_str}': {kwargs}")
+        logger.debug(f"Parsed arguments from '{raw_args_str}' (via util): {kwargs}")
         return kwargs
 
     def _process_single_spellblock(
@@ -250,12 +206,28 @@ class SpellbookMarkdownEngine:
                 spellbook_parser=self, # Pass engine for potential nested parsing
                 **parsed_args
             )
+
+            rendered_html_from_block = block_instance.render()
             
+            # --- ENGINE-LEVEL POST-PROCESSING ---
+            # Strip leading/trailing whitespace from the whole block first
+            processed_html = rendered_html_from_block.strip()
+            # Dedent to remove common leading whitespace from each line
+            # This helps prevent Markdown from interpreting indented HTML lines as code blocks
+            if '\n' in processed_html: # Only dedent if there are multiple lines
+                processed_html = "\n".join(line.lstrip() for line in rendered_html_from_block.splitlines())
+            # --- END POST-PROCESSING ---
 
+            if block_name == "argstest": # Your existing debug print
+                print(f"\nDEBUG ENGINE: Raw HTML from '{block_name}.render()':")
+                print("----------------RAW--------------------")
+                print(rendered_html_from_block) # Show original
+                print("----------------PROCESSED FOR INSERTION----------------")
+                print(processed_html) # Show what will be used
+                print("------------------------------------\n")
 
-            rendered_html = block_instance.render()
             logger.debug(f"Successfully rendered SpellBlock: {block_name}")
-            return rendered_html
+            return processed_html # Return the processed version
         except TemplateDoesNotExist as e:
             msg = f"_ - _ Error rendering SpellBlock '{block_name}': {e}"
             self.reporter.error(msg)
@@ -301,44 +273,46 @@ class SpellbookMarkdownEngine:
         # The GitHub issue "Refactor BlockProcessor for True Nested SpellBlock Parsing"
         # will address this directly.
         
-        # Try self-closing first
+        # First, handle self-closing blocks
         def replace_self_closing(match_obj):
             block_name = match_obj.group(1)
             raw_args_str = match_obj.group(2) or ''
-            return self._process_single_spellblock(block_name, raw_args_str, "", True)
+            # _process_single_spellblock now returns cleaned (stripped, lstripped lines) HTML
+            block_html = self._process_single_spellblock(block_name, raw_args_str, "", True)
+            
+            if block_html.strip(): # If the block rendered something meaningful
+                # Ensure it's treated as a distinct block by the final Markdown pass
+                return f"\n\n{block_html}\n\n"
+            return "" # If block produced no output (e.g., error or truly empty render)
 
         processed_segment = SPELLBLOCK_SELF_CLOSING_PATTERN.sub(replace_self_closing, markdown_segment)
 
-        # Then try content-wrapping (this order matters for now with simple regex)
-        def replace_content_wrapping(match_obj):
-            block_name = match_obj.group(1)
-            raw_args_str = match_obj.group(2) or ''
-            raw_content = match_obj.group(3) or ''
-            return self._process_single_spellblock(block_name, raw_args_str, raw_content, False)
-            
-        # Loop for content-wrapping blocks. This iterative approach is flawed for nesting.
-        # A proper parser would build a tree or use a stack.
-        # For this stage of refactor, we accept this limitation.
+        # Then, handle content-wrapping blocks on the result
         temp_segment = processed_segment
-        while True:
-            current_search_start = 0
-            match = SPELLBLOCK_PATTERN.search(temp_segment, pos=current_search_start)
-            if not match:
-                break
-            
-            # Ensure we don't get stuck in an infinite loop if a block renders itself or similar
-            # This is a basic safeguard.
-            if match.start() == current_search_start and len(match.group(0)) == 0:
-                logger.error("Empty match detected, breaking loop to prevent infinite recursion. Check SPELLBLOCK_PATTERN.")
-                break # Avoid infinite loop on zero-width match at start
+        
+        last_match_end = 0
+        new_segments_list = []
 
-            rendered_block = replace_content_wrapping(match)
-            temp_segment = temp_segment[:match.start()] + rendered_block + temp_segment[match.end():]
-            # To avoid re-processing the just-inserted (potentially larger) block in the same spot:
-            # current_search_start = match.start() + len(rendered_block) # This is complex to get right
-                                                                     # with simple regex replacement.
-                                                                     # The better solution is a proper parser.
-        processed_segment = temp_segment
+        for match in SPELLBLOCK_PATTERN.finditer(temp_segment):
+            # Add text before this match
+            new_segments_list.append(temp_segment[last_match_end:match.start()])
+
+            block_name = match.group(1)
+            raw_args_str = match.group(2) or '' # Should be match.group(2)
+            raw_content = match.group(3) or ''  # Should be match.group(3)
+            
+            block_html = self._process_single_spellblock(block_name, raw_args_str, raw_content, False)
+            
+            if block_html.strip():
+                new_segments_list.append(f"\n\n{block_html}\n\n")
+            # else: if block is empty, we effectively remove it and add nothing here.
+            
+            last_match_end = match.end()
+        
+        # Add any remaining text after the last match
+        new_segments_list.append(temp_segment[last_match_end:])
+        
+        processed_segment = "".join(new_segments_list)
         
         return processed_segment
 
@@ -430,19 +404,9 @@ class SpellbookMarkdownEngine:
             logger.warning("No database handler configured; cannot perform database-specific SpellBlock processing.")
         return []
 
-
-
-
-
-
-
-
-
-
+# --- Test Code ---
 
 if __name__ == '__main__':
-    # --- Minimal Django Setup for __main__ testing ---
-    # This is a lightweight way to allow some Django features to work standalone.
     try:
         from django.conf import settings as django_settings
         if not django_settings.configured:

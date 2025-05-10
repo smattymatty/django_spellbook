@@ -1,0 +1,16 @@
+<div class="args-test-block">
+    <p>Arguments Received:</p>
+    <ul>
+    {% for key, value in parsed_args_sorted %}
+        <li>{{ key }}: [{{ value }}]</li> {# Brackets help see exact value boundaries #}
+    {% empty %}
+        <li>No arguments provided.</li>
+    {% endfor %}
+    </ul>
+    {% if content %}
+    <div class="content-wrapper">
+        <p>Content:</p>
+        {{ content|safe }} {# Assuming content from process_content is already HTML #}
+    </div>
+    {% endif %}
+</div>

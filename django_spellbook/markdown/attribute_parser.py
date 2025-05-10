@@ -1,49 +1,93 @@
 # django_spellbook/markdown/attribute_parser.py
 
 import re
-from typing import Dict, List
+from typing import Dict, List, Optional, Any # Add Optional, Any
+import logging # For potential logging within the util
+
+logger = logging.getLogger(__name__) # Optional: if you want logging from this file
 
 # --- Regular Expressions for Attribute Parsing ---
-
-# Matches class shortcuts like ".my-class" or ".another_class"
-# Allows alphanumeric characters, hyphens, and colons (for Tailwind-like classes)
+# (Your existing RE_CLASS, RE_ID, RE_ATTR for parse_attributes remain here)
 RE_CLASS = re.compile(r'\.([:\w-]+)')
-
-# Matches ID shortcuts like "#my-id"
-# Allows alphanumeric characters and hyphens
 RE_ID = re.compile(r'#([\w-]+)')
+RE_ATTR = re.compile(r'([@:\w-]+)=([\'"])(.*?)\2')
 
-# Matches standard HTML attributes like name="value" or data-attr='value'
-# Handles single or double quotes for values.
-# Allows alphanumeric characters, hyphens, and colons in attribute names (e.g., @click, data-*)
-RE_ATTR = re.compile(r'([@:\w-]+)=([\'"])(.*?)\2') # Group 3 captures the value without quotes
 
-# --- Parsing Function ---
+# --- New Regex for SpellBlock Arguments ---
+# This pattern is designed for the SpellBlock argument syntax:
+# key="value", key='value', key=value_no_quotes, flag
+SPELLBLOCK_ARG_PATTERN = re.compile(
+    r"""
+    (?P<key>[a-zA-Z_][\w-]*) # Key name
+    (?: # Optional equals and value part
+        \s*=\s* # Equals sign, surrounded by optional whitespace
+        (?: # Group for different value types
+            "(?P<d_quoted_value>[^"]*?)" | # Double-quoted value (content in d_quoted_value)
+            '(?P<s_quoted_value>[^']*?)' | # Single-quoted value (content in s_quoted_value)
+            (?P<unquoted_value>[^\s"'=<>`]+)  # Unquoted value
+        )
+    )? # The entire equals and value part is optional (for flags)
+    """,
+    re.VERBOSE
+)
+
+def parse_spellblock_style_attributes(raw_args_str: str, reporter: Optional[Any] = None) -> Dict[str, str]:
+    """
+    Parses a raw string of SpellBlock-style arguments into a dictionary.
+    Handles: key="value", key='value', key=value, flag.
+    Ensures empty string values like key="" are parsed as {'key': ''}.
+    """
+    kwargs: Dict[str, str] = {}
+    if not raw_args_str or not raw_args_str.strip():
+        return kwargs
+
+    for match in SPELLBLOCK_ARG_PATTERN.finditer(raw_args_str):
+        key = match.group("key")
+        if not key: # Should not happen if regex matches, but as a safeguard
+            continue
+        
+        d_quoted_val = match.group("d_quoted_value")
+        s_quoted_val = match.group("s_quoted_value")
+        unquoted_val = match.group("unquoted_value")
+
+        val_to_assign = None
+        was_key_value_pair = False
+
+        if d_quoted_val is not None:
+            val_to_assign = d_quoted_val  # Correctly captures empty string ''
+            was_key_value_pair = True
+        elif s_quoted_val is not None:
+            val_to_assign = s_quoted_val  # Correctly captures empty string ''
+            was_key_value_pair = True
+        elif unquoted_val is not None:
+            val_to_assign = unquoted_val
+            was_key_value_pair = True
+        
+        if was_key_value_pair:
+            # This check is crucial: val_to_assign can be an empty string '', which is NOT None.
+            if val_to_assign is not None: # This check is a bit redundant if was_key_value_pair is True and regex ensures a value group matched.
+                                            # But good for safety. It will be true if val_to_assign is ''.
+                kwargs[key] = val_to_assign
+                if key == "empty_val_arg" or (key == "key" and raw_args_str == 'key=""'): # For specific debugging
+                    print(f"UTIL PARSER DBG ({key}): Added to kwargs: {key}='{kwargs[key]}'")
+            # No specific warning here for "val was None" if it was a key-value because regex should ensure value part.
+        else:
+            # If no value part was matched with an '=', it's a flag
+            # (and the key itself wasn't empty)
+            kwargs[key] = key # Assign key name as value for flags
+
+    # This warning is useful if the whole string didn't yield any kwargs
+    # despite being non-empty, indicating a potential wholesale syntax error.
+    if not kwargs and raw_args_str.strip():
+        if reporter:
+            reporter.warning(f"Could not parse any arguments from string (via util): '{raw_args_str}'. Please check syntax.")
+        logger.warning(f"Argument parsing produced no kwargs from non-empty string (via util): '{raw_args_str}'")
+
+    return kwargs
+
 
 def parse_attributes(attrs_string: str) -> Dict[str, str]:
-    """
-    Parses a string containing attribute definitions, including shortcuts.
-
-    Handles:
-    - Class shortcuts: `.class-name`
-    - ID shortcuts: `#id-name`
-    - Standard attributes: `key="value"` or `key='value'`
-
-    Precedence Rules:
-    - Explicit `id="..."` attribute overrides any `#id-name` shortcut.
-    - Explicit `class="..."` attribute is combined with `.class-name` shortcuts.
-      Shortcut classes appear first, followed by classes from the explicit attribute.
-    - Only the *first* `#id-name` shortcut found is considered if no explicit
-      `id="..."` attribute is present.
-
-    Args:
-        attrs_string: The raw string containing attributes from the tag.
-                      Example: ' .my-class #my-id data-value="example" class="extra-class" '
-
-    Returns:
-        A dictionary where keys are attribute names and values are attribute values.
-        Example: {'class': 'my-class extra-class', 'id': 'my-id', 'data-value': 'example'}
-    """
+    # ... (your existing code for this function) ...
     if not attrs_string:
         return {}
 
