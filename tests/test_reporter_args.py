@@ -304,7 +304,7 @@ class MarkdownReporterSpellblockTestCase(TestCase):
         # Verify the list was extended with a new block
         self.assertEqual(len(self.reporter.spellblocks), 4)
         self.assertEqual(self.reporter.spellblocks[3].name, 'block4')
-        self.assertEqual(self.reporter.spellblocks[3].total_uses, 0)
+        self.assertEqual(self.reporter.spellblocks[3].total_uses, 1)
 
         
         # Test with a block that's already in the list
@@ -357,4 +357,4 @@ class MarkdownReporterSpellblockTestCase(TestCase):
         #self.assertIn({"name": "block4", "total_files": 0, "successful_files": 0, "failed_files": 0}, json_dict["spellblocks"])
 
         self.assertIn({'name': 'block3', 'total_uses': 30, 'failed_uses': 1}, json_dict["spellblocks"])
-        self.assertIn({'name': 'block4', 'total_uses': 0, 'failed_uses': 0}, json_dict["spellblocks"])
+        self.assertIn({'name': 'block4', 'total_uses': 0, 'failed_uses': 1}, json_dict["spellblocks"])

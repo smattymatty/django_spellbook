@@ -116,7 +116,7 @@ class TestCardBlock(TestCase):  # Change to Django's TestCase
         block = CardBlock(MarkdownReporter(StringIO()), content=content)
         context = block.get_context()
 
-        self.assertIn("<h1>Heading</h1>", context['content'])
+        self.assertIn("<h1 id=\"heading\">Heading</h1>", context['content'])
         self.assertIn("<li>List item 1</li>", context['content'])
         self.assertIn("<li>List item 2</li>", context['content'])
 

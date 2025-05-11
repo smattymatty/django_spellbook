@@ -80,4 +80,5 @@ class SpellBlockRegistry:
         Returns:
             Optional[Type[BasicSpellBlock]]: The registered block class if found, None otherwise.
         """
+
         return cls._registry.get(name)

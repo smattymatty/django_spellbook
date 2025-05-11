@@ -87,3 +87,50 @@ class AccordionBlock(BasicSpellBlock):
         context['title'] = self.kwargs.get('title', '')
         context['open'] = self.kwargs.get('open', False)
         return context
+
+# --- Dummy SpellBlocks for Testing ---
+
+@SpellBlockRegistry.register()
+class SimpleTestBlock(BasicSpellBlock):
+    name = "simple"
+    template = "django_spellbook/blocks/test_blocks/simple_block.html" # Will look in tests/templates/test_blocks/simple_block.html
+
+    def __init__(self, content=None, reporter=None, spellbook_parser=None, **kwargs):
+        super().__init__(content=content, reporter=reporter, spellbook_parser=spellbook_parser, **kwargs)
+        self.name = SimpleTestBlock.name # Ensure name is set on instance
+        self.template = SimpleTestBlock.template # Ensure template is set on instance
+
+@SpellBlockRegistry.register()
+class SelfClosingTestBlock(BasicSpellBlock):
+    name = "selfclosing"
+    template = "django_spellbook/blocks/test_blocks/self_closing_block.html"
+
+    def __init__(self, content=None, reporter=None, spellbook_parser=None, **kwargs):
+        super().__init__(content=content, reporter=reporter, spellbook_parser=spellbook_parser, **kwargs)
+        self.name = SelfClosingTestBlock.name
+        self.template = SelfClosingTestBlock.template
+
+@SpellBlockRegistry.register()
+class ArgsTestBlock(BasicSpellBlock):
+    name = "argstest"
+    template = "django_spellbook/blocks/test_blocks/args_test_block.html"
+
+    def __init__(self, content=None, reporter=None, spellbook_parser=None, **kwargs):
+        super().__init__(content=content, reporter=reporter, spellbook_parser=spellbook_parser, **kwargs)
+        # BasicSpellBlock.__init__ should handle setting self.name and self.template
+        # from class attributes if they are not already instance attributes.
+
+    def get_context(self) -> dict:
+        super().get_context() # Call parent's get_context to ensure self.kwargs is set
+        # self.kwargs contains the arguments passed to the block instance (parsed from the tag)
+        # self.content is the raw content string from between the block tags
+
+        # BasicSpellBlock's process_content() turns self.content (Markdown) into HTML
+        processed_content_html = self.process_content()
+
+        context = {
+            'content': processed_content_html,
+            # Provide the parsed arguments, sorted by key for predictable template output
+            'parsed_args_sorted': sorted(self.kwargs.items())
+        }
+        return context

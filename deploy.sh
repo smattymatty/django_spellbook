@@ -12,7 +12,7 @@ echo "Starting test and deployment process..."
 
 # Run the tests with coverage
 echo "Running tests with coverage..."
-coverage run -m unittest
+coverage run manage.py test
 test_status=$?
 
 if [ $test_status -ne 0 ]; then
