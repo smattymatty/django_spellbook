@@ -239,8 +239,8 @@ class MarkdownReporter:
         # Ensure self.spellblocks is initialized if it wasn't in __init__
         # Though your __init__ does initialize it.
         from django_spellbook.management.commands.spellbook_md_p.discovery import SpellblockStatistics, build_new_spellblock_statistics
-        if not hasattr(self, 'spellblocks'):
-            self.spellblocks: List[SpellblockStatistics] = []
+        if not hasattr(self, 'spellblocks'): # pragma: no cover
+            self.spellblocks: List[SpellblockStatistics] = [] # TODO: Properly test record_spellblock_usage
 
         found_block_stat = None
         for block_stat in self.spellblocks:

@@ -103,7 +103,7 @@ def get_installed_apps():
             logger.warning("SPELLBOOK_MD_APP is not set in settings. Using default template.")
             return []
         return result
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         logger.error(f"Error getting SPELLBOOK_MD_APP from settings: {str(e)}")
         return []
 

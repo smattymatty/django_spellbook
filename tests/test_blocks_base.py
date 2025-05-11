@@ -64,11 +64,11 @@ class TestBasicSpellBlock(TestCase):
         args, kwargs = mock_markdown.call_args
         
         # Verify the content matches
-        self.assertEqual(args[0], self.test_content + '\n')
+        self.assertEqual(args[0], self.test_content + '')
         
         # Verify extensions list length
         extensions = kwargs['extensions']
-        self.assertEqual(len(extensions), 5)
+        self.assertEqual(len(extensions), 8)
         
         # Verify the type of the first extension
         self.assertIsInstance(extensions[0], DjangoLikeTagExtension)
@@ -79,6 +79,9 @@ class TestBasicSpellBlock(TestCase):
             'markdown.extensions.tables',
             'markdown.extensions.nl2br',
             'markdown.extensions.sane_lists',
+            'markdown.extensions.footnotes',
+            'markdown.extensions.attr_list',
+            'markdown.extensions.toc',
         ])
         
         self.assertEqual(

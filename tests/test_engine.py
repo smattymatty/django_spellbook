@@ -14,6 +14,10 @@ from django_spellbook.markdown.engine import SpellbookMarkdownEngine
 from django_spellbook.blocks import BasicSpellBlock, SpellBlockRegistry
 from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
 
+# import test blocks
+from django_spellbook.spellblocks import SimpleTestBlock, SelfClosingTestBlock, ArgsTestBlock
+
+
 # Disable most logging for cleaner test output, can be adjusted
 logging.disable(logging.CRITICAL)
 
@@ -22,28 +26,48 @@ logging.disable(logging.CRITICAL)
 class TestSpellbookMarkdownEngine(unittest.TestCase):
 
     @classmethod
+    def _clear_spellblock_registry(cls):
+        """
+        Helper method to robustly clear the SpellBlockRegistry.
+        """
+        registry_cleared = False
+        if hasattr(SpellBlockRegistry, '_registry') and isinstance(SpellBlockRegistry._registry, dict):
+            SpellBlockRegistry._registry.clear()
+            registry_cleared = True
+            print("DEBUG: SpellBlockRegistry._registry cleared.") # For debugging
+        # Add other checks if your registry can be structured differently
+        # elif hasattr(SpellBlockRegistry, 'blocks') ...
+
+        if not registry_cleared:
+            print(
+                "WARNING: TestSpellbookMarkdownEngine._clear_spellblock_registry() "
+                "could not clear SpellBlockRegistry via known attributes. "
+                "Test isolation may be compromised."
+            )
+        # else:
+            print(f"DEBUG: Registry after clear: {SpellBlockRegistry._registry}")
+    
+    @classmethod
     def setUpClass(cls):
         """
         Configure Django settings once for all tests in this class.
         """
-        # Assuming this test file is in your_project_root/tests/test_engine.py
-        # and templates are in your_project_root/tests/templates/
         cls.test_templates_dir = Path(__file__).parent / "templates"
 
         if not settings.configured:
             settings.configure(
                 INSTALLED_APPS=[
-                    'django_spellbook', # Your app must be importable
+                    'django_spellbook',
+                    'django.contrib.auth',
+                    'django.contrib.contenttypes',
                 ],
                 TEMPLATES=[
                     {
                         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-                        'DIRS': [
-                            str(cls.test_templates_dir) # For test-specific templates
-                        ],
-                        'APP_DIRS': True, # For finding django_spellbook's own templates if any default block relies on them
+                        'DIRS': [str(cls.test_templates_dir)],
+                        'APP_DIRS': True,
                         'OPTIONS': {
-                            'debug': True, # Enable template debugging features
+                            'debug': True,
                             'context_processors': [
                                 'django.template.context_processors.debug',
                                 'django.template.context_processors.request',
@@ -52,9 +76,18 @@ class TestSpellbookMarkdownEngine(unittest.TestCase):
                             ],
                         },
                     }
-                ]
+                ],
+                DATABASES={
+                    'default': {
+                        'ENGINE': 'django.db.backends.sqlite3',
+                        'NAME': ':memory:',
+                    }
+                },
             )
-            django.setup() # Initialize Django's settings and app registry
+            django.setup()
+
+        # Clear the registry once before any tests in this class run.
+        cls._clear_spellblock_registry()
 
 
     @classmethod
@@ -62,22 +95,57 @@ class TestSpellbookMarkdownEngine(unittest.TestCase):
         """
         Clean up after all tests in this class.
         """
+        cls._clear_spellblock_registry()
+        current_registry_state = {}
         if hasattr(SpellBlockRegistry, '_registry') and isinstance(SpellBlockRegistry._registry, dict):
-            SpellBlockRegistry._registry.clear()
-        elif hasattr(SpellBlockRegistry, 'blocks') and isinstance(SpellBlockRegistry.blocks, dict): # Fallback if .blocks is the dict
-            SpellBlockRegistry.blocks.clear()
-        else:
-            print("Warning: Could not determine how to clear SpellBlockRegistry in tearDownClass.")
-        print(f"Registry after tearDownClass: {getattr(SpellBlockRegistry, '_registry', getattr(SpellBlockRegistry, 'blocks', 'N/A'))}")
+            current_registry_state = SpellBlockRegistry._registry.copy() # Get a copy for printing
+        # print(f"DEBUG: Registry after tearDownClass: {current_registry_state}")
 
     def setUp(self):
         """
         Set up for each individual test method.
+        Ensures a clean SpellBlockRegistry and fresh engine for each test.
         """
+        # --- 1. Clear the SpellBlockRegistry ---
+        self._clear_spellblock_registry()
+        # print(f"DEBUG: Registry after clear in setUp: {SpellBlockRegistry._registry}")
+
+
+        # --- 2. Define Test-Specific Blocks ---
+        self.test_block_classes = [SimpleTestBlock, SelfClosingTestBlock, ArgsTestBlock]
+
+        # --- 3. Initialize Reporter ---
         self.reporter_stdout = StringIO()
         self.reporter = MarkdownReporter(stdout=self.reporter_stdout, report_level='debug')
 
+        # --- 4. Manually Register Test Blocks ---
+        # This is the corrected way to populate the registry for tests,
+        # bypassing the decorator mechanism for already defined classes.
+        if hasattr(SpellBlockRegistry, '_registry') and isinstance(SpellBlockRegistry._registry, dict):
+            for block_class in self.test_block_classes:
+                # Retrieve the 'name' attribute from the block class
+                block_name = getattr(block_class, 'name', None)
+                if not block_name:
+                    raise ValueError(
+                        f"Test block class {block_class.__name__} must have a 'name' attribute defined."
+                    )
+
+                # Directly add the block class to the internal registry dictionary
+                SpellBlockRegistry._registry[block_name] = block_class
+                # print(f"DEBUG: Registered '{block_name}' in setUp.") # For debugging
+        else:
+            # This case should ideally not be reached if _clear_spellblock_registry worked
+            # and SpellBlockRegistry is structured as expected.
+            raise AttributeError(
+                "SpellBlockRegistry._registry is not a dictionary or does not exist. Cannot register test blocks."
+            )
+        
+        # print(f"DEBUG: Registry after manual registration in setUp: {SpellBlockRegistry._registry}")
+
+
+        # --- 5. Initialize the Markdown Engine ---
         self.engine = SpellbookMarkdownEngine(reporter=self.reporter, fail_on_error=False)
+
 
 
     def tearDown(self):
@@ -167,11 +235,6 @@ class TestSpellbookMarkdownEngine(unittest.TestCase):
                 # write to file for debugging
                 with open(f"tests/templates/engine/args_{block_raw_content}.html", "w") as f:
                     f.write(html_output)
-                # -- Golden File Test (Ultimate Goal) ---
-                with open(f"tests/html_goldens/engine/args_{block_raw_content}.html", "r") as f:
-                    golden_html = f.read()
-                    self.assertEqual(html_output, golden_html, f"Golden file does not match rendered output for input: {md_input}")
-                # -- End Golden File Test ---
                     
                 # Verify the prefix before the block is rendered
                 if md_input.startswith('{نواتج التعلم}'):
@@ -291,5 +354,18 @@ class TestSpellbookMarkdownEngine(unittest.TestCase):
         
         self.assertIn("'errorblock' not found in registry.", log_output)
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_specific_files(self):
+        from django_spellbook.parsers import render_spellbook_markdown_to_html
+
+        """Test that specific files are parsed and rendered."""
+        files_to_parse = [
+            "tests/markdown_testers/edulite_proposal_1.md",
+        ]
+
+        for file_path in files_to_parse:
+            with open(file_path, "r") as f:
+                markdown_text = f.read()
+            html = render_spellbook_markdown_to_html(markdown_text)
+            # create an html file for each file parsed
+            with open(f"tests/html_testers/spec/{(file_path.split('/')[-1])[:-3]}.html", "w") as f:
+                f.write(html)

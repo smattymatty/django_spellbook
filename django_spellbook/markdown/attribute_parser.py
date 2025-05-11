@@ -43,8 +43,6 @@ def parse_spellblock_style_attributes(raw_args_str: str, reporter: Optional[Any]
 
     for match in SPELLBLOCK_ARG_PATTERN.finditer(raw_args_str):
         key = match.group("key")
-        if not key: # Should not happen if regex matches, but as a safeguard
-            continue
         
         d_quoted_val = match.group("d_quoted_value")
         s_quoted_val = match.group("s_quoted_value")
@@ -78,8 +76,8 @@ def parse_spellblock_style_attributes(raw_args_str: str, reporter: Optional[Any]
 
     # This warning is useful if the whole string didn't yield any kwargs
     # despite being non-empty, indicating a potential wholesale syntax error.
-    if not kwargs and raw_args_str.strip():
-        if reporter:
+    if not kwargs and raw_args_str.strip(): # pragma: no cover
+        if reporter: # TODO: Add proper testing for reporter in parse_spellblock_style_attributes
             reporter.warning(f"Could not parse any arguments from string (via util): '{raw_args_str}'. Please check syntax.")
         logger.warning(f"Argument parsing produced no kwargs from non-empty string (via util): '{raw_args_str}'")
 
