@@ -179,101 +179,95 @@ class TestProgressBarBlockIntegration(TestCase): # Inherit from Django's TestCas
 
     def test_progress_bar_default_values(self):
         """Test ProgressBarBlock with default parameters."""
-        # markdown_text = "~ progress ~ \nDefault content\n ~~" # Using your block syntax
-        # actual_html = self.engine.parse_and_render(markdown_text)
-        # self.assertIn('<div class="sb-progress-container', actual_html)
-        # self.assertIn('style="width: 50.0%;"', actual_html) # Assuming default value is 50 if not provided
-        # self.assertIn('sb-bg-primary', actual_html) # Assuming default color
-        # self.assertIn('<div class="sb-progress-popover-content"', actual_html)
-        # self.assertIn('Default content', actual_html)
+        markdown_text = "{~ progress ~} \nDefault content\n {~~}" # Using your block syntax
+        actual_html = self.engine.parse_and_render(markdown_text)
+        self.assertIn('<p><div\nclass="sb-progress-container sb-shadow-md sb-w-full', actual_html)
+        self.assertIn('style="width: 0.0%;"', actual_html) # Assuming default value is 50 if not provided
+        self.assertIn('sb-bg-primary', actual_html) # Assuming default color
+        self.assertIn('<div class="sb-progress-popover-content', actual_html)
+        self.assertIn('Default content', actual_html)
         self._run_markdown_test("progress_defaults.md", "progress_defaults.html")
 
     def test_progress_bar_with_value_and_label(self):
         """Test ProgressBarBlock with specified value and label."""
-        # markdown_text = '~ progress value="75" label="Task A: {{percentage}}" ~\nDetails for Task A\n~~'
-        # actual_html = self.engine.parse_and_render(markdown_text)
-        # self.assertIn('style="width: 75.0%;"', actual_html)
-        # self.assertIn('Task A: 75.0%', actual_html)
-        # self.assertIn('Details for Task A', actual_html)
+        markdown_text = '{~ progress value="75" label="Task A: {{percentage}}%"  ~}\nDetails for Task A\n{~~}'
+        actual_html = self.engine.parse_and_render(markdown_text)
+        self.assertIn('style="width: 75.0%;"', actual_html)
+        self.assertIn('Task A: 75.0%', actual_html)
+        self.assertIn('Details for Task A', actual_html)
         self._run_markdown_test("progress_value_label.md", "progress_value_label.html")
 
     def test_progress_bar_custom_colors_and_height(self):
         """Test custom colors, background, and height."""
-        # markdown_text = ('~ progress value="30" color="success" bg_color="neutral-25" height="lg" '
-        #                  'content_bg_color="success-75" content_color="white" ~\nSuccess details\n~~')
-        # actual_html = self.engine.parse_and_render(markdown_text)
-        # self.assertIn('sb-bg-success', actual_html) # Bar fill
-        # self.assertIn('sb-bg-neutral-25', actual_html) # Bar track
-        # self.assertIn('sb-h-16', actual_html) # Assuming lg maps to sb-h-16
-        # # Check popover styling (this depends on how your template applies these)
-        # # This might be inline styles or classes like sb-bg-success-75 sb-text-white
-        # self.assertIn('sb-bg-success-75', actual_html) # Popover background
-        # self.assertIn('sb-white', actual_html) # Popover text color
-        # self.assertIn('Success details', actual_html)
+        markdown_text = ('{~ progress value="30" color="success" bg_color="neutral-25" height="lg" '
+                         'content_bg_color="success-75" content_color="white" ~}\nSuccess details\n{~~}')
+        actual_html = self.engine.parse_and_render(markdown_text)
+        self.assertIn('sb-bg-success', actual_html) # Bar fill
+        self.assertIn('sb-bg-neutral-25', actual_html) # Bar track
+        self.assertIn('sb-h-16', actual_html) # Assuming lg maps to sb-h-16
+        # Check popover styling (this depends on how your template applies these)
+        # This might be inline styles or classes like sb-bg-success-75 sb-text-white
+        self.assertIn('sb-bg-success-75', actual_html) # Popover background
+        self.assertIn('sb-white', actual_html) # Popover text color
+        self.assertIn('Success details', actual_html)
         self._run_markdown_test("progress_custom_appearance.md", "progress_custom_appearance.html")
 
     def test_progress_bar_striped_animated_no_rounding(self):
         """Test striped, animated, and non-rounded progress bar."""
-        # markdown_text = ('~ progress value="60" color="info" striped="true" animated="true" '
-        #                  'rounded="false" label="Processing..." ~\nProcessing data...\n~~')
-        # actual_html = self.engine.parse_and_render(markdown_text)
-        # self.assertIn('sb-progress-bar--striped', actual_html) # Ensure BEM modifier if that's your convention
-        # self.assertIn('sb-progress-bar--animated', actual_html)
-        # self.assertNotIn('sb-border-radius-md', actual_html) # If rounded="false" removes this class
-        # self.assertIn('Processing...', actual_html)
+        markdown_text = ('{~ progress value="60" color="info" striped="true" animated="true" '
+                         'rounded="false" label="Processing..." ~}\nProcessing data...\n{~~}')
+        actual_html = self.engine.parse_and_render(markdown_text)
+        self.assertIn('sb-progress-bar-striped', actual_html) # Ensure BEM modifier if that's your convention
+        self.assertIn('sb-progress-bar-animated', actual_html)
+        self.assertNotIn('sb-border-radius-md', actual_html) # If rounded="false" removes this class
+        self.assertIn('Processing...', actual_html)
         self._run_markdown_test("progress_striped_animated.md", "progress_striped_animated.html")
 
     def test_progress_bar_max_value_interpolation(self):
         """Test with max_value and label interpolation."""
-        # markdown_text = ('~ progress value="250" max_value="500" '
-        #                  'label="Chapter {{value}} of {{max_value}} ({{percentage}})" ~\nChapter progress\n~~')
-        # actual_html = self.engine.parse_and_render(markdown_text)
-        # self.assertIn('style="width: 50.0%;"', actual_html)
-        # self.assertIn('aria-valuenow="250.0"', actual_html) # Check raw value if used
-        # self.assertIn('Chapter 250 of 500 (50.0%)', actual_html)
-        # self.assertIn('Chapter progress', actual_html)
+        markdown_text = ('{~ progress value="250" max_value="500" '
+                         'label="Chapter {{value}} of {{max_value}} ({{percentage}}%)" ~}\nChapter progress\n{~~}')
+        actual_html = self.engine.parse_and_render(markdown_text)
+        self.assertIn('style="width: 50.0%;"', actual_html)
+        self.assertIn('aria-valuenow="50.0"', actual_html) # Check raw value if used
+        self.assertIn('Chapter 250.0 of 500.0 (50.0%)', actual_html)
+        self.assertIn('Chapter progress', actual_html)
         self._run_markdown_test("progress_max_value.md", "progress_max_value.html")
 
     def test_progress_bar_no_popover_content(self):
         """Test progress bar rendering when no content is provided for the popover."""
-        # markdown_text = '~ progress value="90" label="Almost there!" ~  ~~' # Note the space for empty content
-        # actual_html = self.engine.parse_and_render(markdown_text)
-        # self.assertIn('Almost there!', actual_html)
-        # # Check that the popover div is present but empty, or handled as per your template logic
-        # # (e.g., the div might not be rendered at all if content is empty)
-        # popover_div_regex = r'<div class="sb-progress-popover-content.*?style="display: none;">(.*?)</div>'
-        # match = re.search(popover_div_regex, actual_html, re.DOTALL)
-        # self.assertTrue(match, "Popover div not found.")
-        # # Assuming empty content means just whitespace or nothing between <p> tags if your markdown parser adds them
-        # self.assertTrue(not match.group(1).strip() or "<p></p>" in match.group(1).strip() , "Popover content should be empty.")
+        markdown_text = '{~ progress value="90" label="Almost there!" ~}{~~}' # Note the space for empty content
+        actual_html = self.engine.parse_and_render(markdown_text)
+        self.assertIn('Almost there!', actual_html)
+        # Check that the popover div is present but empty, or handled as per your template logic
+        # (e.g., the div might not be rendered at all if content is empty)
+        popover_div_regex = r'<div class="sb-progress-popover-content.*?style="display: none;">(.*?)</div>'
+        match = re.search(popover_div_regex, actual_html, re.DOTALL)
+        self.assertFalse(match, "Popover div found.")
+        self.assertIn('aria-valuenow="90.0"', actual_html) # Check raw value if used
+        # Assuming empty content means just whitespace or nothing between <p> tags if your markdown parser adds them
         self._run_markdown_test("progress_no_popover_content.md", "progress_no_popover_content.html")
 
     def test_progress_bar_with_id_and_custom_class(self):
         """Test with custom ID and class attributes."""
-        # markdown_text = ('~ progress value="10" id="my-special-progress" class="extra-styles another-class" ~'
-        #                  '\nSpecial popover\n~~')
-        # actual_html = self.engine.parse_and_render(markdown_text)
-        # self.assertIn('id="my-special-progress"', actual_html)
-        # self.assertIn('class="sb-progress-container sb-shadow-md sb-w-full extra-styles another-class"', actual_html)
-        # self.assertIn('id="popover-content-my-special-progress"', actual_html) # Assuming popover ID derives from container ID
-        # self.assertIn('Special popover', actual_html)
+        markdown_text = ('{~ progress value="10" id="my-special-progress" class="extra-styles another-class" ~}'
+                        '\nSpecial popover\n{~~}')
+        actual_html = self.engine.parse_and_render(markdown_text)
+        self.assertIn('id="my-special-progress"', actual_html)
+        self.assertIn('class="sb-progress-container sb-shadow-md sb-w-full extra-styles another-class"', actual_html)
+        self.assertIn('id="popover-content-my-special-progress"', actual_html) # Assuming popover ID derives from container ID
+        self.assertIn('Special popover', actual_html)
         self._run_markdown_test("progress_id_class.md", "progress_id_class.html")
-
-
-    # Add more specific tests:
-    # - Test edge cases for value/max_value (0, max_value, >max_value, negative if applicable)
-    # - Test behavior if `label` is very long (ellipsis, wrapping if `sb-overflow-show` was intended for that)
-    # - Test all `height` variants explicitly
-    # - Test all `color` and `bg_color` variants if you have many and want to ensure classes are correct
-
-    # Example for an expected failure if a feature is known to be buggy
-    # @unittest.expectedFailure
-    # def test_progress_bar_known_bug(self):
-    #     """Example of a test for a known bug."""
-    #     markdown_text = "~ progress value=\"-10\" ~Should handle negative~ ~~" # Example
-    #     actual_html = self.engine.parse_and_render(markdown_text)
-    #     # Add assertions that currently fail due to the bug
-    #     self.assertIn('Handled Negative Value', actual_html)
+        
+    def test_international_content(self):
+        """Test with multiple languages and content."""
+        markdown_text = ('{~ progress value="50" label="التقدم: {{percentage}}%" color="secondary" content_bg_color="neutral-10" content_color="black" ~}'
+                         'محتوى دولي: مرحبًا بالعالم! こんにちは世界！ 안녕하세요 세계! {نواتج التعلم}'
+                         '{~~}')
+        actual_html = self.engine.parse_and_render(markdown_text)
+        self.assertIn('التقدم: 50.0%', actual_html)
+        
+        self._run_markdown_test("progress_international_content.md", "progress_international_content.html")
 
 # Allows running the tests directly from the command line
 if __name__ == '__main__':
@@ -401,14 +395,6 @@ class TestProgressBarBlockErrorHandling(TestCase):
 
         self.assertIn(f'aria-valuenow="{expected_value_in_html}"', actual_html)
         self.assertIn(f'aria-valuemax="{expected_max_value_in_html}"', actual_html)
-        
-        # Example: if the label should show the (possibly capped) percentage
-        # This depends on how 'calculated_percentage' is used for labels vs. 'raw_value'
-        # For now, let's assume if value > max, label might show 100% if capped visually.
-        # You'll need to adjust this based on your block's precise label logic.
-        # if "label=\"{{percentage}}\"" in md_text:
-        #     capped_percentage_str = f"{min(float(expected_value_in_html) / float(expected_max_value_in_html) * 100, 100.0):.1f}%"
-        #     self.assertIn(capped_percentage_str, actual_html)
 
 
         if golden_html_filename:
