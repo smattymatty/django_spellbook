@@ -1,0 +1,1 @@
+{~ progress value="30" color="success" bg_color="neutral-25" height="lg" content_bg_color="success-75" content_color="white" ~}Success details {نواتج التعلم}{~~}

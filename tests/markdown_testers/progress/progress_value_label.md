@@ -1,0 +1,1 @@
+{~ progress value="75" label="My Task: {{percentage}}" ~}Task details here {نواتج التعلم}{~~}

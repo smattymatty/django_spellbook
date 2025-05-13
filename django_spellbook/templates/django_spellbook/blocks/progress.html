@@ -1,0 +1,148 @@
+{# At the top of your SpellBlock template, or where unique_suffix is first needed #}
+{% if not id %}
+    {% if content %}
+    {% now "Uus" as unique_block_id_suffix %} {# Assigns to unique_block_id_suffix variable #}
+    {% endif %}
+  {% endif %}
+
+{# Template for the ProgressBarBlock - Polished for Style and Bug Fixes #}
+<div
+  class="sb-progress-container sb-shadow-md sb-w-full {% if class %}{{ class }}{% endif %}"
+  id="{% if id %}{{ id }}{% else %}progress-container-{{ unique_block_id_suffix }}{% endif %}"
+  >
+  {# External Label: Displayed above the progress bar #}
+  {% if processed_label and not show_percentage and '{{percentage}}' not in label|default:'' %}
+    <div class="sb-progress-label-external sb-mb-1 
+    {% if height == 'sm' %}sb-text-xs{% elif height == 'lg' %}sb-text-lg{% else %}sb-text-md{% endif %}
+    ">
+      {{ processed_label }}
+    </div>
+  {% endif %}
+
+  {# Progress Track: The background of the progress bar #}
+  <div
+    class="sb-progress sb-w-full sb-overflow-hidden {# Base track styles #}
+           sb-bg-{{ bg_color|default:'white-50' }} {# Customizable background #}
+           {% if height == 'sm' %}sb-h-4{% elif height == 'lg' %}sb-h-16{% else %}sb-h-8{% endif %} {# Height variants #}
+           {% if rounded %}sb-border-radius-md{% endif %}" {# Optional rounding #}
+  >
+    {# Progress Bar Fill: The actual colored bar indicating progress #}
+    <div
+      class="sb-progress-bar sb-h-full sb-flex sb-items-center sb-justify-center {# Base fill styles + flex for internal label #}
+             sb-bg-{{ color|default:'primary' }} {# Customizable fill color #}
+             {% if rounded %}sb-border-radius-md{% endif %} {# Match track rounding #}
+             {% if striped %}sb-progress-bar-striped{% endif %} {# Optional striped effect #}
+             {% if animated and striped %}sb-progress-bar-animated{% endif %}" {# Optional animation for stripes #}
+      role="progressbar"
+      style="width: {{ calculated_percentage }}%;"
+      aria-valuenow="{{ calculated_percentage }}"
+      aria-valuemin="0"
+      aria-valuemax="100"
+    >
+      {# Internal Label: Displayed inside the progress bar fill #}
+      {% if show_percentage or '{{percentage}}' in label|default:'' %}
+        {% if processed_label or show_percentage %}
+          <span class="sb-progress-label-internal sb-flex sb-text-center sb-black-75 
+          {% if height == 'sm' %}sb-text-xs{% elif height == 'lg' %}sb-text-lg{% else %}sb-text-md{% endif %}
+          sb-font-semibold sb-whitespace-nowrap sb-overflow-show sb-text-ellipsis sb-px-1">
+            {# Display processed label; fallback to percentage if show_percentage is true and no specific label part #}
+            {% if processed_label %}{{ processed_label }}{% elif show_percentage %}{{ calculated_percentage }}%{% endif %}
+          </span>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% if content %}
+{# The content to be shown as a popover - now with a specific class and initially hidden #}
+<div class="sb-progress-popover-content
+sb-bg-{% if content_bg_color %}{{ content_bg_color }}{% else %}white{% endif %}
+sb-{% if content_color %}{{ content_color }}{% else %}black-75{% endif %}
+{% if content_class %}{{ content_class }}{% endif %}
+" 
+id="popover-content-{% if id %}{{ id|cut:"progress-container-" }}{% else %}{{ unique_block_id_suffix }}{% endif %}"
+style="display: none;"
+>
+  {{ content|safe }}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle multiple progress bars on a page if `id` attribute might not be unique or forloop.counter is used
+    const progressContainers = document.querySelectorAll('.sb-progress-container');
+  
+    progressContainers.forEach(container => {
+      const containerId = container.id; // e.g., "progress-container-1"
+      // Derive popoverId based on containerId. This assumes a consistent naming pattern.
+      // If your id on sb-progress-container can be arbitrary (e.g., from block kwargs),
+      // you might need a data-attribute to link them or adjust this logic.
+      // For now, assuming the forloop.counter pattern in IDs.
+      const popoverIdSuffix = containerId.split('-').pop(); // Extracts "1" from "progress-container-1"
+      const popover = document.getElementById(`popover-content-${popoverIdSuffix}`);
+  
+      if (!popover) {
+        // console.warn(`Popover not found for container ${containerId}`);
+        return; // Skip if corresponding popover isn't found
+      }
+  
+      let popoverVisible = false; // Track visibility to avoid redundant style changes
+  
+      container.addEventListener('mouseenter', function(event) {
+        if (!popoverVisible) {
+          popover.style.display = 'block';
+          popover.classList.add('sb-animate-fade-in');
+          popoverVisible = true;
+        }
+        // Initial position update on enter
+        updatePopoverPosition(event);
+      });
+  
+      container.addEventListener('mousemove', function(event) {
+        if (popoverVisible) {
+          updatePopoverPosition(event);
+        }
+      });
+  
+      container.addEventListener('mouseleave', function() {
+        if (popoverVisible) {
+          popover.style.display = 'none';
+          popoverVisible = false;
+        }
+      });
+  
+      function updatePopoverPosition(mouseEvent) {
+        // Offset from the mouse cursor
+        const offsetX = 15; // pixels to the right
+        const offsetY = 15; // pixels below
+  
+        let newX = mouseEvent.clientX + offsetX;
+        let newY = mouseEvent.clientY + offsetY;
+  
+        // Boundary checks to keep popover within viewport
+        const popoverRect = popover.getBoundingClientRect(); // Get its dimensions once visible
+  
+        // Adjust if too far right
+        if (newX + popoverRect.width > window.innerWidth) {
+          newX = mouseEvent.clientX - popoverRect.width - offsetX; // Position to the left
+        }
+        // Adjust if too far down
+        if (newY + popoverRect.height > window.innerHeight) {
+          newY = mouseEvent.clientY - popoverRect.height - offsetY; // Position above
+        }
+        // Adjust if too far left (after potentially flipping)
+        if (newX < 0) {
+          newX = offsetX;
+        }
+        // Adjust if too far up (after potentially flipping)
+        if (newY < 0) {
+          newY = offsetY;
+        }
+  
+        popover.style.left = newX + 'px';
+        popover.style.top = newY + 'px';
+      }
+    });
+  });
+  </script>
+{% endif %}
