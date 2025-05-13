@@ -151,7 +151,7 @@ class ProgressBarBlock(BasicSpellBlock):
             return value
         if isinstance(value, str):
             return value.lower() in ['true', '1', 't', 'y', 'yes']
-        return default 
+        return default # pragma: no cover
 
     def get_context(self):
         context = super().get_context()
