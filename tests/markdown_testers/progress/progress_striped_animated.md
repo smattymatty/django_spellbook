@@ -1,0 +1,1 @@
+{~ progress value="60" color="info" striped="true" animated="true" rounded="false" label="Processing..." ~}Processing data... {نواتج التعلم}{~~}

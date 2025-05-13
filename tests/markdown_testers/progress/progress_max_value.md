@@ -1,0 +1,1 @@
+{~ progress value="250" max_value="500" label="Chapter {{value}} of {{max_value}} ({{percentage}})" ~}Chapter progress {نواتج التعلم}{~~}

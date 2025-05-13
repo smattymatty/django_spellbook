@@ -1961,27 +1961,51 @@
 /* Width */
 .sb-w-0 {
   width: 0;
+  min-width: 0;
 }
 .sb-w-1 {
   width: 0.25rem;
+  min-width: 0.25rem;
 }
 .sb-w-2 {
   width: 0.5rem;
+  min-width: 0.5rem;
+}
+.sb-w-3 {
+  width: 0.75rem;
+  min-width: 0.75rem;
 }
 .sb-w-4 {
   width: 1rem;
+  min-width: 1rem;
+}
+.sb-w-5 {
+  width: 1.25rem;
+  min-width: 1.25rem;
+}
+.sb-w-6 {
+  width: 1.5rem;
+  min-width: 1.5rem;
+}
+.sb-w-7 {
+  width: 1.75rem;
+  min-width: 1.75rem;
 }
 .sb-w-8 {
   width: 2rem;
+  min-width: 2rem;
 }
 .sb-w-16 {
   width: 4rem;
+  min-width: 4rem;
 }
 .sb-w-32 {
   width: 8rem;
+  min-width: 8rem;
 }
 .sb-w-64 {
   width: 16rem;
+  min-width: 16rem;
 }
 
 /* Percentage Widths */
@@ -2103,6 +2127,51 @@
 /* Heights */
 .sb-h-0 {
   height: 0;
+  min-height: 0;
+}
+.sb-h-1 {
+  height: 0.25rem;
+  min-height: 0.25rem;
+}
+.sb-h-2 {
+  height: 0.5rem;
+  min-height: 0.5rem;
+}
+.sb-h-3 {
+  height: 0.75rem;
+  min-height: 0.75rem;
+}
+.sb-h-4 {
+  height: 1rem;
+  min-height: 1rem;
+}
+.sb-h-5 {
+  height: 1.25rem;
+  min-height: 1.25rem;
+}
+.sb-h-6 {
+  height: 1.5rem;
+  min-height: 1.5rem;
+}
+.sb-h-7 {
+  height: 1.75rem;
+  min-height: 1.75rem;
+}
+.sb-h-8 {
+  height: 2rem;
+  min-height: 2rem;
+}
+.sb-h-16 {
+  height: 4rem;
+  min-height: 4rem;
+}
+.sb-h-32 {
+  height: 8rem;
+  min-height: 8rem;
+}
+.sb-h-64 {
+  height: 16rem;
+  min-height: 16rem;
 }
 .sb-h-auto {
   height: auto;

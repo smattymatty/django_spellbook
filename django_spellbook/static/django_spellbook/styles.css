@@ -493,6 +493,110 @@
   }
 }
 
+/* ==========================================================================
+   ProgressBar Component
+   ========================================================================== */
+
 .sb-accordion-body {
   padding: 1rem;
+}
+
+.sb-progress-container {
+  /* Primary container, width is handled by sb-w-full utility */
+  transition: all 0.2s ease-in-out;
+}
+
+.sb-progress-container:hover {
+  font-weight: bold;
+}
+
+.sb-progress-label-external {
+  /* Styling for label displayed above the bar */
+  /* font-size, margin-bottom handled by sb-text-sm, sb-mb-1 utilities */
+}
+
+.sb-progress {
+  /* The track/background of the progress bar */
+  display: flex; /* Ensures children (the fill) behave as expected */
+  /* width, height, bg-color, border-radius handled by utility classes */
+  /* sb-overflow-hidden is crucial to clip the sb-progress-bar if rounded corners are used */
+}
+
+.sb-progress-bar {
+  /* The colored fill part of the progress bar */
+  /* height, bg-color, border-radius handled by utility classes */
+  /* sb-flex, sb-items-center, sb-justify-center for positioning the internal label */
+  color: #ffffff; /* Default text color for internal label, assuming dark fill. Adjust if needed. */
+  text-align: center;
+  transition: width 0.6s ease;
+  position: relative; /* Helps contain absolutely positioned children if ever needed, though not used here. */
+}
+
+.sb-progress-label-internal {
+  /* Styling for label displayed INSIDE the bar */
+  /* font-size, font-weight, padding handled by sb-text-xs, sb-font-semibold, sb-px-1 utilities */
+  /* sb-whitespace-nowrap, sb-overflow-hidden, sb-text-ellipsis ensure text behaves well if too long for the bar */
+  line-height: 1; /* Helps with vertical centering and consistency */
+  display: inline-block; /* Allows text-ellipsis to work with overflow:hidden */
+  max-width: 100%; /* Ensures the label doesn't try to be wider than its parent bar */
+}
+
+/* Striped Effect */
+.sb-progress-bar-striped {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.15) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 1rem 1rem; /* Adjust size of stripes */
+}
+
+/* Animation for Striped Bars */
+.sb-progress-bar-animated {
+  animation: sb-progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes sb-progress-bar-stripes {
+  from { background-position-x: 1rem; }
+  to { background-position-x: 0; }
+}
+
+.sb-progress-container:hover {
+  font-weight: bold;
+  cursor: default;
+  scale: 1.05;
+}
+
+
+.sb-progress-popover-content {
+  transition: all 0.2s ease-in-out;
+  position: fixed;
+  z-index: 1000;
+  border: 2px solid rgb(87, 87, 87);
+  border-radius: 5px;
+  padding: 0.75rem; /* sb-p-3 */
+  box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.15); /* var(--sb-shadow-md) */
+  max-width: 90%; /* Or whatever max-width is suitable */
+  pointer-events: none; /* So the popover itself doesn't interfere with mouse events on elements below it */
+  /* display: none; is handled by JS and inline style */
+}
+
+.sb-animate-fade-in {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
