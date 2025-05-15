@@ -7,4 +7,9 @@
   --warning-color: #f59e0b;
   --success-color: #16a34a;
   --info-color: #2563eb;
+  --sb-border-radius-sm: 0.125rem;
+  --sb-border-radius-md: 0.375rem;
+  --sb-border-radius-lg: 0.5rem;
+  --sb-border-radius-xl: 0.75rem;
+  --sb-border-radius-2xl: 1rem;
 }
