@@ -1,0 +1,26 @@
+{% comment %} Main template: django_spellbook/blocks/hero_block.html {% endcomment %}
+{% load spellbook_tags %}
+
+<section
+  class="sb-hero {{ layout_class }} {{ vertical_align_class }} {% if bg_color %}sb-bg-{{ bg_color }}{% endif %} {% if text_color %}sb-{{ text_color }}{% endif %} {% if custom_class %}{{ custom_class }}{% endif %}"
+  {% if min_height != "auto" %}style="min-height: {{ min_height }};"{% endif %}
+  {% if id %}id="{{ id }}"{% endif %}
+>
+    {% if layout == "text_left_image_right" %}
+        {% include "django_spellbook/blocks/hero_partials/text_left_image_right.html" with image_src=image_src image_alt=image_alt content=content custom_class=custom_class vertical_align_class=vertical_align_class min_height=min_height bg_color=bg_color text_bg_color=text_bg_color text_color=text_color only %}
+    {% elif layout == "text_center_image_background" %}
+        {% include "django_spellbook/blocks/hero_partials/text_center_image_background.html" with image_src=image_src image_alt=image_alt content=content custom_class=custom_class vertical_align_class=vertical_align_class min_height=min_height bg_color=bg_color text_bg_color=text_bg_color text_color=text_color only %}
+    {% elif layout == "text_only_centered" %}
+        {% include "django_spellbook/blocks/hero_partials/text_only_centered.html" with content=content custom_class=custom_class vertical_align_class=vertical_align_class min_height=min_height bg_color=bg_color text_bg_color=text_bg_color text_color=text_color only %}
+    {% comment %} --- NEW LAYOUTS --- {% endcomment %}
+    {% elif layout == "text_right_image_left" %}
+        {% include "django_spellbook/blocks/hero_partials/text_right_image_left.html" with image_src=image_src image_alt=image_alt content=content custom_class=custom_class vertical_align_class=vertical_align_class min_height=min_height bg_color=bg_color text_bg_color=text_bg_color text_color=text_color only %}
+    {% elif layout == "image_top_text_bottom" %}
+        {% include "django_spellbook/blocks/hero_partials/image_top_text_bottom.html" with image_src=image_src image_alt=image_alt content=content custom_class=custom_class vertical_align_class=vertical_align_class min_height=min_height bg_color=bg_color text_bg_color=text_bg_color text_color=text_color only %}
+    {% elif layout == "image_only_full" %}
+        {% include "django_spellbook/blocks/hero_partials/image_only_full.html" with image_src=image_src image_alt=image_alt content=content custom_class=custom_class vertical_align_class=vertical_align_class min_height=min_height bg_color=bg_color text_bg_color=text_bg_color text_color=text_color only %}
+
+    {% else %}
+    <p class="sb-error">HeroBlock Error: Unknown layout selected.</p>
+  {% endif %}
+</section>

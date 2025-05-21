@@ -1,0 +1,11 @@
+{% comment %} Partial: hero_partials/text_right_image_left.html {% endcomment %}
+<div class="sb-hero-content-wrapper sb-grid sb-grid-cols-1 md:sb-grid-cols-2 sb-gap-8">
+  <div class="sb-hero-media-column md:sb-order-1"> {# Media (image/video) first on medium screens and up #}
+    {% if image_src %}
+      <img src="{{ image_src }}" alt="{{ image_alt }}" class="sb-hero-image">
+    {% endif %}
+  </div>
+  <div class="sb-hero-text-column md:sb-order-2 {% if text_bg_color %}sb-bg-{{ text_bg_color }}{% endif %}"> {# Text second #}
+    {{ content|safe }}
+  </div>
+</div>

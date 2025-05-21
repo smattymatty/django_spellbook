@@ -683,18 +683,19 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.3); /* Default overlay, make this configurable */
-  z-index: 2;
-}
+  background-color: rgba(0, 0, 0, 0.1); /* Default overlay, make this configurable */
+  /* z-index is also not strictly needed here due to source order within the media wrapper */}
 
-.sb-hero-layout--text-center-image-background .sb-hero-content-wrapper {
-  position: relative; /* To sit on top of the background/overlay */
-  z-index: 3;
-  text-align: center;
-  max-width: var(--sb-breakpoint-md, 768px); /* Constrain text width for readability */
-  margin-left: auto;
-  margin-right: auto;
-}
+  .sb-hero-layout--text-center-image-background .sb-hero-content-wrapper {
+    position: relative; /* Establishes a stacking context and allows z-index to work reliably */
+    z-index: 1;         /* Sits on top of .sb-hero-background-media-wrapper (which is z-index: 0) */
+    text-align: center;
+    max-width: var(--sb-breakpoint-md, 768px); /* Adjust as needed */
+    width: 90%; /* Example: ensure it doesn't touch edges on smaller viewports if padding on parent is small */
+    padding: 1rem; /* Add some padding inside the content wrapper if it has its own background (text_bg_color) */
+    box-sizing: border-box;
+    /* The margin:auto for horizontal centering is handled by justify-content:center on the parent .sb-hero */
+  }
 
 /* 3. Layout: Text Only, Centered */
 .sb-hero-layout--text-only-centered {
@@ -869,22 +870,20 @@
   width: 100%;
   height: 100%;
   overflow: hidden; /* Clips the video/image */
-  z-index: 1;
+  z-index: 0;
 }
-.sb-hero-layout--text-center-image-background .sb-hero-background-video,
 .sb-hero-layout--text-center-image-background .sb-hero-background-image-actual {
   position: absolute;
   top: 50%;
   left: 50%;
+  transform: translateX(-50%) translateY(-50%);
   min-width: 100%;
   min-height: 100%;
   width: auto;
   height: auto;
-  transform: translateX(-50%) translateY(-50%);
-  object-fit: cover;
-  background-size: cover;
-  background-position: center;
-  z-index: 1;
+  object-fit: cover; /* Ensures the image covers the area, cropping if necessary */
+  object-position: center center; /* Default, but good to be explicit */
+  /* z-index is not strictly needed here as its parent .sb-hero-background-media-wrapper handles the base stacking. */
 }
 .sb-hero-full-bleed-video {
   position: absolute;

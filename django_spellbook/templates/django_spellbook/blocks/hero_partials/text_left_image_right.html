@@ -1,0 +1,11 @@
+{% comment %} Partial: hero_partials/text_left_image_right.html (with YouTube/Vimeo support) {% endcomment %}
+<div class="sb-hero-content-wrapper sb-grid sb-grid-cols-1 md:sb-grid-cols-2 sb-gap-8">
+  <div class="sb-hero-text-column {% if text_bg_color %}sb-bg-{{ text_bg_color }}{% endif %}">
+    {{ content|safe }}
+  </div>
+  <div class="sb-hero-media-column">
+    {% if image_src %}
+      <img src="{{ image_src }}" alt="{{ image_alt }}" class="sb-hero-image">
+    {% endif %}
+  </div>
+</div>

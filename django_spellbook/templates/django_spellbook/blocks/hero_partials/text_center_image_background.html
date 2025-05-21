@@ -1,0 +1,17 @@
+{% comment %}
+  Partial: hero_partials/text_center_image_background.html
+  (Ensures content wrapper is a direct child of .sb-hero for flex alignment)
+{% endcomment %}
+
+<div class="sb-hero-background-media-wrapper">
+    {% if image_src %}
+        <img src="{{ image_src }}"
+             alt="{{ image_alt|default:'Background image for hero section' }}"
+             class="sb-hero-background-image-actual">
+    {% endif %}
+    <div class="sb-hero-overlay"></div>
+</div>
+
+<div class="sb-hero-content-wrapper sb-text-center {% if text_bg_color %}sb-bg-{{ text_bg_color }}{% endif %} {% if text_color %}sb-{{ text_color }}{% endif %}">
+    {{ content|safe }}
+</div>

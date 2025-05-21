@@ -1,0 +1,4 @@
+{% comment %} Partial: hero_partials/text_only_centered.html {% endcomment %}
+<div class="sb-hero-content-wrapper sb-text-center {% if text_bg_color %}sb-bg-{{ text_bg_color }}{% endif %}"> {# Apply text_bg_color here #}
+  {{ content|safe }}
+</div>

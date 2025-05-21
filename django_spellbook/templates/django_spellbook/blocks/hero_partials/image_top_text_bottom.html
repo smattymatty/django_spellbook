@@ -1,0 +1,11 @@
+{% comment %} Partial: hero_partials/image_top_text_bottom.html {% endcomment %}
+<div class="sb-hero-content-wrapper sb-flex sb-flex-col sb-items-center sb-w-full">
+  {% if image_src %}
+  <div class="sb-hero-media-fullwidth sb-mb-6"> {# Margin bottom for spacing #}
+    <img src="{{ image_src }}" alt="{{ image_alt }}" class="sb-hero-image sb-w-full"> {# Image takes full width of its container #}
+  </div>
+  {% endif %}
+  <div class="sb-hero-text-bottom-content {% if text_bg_color %}sb-bg-{{ text_bg_color }}{% endif %} sb-w-full sb-text-center md:sb-text-left"> {# Example: full width, text centered or left #}
+    {{ content|safe }}
+  </div>
+</div>
