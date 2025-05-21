@@ -1204,7 +1204,17 @@
 .sb-z-auto {
   z-index: auto;
 }
+/* Ensure your sb-order utilities exist if you used them, e.g. md:sb-order-1 */
+  /* @media (min-width: 768px) { .md\:sb-order-1 { order: 1; } .md\:sb-order-2 { order: 2; } } */
 
+@media (min-width: 768px) {
+  .sb-md\:sb-order-1 {
+    order: 1;
+  }
+  .sb-md\:sb-order-2 {
+    order: 2;
+  }
+}
 /* Overflow */
 .sb-overflow-auto {
   overflow: auto;

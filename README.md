@@ -86,7 +86,7 @@ This is the main content of the card.
 
 ![Example of card spellblocks](https://i.imgur.com/dzNUgjQ.png)
 
-Those are two examples of built-in Spellblocks. You can also create your own custom Spellblocks by extending the `BasicSpellBlock` class and registering them with the `SpellBlockRegistry`. See the [documentation on Spellblocks](https://django-spellbook.org/docs/Markdown/spellblocks) for more information.
+Those are two examples of built-in Spellblocks. You can also create your own custom Spellblocks by extending the `BasicSpellBlock` class and registering them with the `SpellBlockRegistry`. See the [documentation on Spellblocks](https://django-spellbook.org/docs/Spellblocks/custom-spellblocks/) for more information.
 
 # Usage - Rendering Markdown to HTML within a python script
 
@@ -144,7 +144,18 @@ The base template must have a block named `spellbook_md` that will be used to wr
 ```html
 <!-- my_app/sb_base.html -->
 {% extends 'base.html' %}
-<div class="spellbook-md">{% block spellbook_md %} {% endblock %}</div>
+{% load spellbook_tags %}
+<!-- extended base.html has a block named 'content' -->
+{% block content %}
+<div class="spellbook-md">
+    <!-- 'spellbook_md' is the required block name -->
+    {% block spellbook_md %} {% endblock %}
+</div>
+{% endblock %}
+<!-- extended base.html has a block named 'extra_css' -->
+{% block extra_css %}
+{% spellbook_styles %}
+{% endblock %}
 ```
 
 #### Multiple Source-Destination Pairs

@@ -1,0 +1,7 @@
+{% comment %} Partial: hero_partials/image_only_full.html (or media_only_full.html) {% endcomment %}
+{% if image_src %}
+  <img src="{{ image_src }}" alt="{{ image_alt }}" class="sb-hero-full-bleed-image">
+{% endif %}
+<div class="sb-hero-content-overlay {% if text_bg_color %}sb-bg-{{ text_bg_color }}{% endif %} {% if text_color %}sb-{{ text_color }}{% endif %}">
+  {{ content|safe }}
+</div>

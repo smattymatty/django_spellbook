@@ -600,3 +600,319 @@
     transform: translateY(0);
   }
 }
+    /* ==========================================================================
+   Hero SpellBlock Styles (MVP)
+   ========================================================================== */
+
+/* --- I. Main Hero Container --- */
+.sb-hero {
+  position: relative; /* For potential absolute positioned children like overlays */
+  display: flex; /* Default to flex for content alignment, can be overridden by layout specifics */
+  width: 100%;
+  overflow: hidden; /* Prevents content from spilling, especially with background images */
+  padding: 2rem 1rem; /* Default padding, adjust as needed (e.g., var(--sb-spacing-8) var(--sb-spacing-4)) */
+  box-sizing: border-box;
+  /* min-height will be set by inline style from parameter, or by .sb-min-h-screen if used */
+}
+
+
+
+/* --- Layout Modifier Classes (applied to .sb-hero) --- */
+
+/* 1. Layout: Text Left, Image Right */
+.sb-hero-layout--text-left-image-right .sb-hero-content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr; /* Mobile: single column */
+  gap: 2rem; /* Default gap, (e.g., var(--sb-spacing-8)) */
+  align-items: center; /* Vertically align columns if they have different heights */
+  width: 100%;
+  max-width: var(--sb-breakpoint-lg, 1024px); /* Example max-width for content */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 768px) { /* md breakpoint, adjust as per your theme */
+  .sb-hero-layout--text-left-image-right .sb-hero-content-wrapper {
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* Two equal columns on medium screens and up */
+  }
+}
+
+.sb-hero-layout--text-left-image-right .sb-hero-text-column {
+  /* Specific styles if text column needs them beyond what content wrapper provides */
+  /* e.g., text alignment for mobile might be here if not handled by utilities */
+}
+/* Style for when text background is applied */
+.sb-hero-text-column[class*="sb-bg-"] { /* Selects if any sb-bg-* class is present */
+  padding: 1rem; /* Or var(--sb-spacing-4) - adjust as needed */
+  border-radius: var(--sb-border-radius-sm, 0.25rem); /* Optional: slightly round the text background */
+}
+
+.sb-hero-layout--text-left-image-right .sb-hero-media-column {
+  display: flex; /* To help center or align the image if needed */
+  justify-content: center; /* Example alignment */
+  align-items: center;
+}
+
+/* 2. Layout: Text Centered, Image Background */
+.sb-hero-layout--text-center-image-background {
+  /* The main .sb-hero itself will often carry the background image via inline style or a class */
+  background-size: cover;
+  background-position: center center;
+  display: flex; /* Ensure it remains a flex container for vertical alignment */
+  justify-content: center; /* Horizontally center the .sb-hero-content-wrapper */
+  /* Vertical alignment is handled by .sb-items-* on .sb-hero */
+  padding: 4rem 1rem; /* Larger default padding for this layout (e.g., var(--sb-spacing-16) var(--sb-spacing-4)) */
+}
+
+.sb-hero-layout--text-center-image-background .sb-hero-background-image-wrapper {
+  /* This is an alternative if you want a dedicated div for the background image
+     instead of putting it on the main .sb-hero section.
+     If used, it would need absolute positioning to fill .sb-hero. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-size: cover;
+  background-position: center center;
+}
+.sb-hero-layout--text-center-image-background .sb-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.1); /* Default overlay, make this configurable */
+  /* z-index is also not strictly needed here due to source order within the media wrapper */}
+
+  .sb-hero-layout--text-center-image-background .sb-hero-content-wrapper {
+    position: relative; /* Establishes a stacking context and allows z-index to work reliably */
+    z-index: 1;         /* Sits on top of .sb-hero-background-media-wrapper (which is z-index: 0) */
+    text-align: center;
+    max-width: var(--sb-breakpoint-md, 768px); /* Adjust as needed */
+    width: 90%; /* Example: ensure it doesn't touch edges on smaller viewports if padding on parent is small */
+    padding: 1rem; /* Add some padding inside the content wrapper if it has its own background (text_bg_color) */
+    box-sizing: border-box;
+    /* The margin:auto for horizontal centering is handled by justify-content:center on the parent .sb-hero */
+  }
+
+/* 3. Layout: Text Only, Centered */
+.sb-hero-layout--text-only-centered {
+  display: flex; /* Ensure it remains a flex container for vertical alignment */
+  justify-content: center; /* Horizontally center the .sb-hero-content-wrapper */
+  text-align: center; /* Center text within the content wrapper by default */
+  padding: 3rem 1rem; /* Default padding (e.g., var(--sb-spacing-12) var(--sb-spacing-4)) */
+}
+
+.sb-hero-layout--text-only-centered .sb-hero-content-wrapper {
+  max-width: var(--sb-breakpoint-md, 768px); /* Constrain text width */
+  width: 100%;
+}
+
+
+/* --- II. Content Wrappers & Columns (General styles if not layout-specific) --- */
+.sb-hero-content-wrapper {
+  width: 100%;
+  box-sizing: border-box;
+  /* Basic styles if needed, specific layouts will override or add to this */
+}
+
+.sb-hero-text-column {
+  /* Styles for the text column, e.g., ensuring proper flow of Hx, P, buttons */
+}
+
+.sb-hero-text-column > :first-child {
+  margin-top: 0; /* Remove top margin from the first element (e.g. h1) */
+}
+.sb-hero-text-column > :last-child {
+  margin-bottom: 0; /* Remove bottom margin from the last element (e.g. last button) */
+}
+
+.sb-hero-media-column {
+  /* Styles for the media column */
+}
+
+/* --- III. Media Elements --- */
+.sb-hero-image {
+  display: block; /* Remove extra space below image */
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--sb-border-radius-md, 0.375rem); /* Optional default rounding for images */
+}
+
+/* --- IV. Height Utilities (Example) --- */
+/* You might have these as global utilities already */
+.sb-min-h-screen {
+  min-height: 100vh; /* Consider 100dvh for better mobile behavior if supported */
+}
+/* Other specific height utilities like .sb-min-h-50vh, .sb-min-h-400px
+   are better handled by inline styles as the number of variations can be large.
+   If `min_height` parameter directly sets `style="min-height: {{ min_height }};"`,
+   then only special values like "screen" might need a class. */
+
+/* --- CTA Area (Optional, for styling button groups) --- */
+.sb-hero-cta-area {
+  margin-top: 1.5rem; /* e.g., var(--sb-spacing-6) */
+  display: flex;
+  flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+  gap: 0.75rem; /* e.g., var(--sb-spacing-3) */
+  /* Default alignment for buttons (start, center, end) could be set here or by utilities */
+}
+
+
+/* Layout: Text Right, Image Left */
+.sb-hero-layout--text-right-image-left .sb-hero-content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr; /* Mobile: single column */
+  gap: 2rem;
+  align-items: center;
+  width: 100%;
+  max-width: var(--sb-breakpoint-lg, 1024px);
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (min-width: 768px) { /* md breakpoint */
+  .sb-hero-layout--text-right-image-left .sb-hero-content-wrapper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sb-hero-layout--text-right-image-left .sb-hero-media-column {
+    order: 1; /* Image first */
+  }
+  .sb-hero-layout--text-right-image-left .sb-hero-text-column {
+    order: 2; /* Text second */
+  }
+}
+
+/* Layout: Image Top, Text Bottom */
+.sb-hero-layout--image-top-text-bottom .sb-hero-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Or stretch, depending on desired text width */
+  width: 100%;
+}
+.sb-hero-layout--image-top-text-bottom .sb-hero-media-fullwidth {
+  width: 100%;
+  margin-bottom: 1.5rem; /* e.g., var(--sb-spacing-6) */
+}
+.sb-hero-layout--image-top-text-bottom .sb-hero-media-fullwidth .sb-hero-image {
+  width: 100%;
+  height: auto; /* Or a fixed aspect ratio / max-height */
+  object-fit: cover; /* If you set a specific height */
+}
+.sb-hero-layout--image-top-text-bottom .sb-hero-text-bottom-content {
+  width: 100%;
+  max-width: var(--sb-breakpoint-md, 768px); /* Constrain text width for readability */
+  text-align: center; /* Default, can be overridden by utilities */
+}
+.sb-hero-text-bottom-content[class*="sb-bg-"] { /* If text_bg_color is applied */
+    padding: 1rem 1.5rem;
+    border-radius: var(--sb-border-radius-md);
+}
+.sb-hero-full-bleed-image { /* Used in image_only_full layout if using an <img> tag */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image covers the entire area, cropping if necessary */
+  object-position: center center; /* Centers the image within its bounds */
+  z-index: 1; /* Typically behind any overlaid content */
+  /* No border-radius here usually, as it's meant to be edge-to-edge */
+}
+
+/* Layout: Image Only Full */
+.sb-hero-layout--image-only-full {
+  padding: 0; /* No padding on the main hero for full bleed */
+  display: grid; /* Allows easy centering of overlaid content */
+  place-items: center; /* Default to center overlay; can be overridden by content_align_vertical */
+  /* The background image can be set on .sb-hero itself using bg_color/image_src
+     OR by including an <img class="sb-hero-full-bleed-image"> inside.
+     If using the <img> tag method, .sb-hero itself might just need position:relative.
+  */
+}
+
+.sb-hero-layout--image-only-full .sb-hero-content-overlay {
+  position: relative; /* If .sb-hero is display:grid and this is the grid item */
+                      /* Or position:absolute if .sb-hero is just position:relative */
+  z-index: 2; /* Above the sb-hero-full-bleed-image */
+  padding: var(--sb-spacing-8, 2rem); /* Example padding */
+  text-align: center; /* Default text alignment for overlay */
+  width: 100%;
+  max-width: var(--sb-breakpoint-md, 768px); /* Constrain overlay content width */
+  box-sizing: border-box;
+}
+
+/* If text_bg_color is applied to the overlay content itself */
+.sb-hero-layout--image-only-full .sb-hero-content-overlay[class*="sb-bg-"] {
+    border-radius: var(--sb-border-radius-md, 0.375rem); /* Optional rounded background for the text block */
+    padding: 1.5rem; /* Adjust padding if it has its own background */
+    /* display: inline-block; /* If you want the background to wrap tightly around the text content */
+    /* max-width: fit-content; /* If display: inline-block and you want it to shrink to text */
+}
+
+.sb-hero-content-overlay[class*="sb-bg-"] { /* If text_bg_color is applied */
+    border-radius: var(--sb-border-radius-md);
+    /* display: inline-block; /* If you want the background to wrap tightly */
+}
+
+.sb-hero-video {
+  display: block;
+  width: 100%; /* Or max-width: 100% depending on desired scaling */
+  height: auto;
+  border-radius: var(--sb-border-radius-md, 0.375rem);
+  object-fit: cover; /* If you want it to fill a specific aspect ratio box */
+}
+.sb-hero-layout--text-center-image-background .sb-hero-background-media-wrapper {
+  position: absolute; /* Fills the parent .sb-hero which should be position:relative */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Clips the video/image */
+  z-index: 0;
+}
+.sb-hero-layout--text-center-image-background .sb-hero-background-image-actual {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: cover; /* Ensures the image covers the area, cropping if necessary */
+  object-position: center center; /* Default, but good to be explicit */
+  /* z-index is not strictly needed here as its parent .sb-hero-background-media-wrapper handles the base stacking. */
+}
+.sb-hero-full-bleed-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  z-index: 1;
+}
+/* The .sb-hero-layout--image-only-full would need position: relative */
+.sb-hero-video-embed-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  /* Common aspect ratios: */
+  /* padding-top: 56.25%; 16:9 */
+  /* padding-top: 75%;    4:3 */
+}
+.sb-hero-video-embed-wrapper.sb-aspect-video { /* Default to 16:9 if this class is used */
+    padding-top: 56.25%;
+}
+
+.sb-hero-video-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
