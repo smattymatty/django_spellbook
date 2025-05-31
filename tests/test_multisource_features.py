@@ -127,13 +127,13 @@ class MultiSourceIntegrationTest(TestCase):
         self.assertTrue(docs_template.exists(), f"Docs template not found at {docs_template}")
         
         content = docs_template.read_text()
-        self.assertIn("<h1>Welcome to Docs</h1>", content)
+        self.assertIn('<h1 id="welcome-to-docs">Welcome to Docs</h1>', content)
         self.assertIn("This is documentation.", content)
 
         blog_template = self.temp_dir / 'blog' / 'templates' / 'blog' / 'spellbook_md' / 'first-post.html'
         self.assertTrue(blog_template.exists(), f"Blog template not found at {blog_template}")
         content = blog_template.read_text()
-        self.assertIn("<h1>Blog Begins</h1>", content)
+        self.assertIn('<h1 id="blog-begins">Blog Begins</h1>', content)
         self.assertIn("first blog post", content)
 
     def test_url_configuration(self):

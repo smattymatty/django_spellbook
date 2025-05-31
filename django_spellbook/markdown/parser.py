@@ -46,6 +46,8 @@ class MarkdownParser:
                 'markdown.extensions.tables',
                 'markdown.extensions.nl2br',
                 'markdown.extensions.sane_lists',
+                # toc
+                'markdown.extensions.toc', 
             ],
         )
         self.reporter: MarkdownReporter = reporter
@@ -99,6 +101,8 @@ class BlockProcessor:
             'markdown.extensions.tables',
             'markdown.extensions.nl2br',
             'markdown.extensions.sane_lists',
+            # toc
+            'markdown.extensions.toc',
         ]
         self.reporter: MarkdownReporter = reporter
 

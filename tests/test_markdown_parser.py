@@ -27,7 +27,7 @@ class TestMarkdownParser(unittest.TestCase):
         """Test HTML output generation"""
         parser = MarkdownParser(self.simple_markdown, self.reporter)
         html = parser.get_html()
-        self.assertIn("<h1>Test</h1>", html)
+        self.assertIn('<h1 id="test">Test</h1>', html)
         self.assertIn("<p>This is a test</p>", html)
 
     def test_get_markdown(self):

@@ -106,7 +106,7 @@ class TestMarkdownFileProcessor(unittest.TestCase):
         html_content, frontmatter = self.processor._process_markdown_content(
             md_text, file_path)
 
-        self.assertEqual(html_content, "<h1>Test Content</h1>")
+        self.assertEqual(html_content, "<h1 id=\"test-content\">Test Content</h1>")
         mock_frontmatter.assert_called_once_with(md_text, file_path)
 
     def test_calculate_relative_url(self):
