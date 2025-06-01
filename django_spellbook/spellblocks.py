@@ -255,6 +255,11 @@ class HeroSpellBlock(BasicSpellBlock):
 
 
     def get_context(self):
+        """
+        Builds the template context for a hero section block with configurable layout, image, and styling.
+        
+        The context includes validated layout choice, image source and alt text, background and text colors, minimum height, vertical content alignment, and custom CSS classes. Invalid or missing parameters are handled with defaults and logged warnings or errors as appropriate.
+        """
         context = super().get_context() # Gets basic context like 'content', 'kwargs'
 
         # --- Layout ---
@@ -316,12 +321,9 @@ class AlignBlock(BasicSpellBlock):
 
     def _process_dimension_value(self, value_str, default_value_with_unit):
         """
-        Processes a dimension string (for width or height) to apply units.
-        - "auto" remains "auto".
-        - Explicit units like "50%", "120px" are validated and returned.
-        - Unitless numbers <= 100 become "NN%".
-        - Unitless numbers > 100 become "NNpx".
-        - Invalid values fall back to default_value_with_unit.
+        Normalizes a dimension value string for width or height, applying appropriate CSS units.
+        
+        Accepts "auto", explicit units (e.g., "50%", "120px"), or unitless numbers. Unitless values ≤ 100 are treated as percentages, values > 100 as pixels. Invalid or negative inputs are converted to safe defaults or the provided default value.
         """
         # 1. Handle "auto" case-insensitively
         if str(value_str).lower() == "auto":
@@ -362,6 +364,11 @@ class AlignBlock(BasicSpellBlock):
 
 
     def get_context(self):
+        """
+        Builds the template context for the AlignBlock with validated alignment and dimension settings.
+        
+        Validates and maps the 'pos' parameter to CSS flexbox justify-content values, processes 'width' and 'height' to normalized CSS units, and maps 'content_align' to CSS text-align values. Passes through optional CSS class, ID, and content class parameters for template rendering.
+        """
         context = super().get_context()
 
         # Position

@@ -37,6 +37,11 @@ class TestAlignBlockIntegration(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        """
+        Sets up the Django test environment and required directories for integration tests.
+        
+        Configures Django settings, including installed apps, templates, and an in-memory database if not already configured. Ensures that directories for markdown input, output HTML, and golden HTML files exist for align block integration tests.
+        """
         super().setUpClass()
         cls.test_templates_dir = BASE_TEST_DIR / "templates" # For any test-specific general templates
 
@@ -85,7 +90,12 @@ class TestAlignBlockIntegration(TestCase):
         os.makedirs(ALIGN_BLOCK_GOLDEN_HTML_DIR, exist_ok=True)
 
     def _clear_and_register_align_block(self):
-        """Clears the registry and registers only the AlignBlock."""
+        """
+        Clears the SpellBlockRegistry and registers only the AlignBlock for isolated testing.
+        
+        Raises:
+            ValueError: If AlignBlock does not have a valid 'name' attribute.
+        """
         if hasattr(SpellBlockRegistry, '_registry') and isinstance(SpellBlockRegistry._registry, dict):
             SpellBlockRegistry._registry.clear()
         else:
@@ -101,7 +111,11 @@ class TestAlignBlockIntegration(TestCase):
             raise ValueError("AlignBlock must have a 'name' attribute for registration.")
 
     def setUp(self):
-        """Set up for each test method."""
+        """
+        Prepares the test environment before each test case.
+        
+        Clears and registers the AlignBlock, initializes the reporter and output buffer, and creates a SpellbookMarkdownEngine instance with the reporter.
+        """
         self._clear_and_register_align_block()
 
         self.reporter_buffer = StringIO()
@@ -110,9 +124,11 @@ class TestAlignBlockIntegration(TestCase):
 
     def _normalize_html(self, html_content):
         """
-        Normalizes HTML content for comparison.
-        Strips leading/trailing whitespace. Add more normalization if needed
-        (e.g., for dynamic IDs, attribute order, etc.).
+        Normalizes HTML content by stripping leading and trailing whitespace.
+        
+        This method prepares HTML strings for comparison in tests by removing
+        extraneous whitespace at the start and end. Additional normalization steps
+        can be added as needed to handle dynamic or non-deterministic HTML output.
         """
         # Example: remove whitespace between tags to reduce trivial differences
         # html_content = re.sub(r'>\s+<', '><', html_content)
@@ -133,8 +149,12 @@ class TestAlignBlockIntegration(TestCase):
 
     def _run_align_block_test(self, md_filename_stem):
         """
-        Helper method for AlignBlock: reads MD, renders, and compares against golden HTML.
-        md_filename_stem is the name without the .md extension.
+        Runs an integration test for AlignBlock by rendering a markdown file and comparing the output HTML to a golden file.
+        
+        Args:
+            md_filename_stem: The base filename (without extension) of the markdown input and golden HTML files.
+        
+        If the golden HTML file does not exist, it is created from the rendered output and the test fails to prompt manual verification. The actual output HTML is always saved for debugging.
         """
         md_filename = f"{md_filename_stem}.md"
         golden_html_filename = f"{md_filename_stem}.html"
@@ -180,71 +200,107 @@ class TestAlignBlockIntegration(TestCase):
     # --- Test Methods for AlignSpellBlock ---
 
     def test_align_block_default_values(self):
-        """Test AlignBlock with no parameters (should use defaults)."""
+        """
+        Tests rendering of AlignBlock with no parameters, verifying default behavior.
+        """
         self._run_align_block_test("align_default_values")
 
     def test_align_block_pos_start(self):
-        """Test AlignBlock with pos='start'."""
+        """
+        Tests rendering of AlignBlock when the position parameter is set to 'start'.
+        """
         self._run_align_block_test("align_pos_start")
 
     def test_align_block_pos_center(self):
-        """Test AlignBlock with pos='center'."""
+        """
+        Tests rendering of AlignBlock with the position parameter set to 'center'.
+        """
         self._run_align_block_test("align_pos_center")
 
     def test_align_block_pos_end(self):
-        """Test AlignBlock with pos='end'."""
+        """
+        Tests rendering of AlignBlock with the position parameter set to 'end'.
+        """
         self._run_align_block_test("align_pos_end")
 
     def test_align_block_width_50_percent(self):
-        """Test AlignBlock with width='50%'."""
+        """
+        Tests rendering of AlignBlock when the width parameter is set to '50%'.
+        """
         self._run_align_block_test("align_width_50_percent")
 
     def test_align_block_height_explicit_value(self):
-        """Test AlignBlock with an explicit height (e.g., height='200px').
-           Note: AlignBlock Python needs to support units other than % for this to be meaningful,
-           or template needs to handle it. Assuming current implementation passes it through."""
+        """
+        Tests AlignBlock rendering with an explicit height value (e.g., height="200px").
+        
+        Verifies that the AlignBlock correctly handles and passes through explicit height values with units other than percent, such as pixels, when rendering from markdown input.
+        """
         # If your AlignBlock only supports % or 'auto' for height, adjust md or Python.
         self._run_align_block_test("align_height_200px") # md would be: {~ align height="200px" ~}..
 
     def test_align_block_width_auto_height_auto(self):
-        """Test AlignBlock with width='auto' and height='auto'."""
+        """
+        Tests rendering of AlignBlock when both width and height are set to 'auto'.
+        """
         self._run_align_block_test("align_width_auto_height_auto")
 
     def test_align_block_content_align_start(self):
-        """Test AlignBlock with content_align='start'."""
+        """
+        Tests AlignBlock rendering when the content_align parameter is set to 'start'.
+        """
         self._run_align_block_test("align_content_align_start")
 
     def test_align_block_content_align_center(self):
-        """Test AlignBlock with content_align='center'."""
+        """
+        Tests rendering of AlignBlock when the content_align parameter is set to 'center'.
+        """
         self._run_align_block_test("align_content_align_center")
 
     def test_align_block_content_align_end(self):
-        """Test AlignBlock with content_align='end'."""
+        """
+        Tests rendering of AlignBlock when the content_align parameter is set to 'end'.
+        """
         self._run_align_block_test("align_content_align_end")
 
     def test_align_block_custom_classes_and_id(self):
-        """Test AlignBlock with custom 'class', 'id', and 'content_class'."""
+        """
+        Tests AlignBlock rendering when custom CSS classes, an ID, and a content class are specified.
+        
+        Verifies that the block correctly applies user-defined 'class', 'id', and 'content_class' parameters in the rendered HTML.
+        """
         self._run_align_block_test("align_custom_classes_and_id")
 
     def test_align_block_combination_params(self):
-        """Test AlignBlock with a combination of parameters."""
+        """
+        Tests AlignBlock rendering with a combination of multiple parameters to verify correct handling of complex configurations.
+        """
         self._run_align_block_test("align_combination_params")
 
     def test_align_block_invalid_pos_value_falls_back_to_default(self):
-        """Test AlignBlock with an invalid 'pos' value (should use default)."""
+        """
+        Tests that AlignBlock falls back to the default position when given an invalid 'pos' value.
+        """
         # You might also want to check logger output if critical
         self._run_align_block_test("align_invalid_pos_value")
 
     def test_align_block_invalid_content_align_value_falls_back_to_default(self):
-        """Test AlignBlock with an invalid 'content_align' value (should use default)."""
+        """
+        Tests that AlignBlock falls back to the default content alignment when given an invalid 'content_align' value.
+        """
         self._run_align_block_test("align_invalid_content_align_value")
 
     def test_align_block_empty_content(self):
-        """Test AlignBlock with empty content between tags."""
+        """
+        Tests rendering of AlignBlock when there is no content between its tags.
+        """
         self._run_align_block_test("align_empty_content")
 
     def test_align_block_content_with_markdown(self):
-        """Test AlignBlock with markdown content inside."""
+        """
+        Tests rendering of an AlignBlock containing markdown-formatted content.
+        
+        Verifies that markdown within the AlignBlock is correctly processed and rendered to HTML.
+        """
         self._run_align_block_test("align_content_with_markdown")
 
 class TestProcessDimensionValue(unittest.TestCase):
@@ -253,7 +309,9 @@ class TestProcessDimensionValue(unittest.TestCase):
     """
 
     def setUp(self):
-        """Set up for each test method."""
+        """
+        Initializes an AlignBlock instance and sets default width and height values for tests.
+        """
         # Instantiate AlignBlock to test its method.
         # If AlignBlock requires specific Django settings or setup beyond simple
         # instantiation, this might need to be a Django TestCase or have settings configured.
@@ -263,12 +321,16 @@ class TestProcessDimensionValue(unittest.TestCase):
         self.default_height = AlignBlock.DEFAULT_HEIGHT # "auto"
 
     def test_process_auto_value(self):
-        """Test that 'auto' is returned as 'auto'."""
+        """
+        Verifies that the '_process_dimension_value' method returns 'auto' for input values of 'auto', regardless of case.
+        """
         self.assertEqual(self.block._process_dimension_value("auto", self.default_height), "auto")
         self.assertEqual(self.block._process_dimension_value("AUTO", self.default_height), "auto")
 
     def test_process_explicit_percentage_values(self):
-        """Test values with explicit '%' unit."""
+        """
+        Verifies that dimension values with an explicit '%' unit are returned unchanged by _process_dimension_value.
+        """
         self.assertEqual(self.block._process_dimension_value("50%", self.default_width), "50%")
         self.assertEqual(self.block._process_dimension_value("100%", self.default_width), "100%")
         self.assertEqual(self.block._process_dimension_value("75.5%", self.default_width), "75.5%")
@@ -276,14 +338,20 @@ class TestProcessDimensionValue(unittest.TestCase):
         self.assertEqual(self.block._process_dimension_value("-50%", self.default_width), "-50%") # Regex allows this
 
     def test_process_explicit_px_values(self):
-        """Test values with explicit 'px' unit."""
+        """
+        Verifies that explicit pixel values are processed correctly by _process_dimension_value.
+        
+        Tests that valid strings with a 'px' unit, including decimals and negative values, are returned unchanged.
+        """
         self.assertEqual(self.block._process_dimension_value("150px", self.default_width), "150px")
         self.assertEqual(self.block._process_dimension_value("0px", self.default_width), "0px")
         self.assertEqual(self.block._process_dimension_value("120.7px", self.default_width), "120.7px")
         self.assertEqual(self.block._process_dimension_value("-100px", self.default_width), "-100px") # Regex allows this
 
     def test_process_unitless_number_le_100_becomes_percentage(self):
-        """Test unitless numbers <= 100 become '%'."""
+        """
+        Verifies that unitless numeric strings less than or equal to 100 are converted to percentage values by the dimension processor.
+        """
         self.assertEqual(self.block._process_dimension_value("50", self.default_width), "50%")
         self.assertEqual(self.block._process_dimension_value("100", self.default_width), "100%")
         self.assertEqual(self.block._process_dimension_value("0", self.default_width), "0%")
@@ -291,14 +359,18 @@ class TestProcessDimensionValue(unittest.TestCase):
         self.assertEqual(self.block._process_dimension_value("50.0", self.default_width), "50%") # Handled by int() if is_integer()
 
     def test_process_unitless_number_gt_100_becomes_px(self):
-        """Test unitless numbers > 100 become 'px'."""
+        """
+        Verifies that unitless numeric values greater than 100 are converted to pixel values by appending 'px'.
+        """
         self.assertEqual(self.block._process_dimension_value("150", self.default_width), "150px")
         self.assertEqual(self.block._process_dimension_value("100.1", self.default_width), "100.1px")
         self.assertEqual(self.block._process_dimension_value("120.5", self.default_width), "120.5px")
         self.assertEqual(self.block._process_dimension_value("150.0", self.default_width), "150px") # Handled by int()
 
     def test_process_negative_unitless_number(self):
-        """Test negative unitless numbers (current logic defaults or returns '0%')."""
+        """
+        Tests that negative unitless numbers are processed as "0%" by _process_dimension_value.
+        """
         # Current _process_dimension_value logic for negative unitless numbers:
         # if num < 0: return "0%" (or default_value_with_unit based on implementation choice)
         # Assuming it's "0%" for this test as per one version of the suggested logic.
@@ -307,31 +379,45 @@ class TestProcessDimensionValue(unittest.TestCase):
 
 
     def test_process_invalid_string_values_fallback_to_default(self):
-        """Test invalid string values fall back to the provided default."""
+        """
+        Verifies that invalid dimension strings cause the method to return the provided default value.
+        
+        Tests that unrecognized units, malformed strings, or unsupported formats are not accepted and result in fallback to the default.
+        """
         self.assertEqual(self.block._process_dimension_value("foo", self.default_width), self.default_width)
         self.assertEqual(self.block._process_dimension_value("50em", self.default_width), self.default_width) # 'em' not explicitly handled
         self.assertEqual(self.block._process_dimension_value("100 percent", self.default_width), self.default_width)
         self.assertEqual(self.block._process_dimension_value("px100", self.default_width), self.default_width)
 
     def test_process_invalid_values_with_units_fallback_to_default(self):
-        """Test invalid numeric parts with units fall back to default."""
+        """
+        Tests that dimension values with invalid numeric parts and units fall back to the default value.
+        """
         self.assertEqual(self.block._process_dimension_value("abc%", self.default_width), self.default_width)
         self.assertEqual(self.block._process_dimension_value("xyzpx", self.default_width), self.default_width)
         self.assertEqual(self.block._process_dimension_value("--50%", self.default_width), self.default_width)
 
 
     def test_process_none_value_falls_back_to_default(self):
-        """Test None input falls back to default."""
+        """
+        Verifies that passing None as the dimension value causes the method to return the default value.
+        """
         # The str() conversion in _process_dimension_value will turn None into "None"
         # which will then fail parsing and fall back to default.
         self.assertEqual(self.block._process_dimension_value(None, self.default_width), self.default_width)
 
     def test_process_empty_string_falls_back_to_default(self):
-        """Test empty string input falls back to default."""
+        """
+        Verifies that an empty string input for a dimension value returns the provided default value.
+        """
         self.assertEqual(self.block._process_dimension_value("", self.default_width), self.default_width)
 
     def test_process_whitespace_around_valid_value(self):
-        """Test values with surrounding whitespace."""
+        """
+        Tests handling of dimension values with leading, trailing, or internal whitespace.
+        
+        Verifies that values with extra whitespace are processed correctly or fall back to defaults, depending on the input format.
+        """
         # The regex re.fullmatch might be strict with whitespace unless explicitly handled.
         # Current regex: r"(-?\d*\.?\d+)\s*(px|%)" - allows space before unit.
         # If value_str is " 50% ", it depends if string is stripped before regex.
@@ -342,7 +428,11 @@ class TestProcessDimensionValue(unittest.TestCase):
         self.assertEqual(self.block._process_dimension_value("  auto  ", self.default_height), "auto") # str.lower() == "auto"
 
     def test_process_default_height_auto(self):
-        """Test processing using default_height ('auto')."""
+        """
+        Tests that dimension values are processed correctly when the default height is 'auto'.
+        
+        Verifies that a valid unitless number is converted to a percentage, and invalid input falls back to the default value 'auto'.
+        """
         self.assertEqual(self.block._process_dimension_value("50", self.default_height), "50%")
         self.assertEqual(self.block._process_dimension_value("invalid", self.default_height), "auto")
 
