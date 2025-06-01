@@ -1,4 +1,6 @@
 # django_spellbook/spellblocks.py
+import re
+
 from django_spellbook.blocks import BasicSpellBlock, SpellBlockRegistry
 from typing import Optional
 
@@ -299,5 +301,115 @@ class HeroSpellBlock(BasicSpellBlock):
             "bottom": "sb-items-end",
         }
         context["vertical_align_class"] = align_map.get(context["content_align_vertical"], "sb-items-center")
+
+        return context
+    
+@SpellBlockRegistry.register()
+class AlignBlock(BasicSpellBlock):
+    name = "align"
+    template = "django_spellbook/blocks/align.html" # Make sure this template is updated
+
+    DEFAULT_POS = "center"
+    DEFAULT_WIDTH = "100%" # Default is fully qualified
+    DEFAULT_HEIGHT = "auto"   # Default is 'auto'
+    DEFAULT_CONTENT_ALIGN = "center"
+
+    def _process_dimension_value(self, value_str, default_value_with_unit):
+        """
+        Processes a dimension string (for width or height) to apply units.
+        - "auto" remains "auto".
+        - Explicit units like "50%", "120px" are validated and returned.
+        - Unitless numbers <= 100 become "NN%".
+        - Unitless numbers > 100 become "NNpx".
+        - Invalid values fall back to default_value_with_unit.
+        """
+        # 1. Handle "auto" case-insensitively
+        if str(value_str).lower() == "auto":
+            return "auto"
+
+        # 2. Check for explicit units (e.g., "50%", "120px")
+        # Regex to match a number (int or float) followed by "px" or "%"
+        # Allows for optional space before unit, case-insensitive units
+        match = re.fullmatch(r"(-?\d*\.?\d+)\s*(px|%)", str(value_str), re.IGNORECASE)
+        if match:
+            number_part, unit = match.groups()
+            # Validate that the number part is indeed a number
+            float(number_part)
+            return f"{number_part}{unit.lower()}" # Return as is, but with unit lowercased
+
+        # 3. Handle numeric input (no unit provided by user)
+        try:
+            num = float(value_str)
+            # Handle negative numbers - typically dimensions shouldn't be negative.
+            # You might choose to treat them as 0 or use the default.
+            if num < 0:
+                logger.warning(f"Negative dimension value '{value_str}' received. Using '0%' or default. Forcing 0 for now.")
+                # Or return default_value_with_unit
+                return "0%" # Or "0px" depending on context, but % is safer for 0
+
+            if num <= 100:
+                # Format to avoid ".0%" for whole numbers
+                return f"{int(num) if num.is_integer() else num}%"
+            else: # num > 100
+                return f"{int(num) if num.is_integer() else num}px"
+        except ValueError:
+            # Not "auto", not a recognized number+unit, not a simple number.
+            logger.error(f"Unrecognized dimension value: '{value_str}'. Using default: '{default_value_with_unit}'.")
+            return default_value_with_unit
+        except TypeError: # Handles if value_str is None or other non-string/non-numeric type
+            logger.error(f"Invalid type for dimension value: '{value_str}'. Using default: '{default_value_with_unit}'.")
+            return default_value_with_unit
+
+
+    def get_context(self):
+        context = super().get_context()
+
+        # Position
+        pos = self.kwargs.get("pos", self.DEFAULT_POS).lower()
+        if pos not in ["start", "center", "end"]: # These correspond to flex justify-content values
+            logger.error(f"AlignBlock: Invalid 'pos' parameter: '{pos}'. Defaulting to '{self.DEFAULT_POS}'.")
+            pos = self.DEFAULT_POS
+        # Map to CSS flexbox justify-content values if needed, or use directly if your CSS handles start/end
+        # Assuming 'start' -> 'flex-start', 'end' -> 'flex-end', 'center' -> 'center'
+        # For simplicity, if your CSS uses "start", "center", "end" directly for justify-content, no change here.
+        # If CSS expects flex-start/flex-end:
+        if pos == "start":
+            context["pos_css"] = "flex-start"
+        elif pos == "end":
+            context["pos_css"] = "flex-end"
+        else: # center
+            context["pos_css"] = "center"
+
+        context["pos"] = context["pos_css"] # Overwriting pos with the CSS value
+
+
+        # Width and Height using the new processing method
+        raw_width = self.kwargs.get("width", self.DEFAULT_WIDTH)
+        context["width"] = self._process_dimension_value(raw_width, self.DEFAULT_WIDTH)
+
+        raw_height = self.kwargs.get("height", self.DEFAULT_HEIGHT)
+        context["height"] = self._process_dimension_value(raw_height, self.DEFAULT_HEIGHT)
+
+        # Content Alignment
+        content_align = self.kwargs.get("content_align", self.DEFAULT_CONTENT_ALIGN).lower()
+        if content_align not in ["start", "center", "end"]:
+            logger.error(f"AlignBlock: Invalid 'content_align' parameter: '{content_align}'. Defaulting to '{self.DEFAULT_CONTENT_ALIGN}'.")
+            content_align = self.DEFAULT_CONTENT_ALIGN
+        # Map to CSS text-align values
+        if content_align == "start":
+            context["content_align_css"] = "left"
+        elif content_align == "end":
+            context["content_align_css"] = "right"
+        else: # center
+            context["content_align_css"] = "center"
+        # The template you provided uses `{% if content_align == 'start' %}left{% ... %}`
+        # So it's better to pass the original 'start', 'center', 'end' for content_align
+        context["content_align"] = content_align
+
+
+        # Standard string/optional parameters
+        context["class"] = self.kwargs.get("class", None)
+        context["id"] = self.kwargs.get("id", None)
+        context["content_class"] = self.kwargs.get("content_class", None)
 
         return context
