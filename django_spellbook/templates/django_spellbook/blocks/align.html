@@ -1,0 +1,11 @@
+<div {% if id %}id="{{ id }}"{% endif %}
+    class="sb-align-outer-wrapper {% if class %}{{ class }}{% endif %}" {# Safely include class #}
+    style="display: flex; justify-content: {{ pos }};" {# pos is now flex-start, center, or flex-end #}
+    >
+    <div class="sb-align-inner-block" style="width: {{ width }}; height: {{ height }};"> {# Directly use width and height #}
+        <div class="sb-align-content {% if content_class %}{{ content_class }}{% endif %}" {# Safely include content_class #}
+             style="text-align: {% if content_align == 'start' %}left{% elif content_align == 'end' %}right{% else %}center{% endif %};">
+            {{ content|safe }}
+        </div>
+    </div>
+</div>
