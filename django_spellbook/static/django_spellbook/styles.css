@@ -931,3 +931,281 @@
 .sb-align-content {
   width: 100%;
 }
+
+/* Button Block */
+/* Base sb-btn styles - Using your CSS variables where applicable */
+    .sb-btn {
+        display: inline-block;
+        font-weight: 600;
+        line-height: 1.5;
+        text-align: center;
+        text-decoration: none;
+        vertical-align: middle;
+        cursor: pointer;
+        user-select: none;
+        background-color: transparent;
+        border: 1px solid transparent; /* Base border, color variants will override color */
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        border-radius: var(--sb-border-radius-md, 0.375rem);
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
+    }
+    /* Hover and Focus-Visible for scaling effect */
+    .sb-btn:hover,
+    .sb-btn:focus-visible {
+        /* Combined for consistent visual feedback */
+        transform: scale(1.05); /* Scale effect on hover/focus */
+    }
+    /* Specific focus-visible style for outline/box-shadow if needed beyond hover */
+    .sb-btn:focus-visible {
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.4); /* Example focus ring */
+    }
+    /* If hover also changes other properties like background, ensure they are defined in variant :hover states below */
+    /* Disabled state */
+    .sb-btn:disabled,
+    .sb-btn.sb-disabled {
+        pointer-events: none;
+        opacity: 0.65;
+        transform: none; /* Ensure disabled buttons don't scale */
+    }
+    /* --- Click Animation (from your old code) --- */
+    @keyframes click-animation {
+        0% {
+            /* Start with a more prominent border using accent color */
+            box-shadow: 0 0 0 3px var(--accent-color, #f59e0b), inset 0 0 0 1px var(--accent-color, #f59e0b);
+            transform: scale(1.03); /* Slight initial pop for the animation */
+        }
+        50% {
+            /* Briefly 'press in' - could reduce scale or change shadow */
+            box-shadow: 0 0 0 1px var(--accent-color, #f59e0b), inset 0 1px 2px rgba(0, 0, 0, 0.2);
+            transform: scale(0.98);
+        }
+        100% {
+            /* Return to a slightly popped state before settling */
+            box-shadow: 0 0 0 3px var(--accent-color, #f59e0b), inset 0 0 0 1px var(--accent-color, #f59e0b);
+            transform: scale(1.03);
+        }
+    }
+    .sb-btn.click-animation {
+        /* Apply the animation when this class is added */
+        animation: click-animation 0.4s ease-in-out;
+    }
+    /* --- Color Variants (ensure hover styles here also work with the scale transform) --- */
+    /* Primary Button */
+    .sb-btn-primary {
+        color: #fff;
+        background-color: var(--primary-color, #3b82f6);
+        border-color: var(--primary-color, #3b82f6);
+    }
+    .sb-btn-primary:hover {
+        color: #fff;
+        background-color: #2573df; /* Darker shade */
+        border-color: #1c6cd9;
+        transform: scale(1.05); /* Explicitly keep or enhance hover transform if needed */
+    }
+    .sb-btn-primary:focus-visible {
+        /* transform: scale(1.05); Combined above */
+        box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.5);
+    }
+    /* Add :active state for immediate feedback on click, separate from keyframe animation */
+    .sb-btn-primary:active {
+        background-color: #1c6cd9; /* Even darker or same as hover */
+        transform: scale(0.98); /* "Pressed" effect */
+    }
+    /* Secondary Button */
+    .sb-btn-secondary {
+        color: #fff;
+        background-color: var(--secondary-color, #6b7280);
+        border-color: var(--secondary-color, #6b7280);
+    }
+    .sb-btn-secondary:hover {
+        color: #fff;
+        background-color: #5a6268;
+        border-color: #545b62;
+        transform: scale(1.05);
+    }
+    .sb-btn-secondary:focus-visible {
+        /* transform: scale(1.05); */
+        box-shadow: 0 0 0 0.25rem rgba(107, 114, 128, 0.5);
+    }
+    .sb-btn-secondary:active {
+        background-color: #545b62;
+        transform: scale(0.98);
+    }
+    /* Accent Button */
+    .sb-btn-accent {
+        color: #000;
+        background-color: var(--accent-color, #f59e0b);
+        border-color: var(--accent-color, #f59e0b);
+    }
+    .sb-btn-accent:hover {
+        color: #000;
+        background-color: #e08e0a;
+        border-color: #d48609;
+        transform: scale(1.05);
+    }
+    .sb-btn-accent:focus-visible {
+        /* transform: scale(1.05); */
+        box-shadow: 0 0 0 0.25rem rgba(245, 158, 11, 0.5);
+    }
+    .sb-btn-accent:active {
+        background-color: #d48609;
+        transform: scale(0.98);
+    }
+    /* Error Button */
+    .sb-btn-error {
+        color: #fff;
+        background-color: var(--error-color, #dc2626);
+        border-color: var(--error-color, #dc2626);
+    }
+    .sb-btn-error:hover {
+        color: #fff;
+        background-color: #c02222;
+        border-color: #b62020;
+        transform: scale(1.05);
+    }
+    .sb-btn-error:focus-visible {
+        /* transform: scale(1.05); */
+        box-shadow: 0 0 0 0.25rem rgba(220, 38, 38, 0.5);
+    }
+    .sb-btn-error:active {
+        background-color: #b62020;
+        transform: scale(0.98);
+    }
+    /* Warning Button */
+    .sb-btn-warning {
+        color: #000;
+        background-color: var(--warning-color, #f59e0b);
+        border-color: var(--warning-color, #f59e0b);
+    }
+    .sb-btn-warning:hover {
+        color: #000;
+        background-color: #e08e0a;
+        border-color: #d48609;
+        transform: scale(1.05);
+    }
+    .sb-btn-warning:focus-visible {
+        /* transform: scale(1.05); */
+        box-shadow: 0 0 0 0.25rem rgba(245, 158, 11, 0.5);
+    }
+    .sb-btn-warning:active {
+        background-color: #d48609;
+        transform: scale(0.98);
+    }
+    /* Success Button */
+    .sb-btn-success {
+        color: #fff;
+        background-color: var(--success-color, #16a34a);
+        border-color: var(--success-color, #16a34a);
+    }
+    .sb-btn-success:hover {
+        color: #fff;
+        background-color: #138d40;
+        border-color: #11803b;
+        transform: scale(1.05);
+    }
+    .sb-btn-success:focus-visible {
+        /* transform: scale(1.05); */
+        box-shadow: 0 0 0 0.25rem rgba(22, 163, 74, 0.5);
+    }
+    .sb-btn-success:active {
+        background-color: #11803b;
+        transform: scale(0.98);
+    }
+    /* Info Button */
+    .sb-btn-info {
+        color: #fff;
+        background-color: var(--info-color, #2563eb);
+        border-color: var(--info-color, #2563eb);
+    }
+    .sb-btn-info:hover {
+        color: #fff;
+        background-color: #1e54d3;
+        border-color: #1c4fc3;
+        transform: scale(1.05);
+    }
+    .sb-btn-info:focus-visible {
+        /* transform: scale(1.05); */
+        box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.5);
+    }
+    .sb-btn-info:active {
+        background-color: #1c4fc3;
+        transform: scale(0.98);
+    }
+    /* Black Button */
+    .sb-btn-black {
+        color: #fff;
+        background-color: #1f2937;
+        border-color: #1f2937;
+    }
+    .sb-btn-black:hover {
+        color: #fff;
+        background-color: #111827;
+        border-color: #0d1117;
+        transform: scale(1.05);
+    }
+    .sb-btn-black:focus-visible {
+        /* transform: scale(1.05); */
+        box-shadow: 0 0 0 0.25rem rgba(31, 41, 55, 0.5);
+    }
+    .sb-btn-black:active {
+        background-color: #0d1117;
+        transform: scale(0.98);
+    }
+    /* White Button */
+    .sb-btn-white {
+        color: #1f2937;
+        background-color: #ffffff;
+        border-color: #d1d5db;
+    }
+    .sb-btn-white:hover {
+        color: #111827;
+        background-color: #f9fafb;
+        border-color: #adb5bd;
+        transform: scale(1.05);
+    }
+    .sb-btn-white:focus-visible {
+        /* transform: scale(1.05); */
+        box-shadow: 0 0 0 0.25rem rgba(209, 213, 219, 0.5);
+    }
+    .sb-btn-white:active {
+        background-color: #e9eafb; /* Your previous hover color for white button */
+        border-color: #9ca3af;
+        transform: scale(0.98);
+    }
+
+    .sb-btn-sm {
+    padding: 0.25rem 0.75rem; /* Example: Smaller padding */
+    font-size: 0.875rem;     /* Example: Smaller font size */
+    /* Adjust border-radius if you want it proportional, e.g., var(--sb-border-radius-sm) */
+}
+
+.sb-btn-lg {
+    padding: 0.75rem 1.5rem; /* Example: Larger padding */
+    font-size: 1.125rem;    /* Example: Larger font size */
+    /* Adjust border-radius if you want it proportional, e.g., var(--sb-border-radius-lg) */
+}
+
+/* --- Icon Styling within Buttons --- */
+.sb-btn .sb-icon {
+    display: inline-block;
+    vertical-align: middle; /* Or text-bottom, baseline, etc., depending on icon style */
+    /* Add general icon styling here if needed, like fill/stroke color if using inline SVGs as classes */
+    /* For font icons or SVG-sprite classes, their own CSS will define appearance */
+    line-height: 1; /* Helps with consistent vertical alignment */
+}
+
+.sb-btn .sb-icon-left {
+    margin-right: 0.5em; /* Space between icon and text */
+}
+
+.sb-btn .sb-icon-right {
+    margin-left: 0.5em; /* Space between icon and text */
+}
+
+/* Optional: Ensure text and icons align nicely */
+.sb-btn-text {
+    display: inline-block;
+    vertical-align: middle;
+}
