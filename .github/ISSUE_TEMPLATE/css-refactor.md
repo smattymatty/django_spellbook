@@ -1,3 +1,10 @@
+---
+name: CSS Module Refactoring Task
+about: Defines a task to refactor a specific set of styles into a dedicated CSS module.
+title: 'CSS Module: Refactor [Module Name] to [path/to/module.css]'
+labels: 'css, refactor, module'
+assignees: ''
+---
 ## Task Description
 
 This task involves refactoring a specific set of CSS utilities or component styles from the existing monolithic stylesheets into a new dedicated CSS module. This task is a sub-issue of the main "EPIC: CSS Architecture Refactor."
