@@ -3325,3 +3325,8 @@
     scroll-behavior: auto !important;
   }
 }
+
+
+.sb-disabled {
+  pointer-events: none;
+}

@@ -428,15 +428,7 @@ class ButtonBlock(BasicSpellBlock):
 
         # --- Core Parameters ---
         href = self.kwargs.get("href")
-        if not href:
-            logger.warning("ButtonBlock: 'href' parameter is missing. Button will link to '#'.")
-            href = "#"  # Fallback href
         context["href"] = href
-
-        # Label from parameter (for self-closing block) vs. content from within the block
-        # The template will need to decide: if self.content is non-empty, use it, else use label.
-        context["label"] = self.kwargs.get("label", None)
-        # self.content will be available from BasicSpellBlock if content is between {~ button ~} and {~~}
 
         # --- Styling and Behavior Parameters ---
         button_type = self.kwargs.get("type", self.DEFAULT_TYPE).lower()

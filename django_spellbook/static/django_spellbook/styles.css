@@ -1,3 +1,10 @@
+/* Root Variables */
+:root {
+    --sb-btn-default-color: var(--sb-primary-color);
+    --sb-btn-default-bg: var(--sb-primary-bg);
+    --sb-btn-default-border: var(--sb-primary-border);
+}
+
 /* Alert Block */
 .sb-alert {
   padding: 1rem;
@@ -950,6 +957,13 @@
         border-radius: var(--sb-border-radius-md, 0.375rem);
         transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
     }
+
+    .sb-btn-default {
+        color: var(--sb-btn-default-color, var(--sb-primary-color));
+        background-color: var(--sb-btn-default-bg, var(--sb-primary-bg));
+        border-color: var(--sb-btn-default-border, var(--sb-primary-border));
+    }
+    
     /* Hover and Focus-Visible for scaling effect */
     .sb-btn:hover,
     .sb-btn:focus-visible {
@@ -1188,12 +1202,16 @@
 }
 
 /* --- Icon Styling within Buttons --- */
-.sb-btn .sb-icon {
+.sb-btn .sb-icon { /* Assuming icons are always in buttons for this context */
     display: inline-block;
-    vertical-align: middle; /* Or text-bottom, baseline, etc., depending on icon style */
-    /* Add general icon styling here if needed, like fill/stroke color if using inline SVGs as classes */
-    /* For font icons or SVG-sprite classes, their own CSS will define appearance */
-    line-height: 1; /* Helps with consistent vertical alignment */
+    vertical-align: middle; 
+    width: 1em;             /* Default width, scales with font-size of parent */
+    height: 1em;            /* Default height */
+    line-height: 1;
+
+    /* --- For SVG mask technique --- */
+    background-color: currentColor; /* This makes the icon take the color of the surrounding text.
+                                       You can change this to any specific color too. */
 }
 
 .sb-btn .sb-icon-left {
@@ -1203,6 +1221,86 @@
 .sb-btn .sb-icon-right {
     margin-left: 0.5em; /* Space between icon and text */
 }
+
+/* --- Specific Icon Definitions using SVG Masks --- */
+
+.sb-icon-download {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-download.svg'); /* Path relative to this CSS file */
+    mask-size: contain;                      /* Ensures the entire SVG fits */
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-edit {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-edit.svg'); /* Path relative to this CSS file */
+    mask-size: contain;                      /* Ensures the entire SVG fits */
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-arrow-right {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-arrow-right.svg'); /* Path relative to this CSS file */
+    mask-size: contain;                      /* Ensures the entire SVG fits */
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-arrow-left {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-arrow-left.svg'); /* Path relative to this CSS file */
+    mask-size: contain;                      /* Ensures the entire SVG fits */
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-settings {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-settings.svg'); /* Path relative to this CSS file */
+    mask-size: contain;                      /* Ensures the entire SVG fits */
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-user {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-user.svg'); /* Path relative to this CSS file */
+    mask-size: contain;                      /* Ensures the entire SVG fits */
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-plus {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-plus.svg'); /* Path relative to this CSS file */
+    mask-size: contain;                      /* Ensures the entire SVG fits */
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-minus {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-minus.svg'); /* Path relative to this CSS file */
+    mask-size: contain;                      /* Ensures the entire SVG fits */
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-arcanum {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-arcanum.svg'); /* Or your chosen path style */
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-elven-city {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-elven-city.svg'); /* Or your chosen path style */
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-glimmering-forest {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-glimmering-forest.svg'); /* Or your chosen path style */
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
 
 /* Optional: Ensure text and icons align nicely */
 .sb-btn-text {
