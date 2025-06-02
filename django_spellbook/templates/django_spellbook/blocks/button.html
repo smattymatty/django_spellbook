@@ -1,0 +1,23 @@
+<div class="sb-button-container"> 
+    <a {% if id %}id="{{ id }}"{% endif %} {% if href %}href="{% if not disabled %}{{ href }}{% else %}#{% endif %}"{% endif %} class="sb-btn sb-btn-{{ button_type|default:'default' }} sb-btn-{{ button_size|default:'md' }} {% if disabled %}sb-disabled{% endif %} {% if custom_class %}{{ custom_class }}{% endif %}"
+        {% if target %}target="{{ target }}"{% endif %}
+        {% if disabled %}
+            aria-disabled="true"
+            role="link"
+            tabindex="-1"
+        {% endif %}>
+        {% if icon_left %}
+            <span class="sb-icon {{ icon_left }} sb-icon-left" aria-hidden="true"></span>
+        {% endif %}
+        <span class="sb-btn-text">
+            {% if content %}
+                {{ content|safe }}
+            {% else %}
+                Button
+            {% endif %}
+        </span>
+        {% if icon_right %}
+            <span class="sb-icon {{ icon_right }} sb-icon-right" aria-hidden="true"></span>
+        {% endif %}
+    </a>
+</div>

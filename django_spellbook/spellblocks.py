@@ -413,3 +413,51 @@ class AlignBlock(BasicSpellBlock):
         context["content_class"] = self.kwargs.get("content_class", None)
 
         return context
+    
+@SpellBlockRegistry.register()
+class ButtonBlock(BasicSpellBlock):
+    name = "button"
+    template = "django_spellbook/blocks/button.html"  # You'll create this template next
+
+    # Define default values for parameters
+    DEFAULT_TYPE = "default"
+    DEFAULT_SIZE = "md"
+
+    def get_context(self):
+        context = super().get_context()
+
+        # --- Core Parameters ---
+        href = self.kwargs.get("href")
+        context["href"] = href
+
+        # --- Styling and Behavior Parameters ---
+        button_type = self.kwargs.get("type", self.DEFAULT_TYPE).lower()
+        # Basic validation for common types, can be expanded with your CSS.
+        # These will map to CSS classes like sb-button-primary, sb-button-default.
+        # You might want a predefined list of valid types if your CSS is strict.
+        context["button_type"] = button_type
+
+        button_size = self.kwargs.get("size", self.DEFAULT_SIZE).lower()
+        # These will map to CSS classes like sb-button-sm, sb-button-lg.
+        context["button_size"] = button_size
+
+        context["target"] = self.kwargs.get("target", None) # e.g., "_blank"
+
+        disabled_str = self.kwargs.get("disabled", "false").lower()
+        context["disabled"] = disabled_str == "true"
+        # If disabled, the template might omit href or add specific ARIA attributes.
+
+        # --- Icon Parameters ---
+        context["icon_left"] = self.kwargs.get("icon_left", None)
+        context["icon_right"] = self.kwargs.get("icon_right", None)
+
+        # --- Customization ---
+        context["custom_class"] = self.kwargs.get("class", None) # Renamed to avoid conflict with Python 'class'
+        context["id"] = self.kwargs.get("id", None)
+        
+        # --- Tag Type ---
+        # For this simplified version, it's always an 'a' tag.
+        # If you later expand to support <button>, this could be dynamic.
+        context["is_anchor"] = True 
+
+        return context

@@ -1,0 +1,374 @@
+<h1 id="button-block-button-showcase">Button Block (<code>~ button ~</code>) Showcase</h1>
+<p>The <code>~ button ~</code> SpellBlock allows you to easily create styled HTML anchor (<code>&lt;a&gt;</code>) tags that look and behave like buttons. This is perfect for calls-to-action, navigation, and links that need to stand out. This guide demonstrates its parameters and common use cases for the link-focused button.</p>
+<h2 id="basic-usage">Basic Usage</h2>
+<p>To create a basic button, you provide an <code>href</code> and the button's text content between the tags.</p>
+<pre><code>{~ button href=&quot;/getting-started&quot; ~}
+Get Started
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="/getting-started" class="sb-btn sb-btn-default sb-btn-md  "
+
+>
+
+<span class="sb-btn-text">
+
+<p>Get Started</p>
+
+</span>
+
+</a>
+</div>
+
+<h2 id="parameters-showcase">Parameters Showcase</h2>
+<p>The <code>~ button ~</code> block offers several parameters for customization:</p>
+<h3 id="href-required"><code>href</code> (Required)</h3>
+<p>This defines the URL the button links to. If omitted, it defaults to <code>"#"</code> but a warning will be logged.</p>
+<pre><code>{~ button href=&quot;/features&quot; ~}
+Learn About Features
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="/features" class="sb-btn sb-btn-default sb-btn-md  "
+
+>
+
+<span class="sb-btn-text">
+
+<p>Learn About Features</p>
+
+</span>
+
+</a>
+</div>
+
+<pre><code>{~ button ~}
+Button with Default Href
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a   class="sb-btn sb-btn-default sb-btn-md  "
+
+>
+
+<span class="sb-btn-text">
+
+<p>Button with Default Href</p>
+
+</span>
+
+</a>
+</div>
+
+<h3 id="type-visual-style"><code>type</code> (Visual Style)</h3>
+<p>Controls the button's appearance. Corresponds to predefined CSS classes (e.g., <code>sb-btn-primary</code>).<br />
+Default: <code>default</code>.<br />
+Supported types (based on your CSS): <code>default</code>, <code>primary</code>, <code>secondary</code>, <code>success</code>, <code>warning</code>, <code>danger</code>, <code>info</code>, <code>accent</code>, <code>black</code>, <code>white</code>.</p>
+<p><strong>Primary Button:</strong></p>
+<pre><code>{~ button href=&quot;/submit&quot; type=&quot;primary&quot; ~}
+Submit Action
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="/submit" class="sb-btn sb-btn-primary sb-btn-md  "
+
+>
+
+<span class="sb-btn-text">
+
+<p>Submit Action</p>
+
+</span>
+
+</a>
+</div>
+
+<p><strong>Secondary Button:</strong></p>
+<pre><code>{~ button href=&quot;/details&quot; type=&quot;secondary&quot; ~}
+View Details
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="/details" class="sb-btn sb-btn-secondary sb-btn-md  "
+
+>
+
+<span class="sb-btn-text">
+
+<p>View Details</p>
+
+</span>
+
+</a>
+</div>
+
+<p><strong>Success Button:</strong></p>
+<pre><code>{~ button href=&quot;/checkout&quot; type=&quot;success&quot; ~}
+Confirm Purchase
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="/checkout" class="sb-btn sb-btn-success sb-btn-md  "
+
+>
+
+<span class="sb-btn-text">
+
+<p>Confirm Purchase</p>
+
+</span>
+
+</a>
+</div>
+
+<p><em>(You can add more examples for <code>danger</code>, <code>warning</code>, <code>info</code>, <code>accent</code>, etc. as needed)</em></p>
+<h3 id="size"><code>size</code></h3>
+<p>Adjusts the button's size (padding, font-size). Corresponds to CSS classes (e.g., <code>sb-btn-sm</code>).<br />
+Default: <code>md</code>. Supported: <code>sm</code>, <code>md</code>, <code>lg</code>.</p>
+<p><strong>Small Button:</strong></p>
+<pre><code>{~ button href=&quot;/small-action&quot; type=&quot;primary&quot; size=&quot;sm&quot; ~}
+Small Primary
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="/small-action" class="sb-btn sb-btn-primary sb-btn-sm  "
+
+>
+
+<span class="sb-btn-text">
+
+<p>Small Primary</p>
+
+</span>
+
+</a>
+</div>
+
+<p><strong>Medium Button (Default Size):</strong></p>
+<pre><code>{~ button href=&quot;/medium-action&quot; type=&quot;secondary&quot; size=&quot;md&quot; ~}
+Medium Secondary
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="/medium-action" class="sb-btn sb-btn-secondary sb-btn-md  "
+
+>
+
+<span class="sb-btn-text">
+
+<p>Medium Secondary</p>
+
+</span>
+
+</a>
+</div>
+
+<p><strong>Large Button:</strong></p>
+<pre><code>{~ button href=&quot;/large-action&quot; type=&quot;success&quot; size=&quot;lg&quot; ~}
+Large Success
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="/large-action" class="sb-btn sb-btn-success sb-btn-lg  "
+
+>
+
+<span class="sb-btn-text">
+
+<p>Large Success</p>
+
+</span>
+
+</a>
+</div>
+
+<h3 id="target"><code>target</code></h3>
+<p>Standard HTML <code>target</code> attribute for links (e.g., <code>_blank</code> to open in a new tab).</p>
+<pre><code>{~ button href=&quot;https://example.com&quot; target=&quot;_blank&quot; type=&quot;info&quot; ~}
+Open External Link
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="https://example.com" class="sb-btn sb-btn-info sb-btn-md  "
+target="_blank"
+>
+
+<span class="sb-btn-text">
+
+<p>Open External Link</p>
+
+</span>
+
+</a>
+</div>
+
+<h3 id="disabled"><code>disabled</code></h3>
+<p>Renders the button in a disabled state. The <code>href</code> will point to <code>"#"</code> and ARIA attributes for disabled state will be added.<br />
+Default: <code>false</code>. Set to <code>true</code> to disable.</p>
+<pre><code>{~ button href=&quot;/secret-area&quot; type=&quot;error&quot; disabled=&quot;true&quot; ~}
+Access Restricted
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="#" class="sb-btn sb-btn-error sb-btn-md sb-disabled "
+
+
+aria-disabled="true"
+role="link"
+tabindex="-1"
+>
+
+<span class="sb-btn-text">
+
+<p>Access Restricted</p>
+
+</span>
+
+</a>
+</div>
+
+<h3 id="icon_left-and-icon_right"><code>icon_left</code> and <code>icon_right</code></h3>
+<p>Adds an icon to the left or right of the button text. You provide the CSS class for the icon.</p>
+<p><strong>Icon Left:</strong></p>
+<pre><code>{~ button href=&quot;/download&quot; type=&quot;primary&quot; icon_left=&quot;sb-icon-download&quot; ~}
+Download File
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="/download" class="sb-btn sb-btn-primary sb-btn-md  "
+
+>
+
+<span class="sb-icon sb-icon-download sb-icon-left" aria-hidden="true"></span>
+
+<span class="sb-btn-text">
+
+<p>Download File</p>
+
+</span>
+
+</a>
+</div>
+
+<p><strong>Icon Right:</strong></p>
+<pre><code>{~ button href=&quot;/next&quot; type=&quot;default&quot; icon_right=&quot;sb-icon-arrow-right&quot; ~}
+Next Step
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="/next" class="sb-btn sb-btn-default sb-btn-md  "
+
+>
+
+<span class="sb-btn-text">
+
+<p>Next Step</p>
+
+</span>
+
+<span class="sb-icon sb-icon-arrow-right sb-icon-right" aria-hidden="true"></span>
+
+</a>
+</div>
+
+<p><strong>Both Icons:</strong></p>
+<pre><code>{~ button href=&quot;/settings&quot; type=&quot;secondary&quot; icon_left=&quot;sb-icon-settings&quot; icon_right=&quot;sb-icon-edit&quot; ~}
+Manage Settings
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="/settings" class="sb-btn sb-btn-secondary sb-btn-md  "
+
+>
+
+<span class="sb-icon sb-icon-settings sb-icon-left" aria-hidden="true"></span>
+
+<span class="sb-btn-text">
+
+<p>Manage Settings</p>
+
+</span>
+
+<span class="sb-icon sb-icon-edit sb-icon-right" aria-hidden="true"></span>
+
+</a>
+</div>
+
+<h3 id="class-and-id"><code>class</code> and <code>id</code></h3>
+<p>Apply custom CSS classes or an HTML <code>id</code> for additional styling or JavaScript targeting.</p>
+<pre><code>{~ button href=&quot;/custom&quot; class=&quot;my-special-button analytics-trigger&quot; id=&quot;ctaButtonHomePage&quot; type=&quot;accent&quot; ~}
+Special Offer
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a id="ctaButtonHomePage" href="/custom" class="sb-btn sb-btn-accent sb-btn-md  my-special-button analytics-trigger"
+
+>
+
+<span class="sb-btn-text">
+
+<p>Special Offer</p>
+
+</span>
+
+</a>
+</div>
+
+<h2 id="content-formatting-within-buttons">Content Formatting within Buttons</h2>
+<p>The text inside the button tags is processed as Markdown.</p>
+<pre><code>{~ button href=&quot;/formatted-content&quot; type=&quot;primary&quot; size=&quot;lg&quot; ~}
+Click **Here** for *Amazing* `Offers`!
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a  href="/formatted-content" class="sb-btn sb-btn-primary sb-btn-lg  "
+
+>
+
+<span class="sb-btn-text">
+
+<p>Click <strong>Here</strong> for <em>Amazing</em> <code>Offers</code>!</p>
+
+</span>
+
+</a>
+</div>
+
+<h2 id="combined-example">Combined Example</h2>
+<p>A button using multiple parameters:</p>
+<pre><code>{~ button
+    href=&quot;/user/profile&quot;
+    type=&quot;info&quot;
+    size=&quot;lg&quot;
+    target=&quot;_blank&quot;
+    icon_left=&quot;sb-icon-user&quot;
+    class=&quot;user-profile-button&quot;
+    id=&quot;userProfileBtn&quot;
+~}
+View My Profile
+{~~}
+</code></pre>
+<div class="sb-button-container"> 
+<a id="userProfileBtn" href="/user/profile" class="sb-btn sb-btn-info sb-btn-lg  user-profile-button"
+target="_blank"
+>
+
+<span class="sb-icon sb-icon-user sb-icon-left" aria-hidden="true"></span>
+
+<span class="sb-btn-text">
+
+<p>View My Profile</p>
+
+</span>
+
+</a>
+</div>
+
+<h2 id="use-cases">Use Cases</h2>
+<ul>
+<li><strong>Primary Calls to Action:</strong> Guide users to the most important actions (e.g., "Sign Up", "Buy Now").</li>
+<li><strong>Secondary Actions:</strong> Offer alternative, less critical actions (e.g., "Learn More", "View Details").</li>
+<li><strong>Navigation:</strong> Use link-styled buttons for subtle navigation items that still need a button's click area.</li>
+<li><strong>Downloads &amp; External Links:</strong> Clearly indicate actions like downloading files or navigating to external sites, often with icons.</li>
+</ul>
+<hr />
