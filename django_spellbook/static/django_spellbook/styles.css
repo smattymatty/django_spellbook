@@ -1188,6 +1188,146 @@
         border-color: #9ca3af;
         transform: scale(0.98);
     }
+    /* Emphasis Button */
+    .sb-btn-emphasis {
+        color: #fff;
+        background-color: var(--emphasis-color, #8b5cf6);
+        border-color: var(--emphasis-color, #8b5cf6);
+    }
+    .sb-btn-emphasis:hover {
+        color: #fff;
+        background-color: #7a4fe2;
+        border-color: #6a3ec9;
+        transform: scale(1.05);
+    }
+    .sb-btn-emphasis:focus-visible {
+        /* transform: scale(1.05); Combined above */
+        box-shadow: 0 0 0 0.25rem rgba(139, 92, 246, 0.5);
+    }
+    .sb-btn-emphasis:active {
+        background-color: #6a3ec9;
+        transform: scale(0.98);
+    }
+    /* Subtle Button */
+    .sb-btn-subtle {
+        color: #000;
+        background-color: var(--subtle-color, #f3f4f6);
+        border-color: var(--subtle-color, #f3f4f6);
+    }
+    .sb-btn-subtle:hover {
+        color: #000;
+        background-color: #e5e7eb;
+        border-color: #d1d5db;
+        transform: scale(1.05);
+    }
+    .sb-btn-subtle:focus-visible {
+        /* transform: scale(1.05); Combined above */
+        box-shadow: 0 0 0 0.25rem rgba(209, 213, 219, 0.5);
+    }
+    .sb-btn-subtle:active {
+        background-color: #d1d5db;
+        transform: scale(0.98);
+    }
+    /* Distinct Button */
+    .sb-btn-distinct {
+        color: #fff;
+        background-color: var(--distinct-color, #06b6d4);
+        border-color: var(--distinct-color, #06b6d4);
+    }
+    .sb-btn-distinct:hover {
+        color: #fff;
+        background-color: #05a1b8;
+        border-color: #048c9e;
+        transform: scale(1.05);
+    }
+    .sb-btn-distinct:focus-visible {
+        /* transform: scale(1.05); Combined above */
+        box-shadow: 0 0 0 0.25rem rgba(6, 182, 212, 0.5);
+    }
+    .sb-btn-distinct:active {
+        background-color: #048c9e;
+        transform: scale(0.98);
+    }
+    /* Aether Button */
+    .sb-btn-aether {
+        color: #000;
+        background-color: var(--aether-color, #c026d3);
+        border-color: var(--aether-color, #c026d3);
+    }
+    .sb-btn-aether:hover {
+        color: #000;
+        background-color: #b725c9;
+        border-color: #a625c0;
+        transform: scale(1.05);
+    }
+    .sb-btn-aether:focus-visible {
+        /* transform: scale(1.05); Combined above */
+        box-shadow: 0 0 0 0.25rem rgba(194, 38, 211, 0.5);
+    }
+    .sb-btn-aether:active {
+        background-color: #a625c0;
+        transform: scale(0.98);
+    }
+    /* Artifact Button */
+    .sb-btn-artifact {
+        color: #fff;
+        background-color: var(--artifact-color, #a16207);
+        border-color: var(--artifact-color, #a16207);
+    }
+    .sb-btn-artifact:hover {
+        color: #fff;
+        background-color: #8f4f0d;
+        border-color: #7f4a0b;
+        transform: scale(1.05);
+    }
+    .sb-btn-artifact:focus-visible {
+        /* transform: scale(1.05); Combined above */
+        box-shadow: 0 0 0 0.25rem rgba(161, 98, 7, 0.5);
+    }
+    .sb-btn-artifact:active {
+        background-color: #7f4a0b;
+        transform: scale(0.98);
+    }
+    /* Sylvan Button */
+    .sb-btn-sylvan {
+        color: #000;
+        background-color: var(--sylvan-color, #3f6212);
+        border-color: var(--sylvan-color, #3f6212);
+    }
+    .sb-btn-sylvan:hover {
+        color: #000;
+        background-color: #2d4706;
+        border-color: #233e06;
+        transform: scale(1.05);
+    }
+    .sb-btn-sylvan:focus-visible {
+        /* transform: scale(1.05); Combined above */
+        box-shadow: 0 0 0 0.25rem rgba(63, 98, 18, 0.5);
+    }
+    .sb-btn-sylvan:active {
+        background-color: #233e06;
+        transform: scale(0.98);
+    }
+    /* Danger Button */
+    .sb-btn-danger {
+        color: #fff;
+        background-color: var(--danger-color, #a80000);
+        border-color: var(--danger-color, #a80000);
+    }
+    .sb-btn-danger:hover {
+        color: #fff;
+        background-color: #9c0000;
+        border-color: #8a0000;
+        transform: scale(1.05);
+    }
+    .sb-btn-danger:focus-visible {
+        /* transform: scale(1.05); Combined above */
+        box-shadow: 0 0 0 0.25rem rgba(154, 0, 0, 0.5);
+    }
+    .sb-btn-danger:active {
+        background-color: #8a0000;
+        transform: scale(0.98);
+    }
 
     .sb-btn-sm {
     padding: 0.25rem 0.75rem; /* Example: Smaller padding */
@@ -1226,6 +1366,13 @@
 
 .sb-icon-download {
     mask-image: url('/static/django_spellbook/svgs/sb-icon-download.svg'); /* Path relative to this CSS file */
+    mask-size: contain;                      /* Ensures the entire SVG fits */
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-spotlight {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-spotlight.svg'); /* Path relative to this CSS file */
     mask-size: contain;                      /* Ensures the entire SVG fits */
     mask-repeat: no-repeat;
     mask-position: center;
@@ -1301,6 +1448,40 @@
     mask-position: center;
 }
 
+.sb-icon-ancient-tome {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-ancient-tome.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-ellipsis-horizontal {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-ellipsis-horizontal.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-gemcut {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-gemcut.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-swirl-energy {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-swirl-energy.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.sb-icon-sylvan-leaf {
+    mask-image: url('/static/django_spellbook/svgs/sb-icon-sylvan-leaf.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
 
 /* Optional: Ensure text and icons align nicely */
 .sb-btn-text {

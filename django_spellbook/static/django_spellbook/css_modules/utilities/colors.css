@@ -1,0 +1,1985 @@
+/* Main utilities/colors.css */
+/* THIS FILE WILL CONTAIN ALL THE COLOR UTILITIES */
+/* It will be imported into the main utilities.css */
+
+/* Background Color */
+.sb-bg-black {
+  background-color: #000;
+}
+.sb-bg-white {
+  background-color: #fff;
+}
+.sb-bg-black-25 {
+  background-color: rgba(0, 0, 0, 0.25);
+}
+.sb-bg-black-50 {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.sb-bg-black-75 {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+.sb-bg-white-25 {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+.sb-bg-white-50 {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+.sb-bg-white-75 {
+  background-color: rgba(255, 255, 255, 0.75);
+}
+.sb-bg-primary {
+  background-color: var(--primary-color, #3b82f6);
+}
+.sb-bg-secondary {
+  background-color: var(--secondary-color, #6b7280);
+}
+.sb-bg-accent {
+  background-color: var(--accent-color, #f59e0b);
+}
+.sb-bg-neutral {
+  background-color: var(--neutral-color, #2563eb);
+}
+.sb-bg-error {
+  background-color: var(--error-color, #dc2626);
+}
+.sb-bg-warning {
+  background-color: var(--warning-color, #f59e0b);
+}
+.sb-bg-success {
+  background-color: var(--success-color, #16a34a);
+}
+.sb-bg-info {
+  background-color: var(--info-color, #2563eb);
+}
+.sb-bg-transparent {
+  background-color: transparent;
+}
+.sb-bg-emphasis {
+  background-color: var(--emphasis-color, #8b5cf6);
+}
+.sb-bg-subtle {
+  background-color: var(--subtle-color, #f3f4f6);
+}
+.sb-bg-distinct {
+  background-color: var(--distinct-color, #06b6d4);
+}
+.sb-bg-aether {
+  background-color: var(--aether-color, #c026d3);
+}
+.sb-bg-artifact {
+  background-color: var(--artifact-color, #a16207);
+}
+.sb-bg-sylvan {
+  background-color: var(--sylvan-color, #3f6212);
+}
+.sb-bg-danger {
+  background-color: var(--danger-color, #a80000);
+}
+/* variable background colors with opacity variants */
+.sb-bg-primary-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--primary-color, #3b82f6) 25%,
+    transparent
+  );
+}
+.sb-bg-primary-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--primary-color, #3b82f6) 50%,
+    transparent
+  );
+}
+.sb-bg-primary-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--primary-color, #3b82f6) 75%,
+    transparent
+  );
+}
+.sb-bg-secondary-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--secondary-color, #6b7280) 25%,
+    transparent
+  );
+}
+.sb-bg-secondary-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--secondary-color, #6b7280) 50%,
+    transparent
+  );
+}
+.sb-bg-secondary-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--secondary-color, #6b7280) 75%,
+    transparent
+  );
+}
+.sb-bg-accent-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--accent-color, #f59e0b) 25%,
+    transparent
+  );
+}
+.sb-bg-accent-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--accent-color, #f59e0b) 50%,
+    transparent
+  );
+}
+.sb-bg-accent-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--accent-color, #f59e0b) 75%,
+    transparent
+  );
+}
+.sb-bg-neutral-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--neutral-color, #2563eb) 25%,
+    transparent
+  );
+}
+.sb-bg-neutral-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--neutral-color, #2563eb) 50%,
+    transparent
+  );
+}
+.sb-bg-neutral-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--neutral-color, #2563eb) 75%,
+    transparent
+  );
+}
+.sb-bg-error-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--error-color, #dc2626) 25%,
+    transparent
+  );
+}
+.sb-bg-error-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--error-color, #dc2626) 50%,
+    transparent
+  );
+}
+.sb-bg-error-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--error-color, #dc2626) 75%,
+    transparent
+  );
+}
+.sb-bg-warning-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--warning-color, #f59e0b) 25%,
+    transparent
+  );
+}
+.sb-bg-warning-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--warning-color, #f59e0b) 50%,
+    transparent
+  );
+}
+.sb-bg-warning-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--warning-color, #f59e0b) 75%,
+    transparent
+  );
+}
+.sb-bg-success-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--success-color, #16a34a) 25%,
+    transparent
+  );
+}
+.sb-bg-success-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--success-color, #16a34a) 50%,
+    transparent
+  );
+}
+.sb-bg-success-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--success-color, #16a34a) 75%,
+    transparent
+  );
+}
+.sb-bg-info-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--info-color, #2563eb) 25%,
+    transparent
+  );
+}
+.sb-bg-info-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--info-color, #2563eb) 50%,
+    transparent
+  );
+}
+.sb-bg-info-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--info-color, #2563eb) 75%,
+    transparent
+  );
+}
+.sb-bg-emphasis-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--emphasis-color, #8b5cf6) 25%,
+    transparent
+  );
+}
+.sb-bg-emphasis-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--emphasis-color, #8b5cf6) 50%,
+    transparent
+  );
+}
+.sb-bg-emphasis-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--emphasis-color, #8b5cf6) 75%,
+    transparent
+  );
+}
+.sb-bg-subtle-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--subtle-color, #f3f4f6) 25%,
+    transparent
+  );
+}
+.sb-bg-subtle-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--subtle-color, #f3f4f6) 50%,
+    transparent
+  );
+}
+.sb-bg-subtle-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--subtle-color, #f3f4f6) 75%,
+    transparent
+  );
+}
+.sb-bg-distinct-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--distinct-color, #06b6d4) 25%,
+    transparent
+  );
+}
+.sb-bg-distinct-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--distinct-color, #06b6d4) 50%,
+    transparent
+  );
+}
+.sb-bg-distinct-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--distinct-color, #06b6d4) 75%,
+    transparent
+  );
+}
+.sb-bg-aether-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--aether-color, #c026d3) 25%,
+    transparent
+  );
+}
+.sb-bg-aether-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--aether-color, #c026d3) 50%,
+    transparent
+  );
+}
+.sb-bg-aether-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--aether-color, #c026d3) 75%,
+    transparent
+  );
+}
+.sb-bg-artifact-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--artifact-color, #a16207) 25%,
+    transparent
+  );
+}
+.sb-bg-artifact-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--artifact-color, #a16207) 50%,
+    transparent
+  );
+} 
+.sb-bg-artifact-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--artifact-color, #a16207) 75%,
+    transparent
+  );
+}
+.sb-bg-sylvan-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--sylvan-color, #3f6212) 25%,
+    transparent
+  );
+}
+.sb-bg-sylvan-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--sylvan-color, #3f6212) 50%,
+    transparent
+  );
+}
+.sb-bg-sylvan-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--sylvan-color, #3f6212) 75%,
+    transparent
+  );
+}
+.sb-bg-danger-25 {
+  background-color: color-mix(
+    in srgb,
+    var(--danger-color, #a80000) 25%,
+    transparent
+  );
+}
+.sb-bg-danger-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--danger-color, #a80000) 50%,
+    transparent
+  );
+}
+.sb-bg-danger-75 {
+  background-color: color-mix(
+    in srgb,
+    var(--danger-color, #a80000) 75%,
+    transparent
+  );
+}
+
+/* hover background colors */
+.sb-hover\:bg-black:hover {
+  background-color: #000;
+}
+.sb-hover\:bg-white:hover {
+  background-color: #fff;
+}
+.sb-hover\:bg-black-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--black-color, #000000) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-black-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--black-color, #000000) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-black-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--black-color, #000000) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-white-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--white-color, #ffffff) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-white-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--white-color, #ffffff) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-white-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--white-color, #ffffff) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-primary:hover {
+  background-color: var(--primary-color, #3b82f6);
+}
+.sb-hover\:bg-secondary:hover {
+  background-color: var(--secondary-color, #6b7280);
+}
+.sb-hover\:bg-accent:hover {
+  background-color: var(--accent-color, #f59e0b);
+}
+.sb-hover\:bg-neutral:hover {
+  background-color: var(--neutral-color, #2563eb);
+}
+.sb-hover\:bg-error:hover {
+  background-color: var(--error-color, #dc2626);
+}
+.sb-hover\:bg-warning:hover {
+  background-color: var(--warning-color, #f59e0b);
+}
+.sb-hover\:bg-success:hover {
+  background-color: var(--success-color, #16a34a);
+}
+.sb-hover\:bg-info:hover {
+  background-color: var(--info-color, #2563eb);
+}
+.sb-hover\:bg-emphasis:hover {
+  background-color: var(--emphasis-color, #8b5cf6);
+}
+.sb-hover\:bg-subtle:hover {
+  background-color: var(--subtle-color, #f3f4f6);
+}
+.sb-hover\:bg-distinct:hover {
+  background-color: var(--distinct-color, #06b6d4);
+}
+.sb-hover\:bg-aether:hover {
+  background-color: var(--aether-color, #c026d3);
+}
+.sb-hover\:bg-artifact:hover {
+  background-color: var(--artifact-color, #a16207);
+}
+.sb-hover\:bg-sylvan:hover {
+  background-color: var(--sylvan-color, #3f6212);
+}
+.sb-hover\:bg-danger:hover {
+  background-color: var(--danger-color, #a80000);
+}
+
+/* hover background colors with opacity variants */
+.sb-hover\:bg-primary-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--primary-color, #3b82f6) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-primary-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--primary-color, #3b82f6) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-primary-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--primary-color, #3b82f6) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-secondary-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--secondary-color, #6b7280) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-secondary-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--secondary-color, #6b7280) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-secondary-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--secondary-color, #6b7280) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-accent-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--accent-color, #f59e0b) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-accent-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--accent-color, #f59e0b) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-accent-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--accent-color, #f59e0b) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-neutral-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--neutral-color, #2563eb) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-neutral-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--neutral-color, #2563eb) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-neutral-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--neutral-color, #2563eb) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-error-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--error-color, #dc2626) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-error-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--error-color, #dc2626) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-error-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--error-color, #dc2626) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-warning-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--warning-color, #f59e0b) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-warning-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--warning-color, #f59e0b) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-warning-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--warning-color, #f59e0b) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-success-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--success-color, #16a34a) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-success-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--success-color, #16a34a) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-success-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--success-color, #16a34a) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-info-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--info-color, #2563eb) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-info-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--info-color, #2563eb) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-info-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--info-color, #2563eb) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-emphasis-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--emphasis-color, #8b5cf6) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-emphasis-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--emphasis-color, #8b5cf6) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-emphasis-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--emphasis-color, #8b5cf6) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-subtle-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--subtle-color, #f3f4f6) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-subtle-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--subtle-color, #f3f4f6) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-subtle-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--subtle-color, #f3f4f6) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-distinct-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--distinct-color, #06b6d4) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-distinct-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--distinct-color, #06b6d4) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-distinct-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--distinct-color, #06b6d4) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-aether-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--aether-color, #c026d3) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-aether-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--aether-color, #c026d3) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-aether-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--aether-color, #c026d3) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-artifact-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--artifact-color, #a16207) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-artifact-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--artifact-color, #a16207) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-artifact-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--artifact-color, #a16207) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-sylvan-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--sylvan-color, #3f6212) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-sylvan-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--sylvan-color, #3f6212) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-sylvan-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--sylvan-color, #3f6212) 75%,
+    transparent
+  );
+}
+.sb-hover\:bg-danger-25:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--danger-color, #a80000) 25%,
+    transparent
+  );
+}
+.sb-hover\:bg-danger-50:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--danger-color, #a80000) 50%,
+    transparent
+  );
+}
+.sb-hover\:bg-danger-75:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--danger-color, #a80000) 75%,
+    transparent
+  );
+}
+
+/* Color */
+.sb-black {
+  color: #000;
+}
+.sb-white {
+  color: #fff;
+}
+.sb-black-25 {
+  color: rgba(0, 0, 0, 0.25);
+}
+.sb-black-50 {
+  color: rgba(0, 0, 0, 0.5);
+}
+.sb-black-75 {
+  color: rgba(0, 0, 0, 0.75);
+}
+.sb-white-25 {
+  color: rgba(255, 255, 255, 0.25);
+}
+.sb-white-50 {
+  color: rgba(255, 255, 255, 0.5);
+}
+.sb-white-75 {
+  color: rgba(255, 255, 255, 0.75);
+}
+.sb-primary {
+  color: var(--primary-color, #3b82f6);
+}
+.sb-secondary {
+  color: var(--secondary-color, #6b7280);
+}
+.sb-accent {
+  color: var(--accent-color, #f59e0b);
+}
+.sb-neutral {
+  color: var(--neutral-color, #2563eb);
+}
+.sb-error {
+  color: var(--error-color, #dc2626);
+}
+.sb-warning {
+  color: var(--warning-color, #f59e0b);
+}
+.sb-success {
+  color: var(--success-color, #16a34a);
+}
+.sb-info {
+  color: var(--info-color, #2563eb);
+}
+.sb-emphasis {
+  color: var(--emphasis-color, #8b5cf6);
+}
+.sb-subtle {
+  color: var(--subtle-color, #f3f4f6);
+}
+.sb-distinct {
+  color: var(--distinct-color, #06b6d4);
+}
+.sb-aether {
+  color: var(--aether-color, #c026d3);
+}
+.sb-artifact {
+  color: var(--artifact-color, #a16207);
+}
+.sb-sylvan {
+  color: var(--sylvan-color, #3f6212);
+}
+.sb-danger {
+  color: var(--danger-color, #a80000);
+}
+/* hovered colors */
+.sb-hover\:primary:hover {
+  color: var(--primary-color, #3b82f6);
+}
+.sb-hover\:secondary:hover {
+  color: var(--secondary-color, #6b7280);
+}
+.sb-hover\:accent:hover {
+  color: var(--accent-color, #f59e0b);
+}
+.sb-hover\:neutral:hover {
+  color: var(--neutral-color, #2563eb);
+}
+.sb-hover\:error:hover {
+  color: var(--error-color, #dc2626);
+}
+.sb-hover\:warning:hover {
+  color: var(--warning-color, #f59e0b);
+}
+.sb-hover\:success:hover {
+  color: var(--success-color, #16a34a);
+}
+.sb-hover\:info:hover {
+  color: var(--info-color, #2563eb);
+}
+.sb-hover\:black:hover {
+  color: #000;
+}
+.sb-hover\:white:hover {
+  color: #fff;
+}
+.sb-hover\:emphasis:hover {
+  color: var(--emphasis-color, #8b5cf6);
+}
+.sb-hover\:subtle:hover {
+  color: var(--subtle-color, #f3f4f6);
+}
+.sb-hover\:distinct:hover {
+  color: var(--distinct-color, #06b6d4);
+}
+.sb-hover\:aether:hover {
+  color: var(--aether-color, #c026d3);
+}
+.sb-hover\:artifact:hover {
+  color: var(--artifact-color, #a16207);
+}
+.sb-hover\:sylvan:hover {
+  color: var(--sylvan-color, #3f6212);
+}
+.sb-hover\:danger:hover {
+  color: var(--danger-color, #a80000);
+}
+
+/* Theme Colors with Opacity Variants */
+.sb-primary-25 {
+  color: color-mix(in srgb, var(--primary-color, #3b82f6) 25%, transparent);
+}
+.sb-primary-50 {
+  color: color-mix(in srgb, var(--primary-color, #3b82f6) 50%, transparent);
+}
+.sb-primary-75 {
+  color: color-mix(in srgb, var(--primary-color, #3b82f6) 75%, transparent);
+}
+.sb-secondary-25 {
+  color: color-mix(in srgb, var(--secondary-color, #6b7280) 25%, transparent);
+}
+.sb-secondary-50 {
+  color: color-mix(in srgb, var(--secondary-color, #6b7280) 50%, transparent);
+}
+.sb-secondary-75 {
+  color: color-mix(in srgb, var(--secondary-color, #6b7280) 75%, transparent);
+}
+.sb-accent-25 {
+  color: color-mix(in srgb, var(--accent-color, #f59e0b) 25%, transparent);
+}
+.sb-accent-50 {
+  color: color-mix(in srgb, var(--accent-color, #f59e0b) 50%, transparent);
+}
+.sb-accent-75 {
+  color: color-mix(in srgb, var(--accent-color, #f59e0b) 75%, transparent);
+}
+.sb-neutral-25 {
+  color: color-mix(in srgb, var(--neutral-color, #2563eb) 25%, transparent);
+}
+.sb-neutral-50 {
+  color: color-mix(in srgb, var(--neutral-color, #2563eb) 50%, transparent);
+}
+.sb-neutral-75 {
+  color: color-mix(in srgb, var(--neutral-color, #2563eb) 75%, transparent);
+}
+.sb-error-25 {
+  color: color-mix(in srgb, var(--error-color, #dc2626) 25%, transparent);
+}
+.sb-error-50 {
+  color: color-mix(in srgb, var(--error-color, #dc2626) 50%, transparent);
+}
+.sb-error-75 {
+  color: color-mix(in srgb, var(--error-color, #dc2626) 75%, transparent);
+}
+.sb-warning-25 {
+  color: color-mix(in srgb, var(--warning-color, #f59e0b) 25%, transparent);
+}
+.sb-warning-50 {
+  color: color-mix(in srgb, var(--warning-color, #f59e0b) 50%, transparent);
+}
+.sb-warning-75 {
+  color: color-mix(in srgb, var(--warning-color, #f59e0b) 75%, transparent);
+}
+.sb-success-25 {
+  color: color-mix(in srgb, var(--success-color, #16a34a) 25%, transparent);
+}
+.sb-success-50 {
+  color: color-mix(in srgb, var(--success-color, #16a34a) 50%, transparent);
+}
+.sb-success-75 {
+  color: color-mix(in srgb, var(--success-color, #16a34a) 75%, transparent);
+}
+.sb-info-25 {
+  color: color-mix(in srgb, var(--info-color, #2563eb) 25%, transparent);
+}
+.sb-info-50 {
+  color: color-mix(in srgb, var(--info-color, #2563eb) 50%, transparent);
+}
+.sb-info-75 {
+  color: color-mix(in srgb, var(--info-color, #2563eb) 75%, transparent);
+}
+.sb-emphasis-25 {
+  color: color-mix(in srgb, var(--emphasis-color, #8b5cf6) 25%, transparent);
+}
+.sb-emphasis-50 {
+  color: color-mix(in srgb, var(--emphasis-color, #8b5cf6) 50%, transparent);
+}
+.sb-emphasis-75 {
+  color: color-mix(in srgb, var(--emphasis-color, #8b5cf6) 75%, transparent);
+}
+.sb-subtle-25 {
+  color: color-mix(in srgb, var(--subtle-color, #f3f4f6) 25%, transparent);
+}
+.sb-subtle-50 {
+  color: color-mix(in srgb, var(--subtle-color, #f3f4f6) 50%, transparent);
+}
+.sb-subtle-75 {
+  color: color-mix(in srgb, var(--subtle-color, #f3f4f6) 75%, transparent);
+}
+.sb-distinct-25 {
+  color: color-mix(in srgb, var(--distinct-color, #06b6d4) 25%, transparent);
+}
+.sb-distinct-50 {
+  color: color-mix(in srgb, var(--distinct-color, #06b6d4) 50%, transparent);
+}
+.sb-distinct-75 {
+  color: color-mix(in srgb, var(--distinct-color, #06b6d4) 75%, transparent);
+}
+.sb-aether-25 {
+  color: color-mix(in srgb, var(--aether-color, #c026d3) 25%, transparent);
+}
+.sb-aether-50 {
+  color: color-mix(in srgb, var(--aether-color, #c026d3) 50%, transparent);
+}
+.sb-aether-75 {
+  color: color-mix(in srgb, var(--aether-color, #c026d3) 75%, transparent);
+}
+.sb-artifact-25 {
+  color: color-mix(in srgb, var(--artifact-color, #a16207) 25%, transparent);
+}
+.sb-artifact-50 {
+  color: color-mix(in srgb, var(--artifact-color, #a16207) 50%, transparent);
+}
+.sb-artifact-75 {
+  color: color-mix(in srgb, var(--artifact-color, #a16207) 75%, transparent);
+}
+.sb-sylvan-25 {
+  color: color-mix(in srgb, var(--sylvan-color, #3f6212) 25%, transparent);
+}
+.sb-sylvan-50 {
+  color: color-mix(in srgb, var(--sylvan-color, #3f6212) 50%, transparent);
+}
+.sb-sylvan-75 {
+  color: color-mix(in srgb, var(--sylvan-color, #3f6212) 75%, transparent);
+}
+.sb-danger-25 {
+  color: color-mix(in srgb, var(--danger-color, #a80000) 25%, transparent);
+}
+.sb-danger-50 {
+  color: color-mix(in srgb, var(--danger-color, #a80000) 50%, transparent);
+}
+.sb-danger-75 {
+  color: color-mix(in srgb, var(--danger-color, #a80000) 75%, transparent);
+}
+
+/* hover variants with opacity for colors */
+.sb-hover\:primary-25:hover {
+  color: color-mix(in srgb, var(--primary-color, #3b82f6) 25%, transparent);
+}
+.sb-hover\:primary-50:hover {
+  color: color-mix(in srgb, var(--primary-color, #3b82f6) 50%, transparent);
+}
+.sb-hover\:primary-75:hover {
+  color: color-mix(in srgb, var(--primary-color, #3b82f6) 75%, transparent);
+}
+.sb-hover\:secondary-25:hover {
+  color: color-mix(in srgb, var(--secondary-color, #6b7280) 25%, transparent);
+}
+.sb-hover\:secondary-50:hover {
+  color: color-mix(in srgb, var(--secondary-color, #6b7280) 50%, transparent);
+}
+.sb-hover\:secondary-75:hover {
+  color: color-mix(in srgb, var(--secondary-color, #6b7280) 75%, transparent);
+}
+.sb-hover\:accent-25:hover {
+  color: color-mix(in srgb, var(--accent-color, #f59e0b) 25%, transparent);
+}
+.sb-hover\:accent-50:hover {
+  color: color-mix(in srgb, var(--accent-color, #f59e0b) 50%, transparent);
+}
+.sb-hover\:accent-75:hover {
+  color: color-mix(in srgb, var(--accent-color, #f59e0b) 75%, transparent);
+}
+.sb-hover\:neutral-25:hover {
+  color: color-mix(in srgb, var(--neutral-color, #2563eb) 25%, transparent);
+}
+.sb-hover\:neutral-50:hover {
+  color: color-mix(in srgb, var(--neutral-color, #2563eb) 50%, transparent);
+}
+.sb-hover\:neutral-75:hover {
+  color: color-mix(in srgb, var(--neutral-color, #2563eb) 75%, transparent);
+}
+.sb-hover\:error-25:hover {
+  color: color-mix(in srgb, var(--error-color, #dc2626) 25%, transparent);
+}
+.sb-hover\:error-50:hover {
+  color: color-mix(in srgb, var(--error-color, #dc2626) 50%, transparent);
+}
+.sb-hover\:error-75:hover {
+  color: color-mix(in srgb, var(--error-color, #dc2626) 75%, transparent);
+}
+.sb-hover\:warning-25:hover {
+  color: color-mix(in srgb, var(--warning-color, #f59e0b) 25%, transparent);
+}
+.sb-hover\:warning-50:hover {
+  color: color-mix(in srgb, var(--warning-color, #f59e0b) 50%, transparent);
+}
+.sb-hover\:warning-75:hover {
+  color: color-mix(in srgb, var(--warning-color, #f59e0b) 75%, transparent);
+}
+.sb-hover\:success-25:hover {
+  color: color-mix(in srgb, var(--success-color, #16a34a) 25%, transparent);
+}
+.sb-hover\:success-50:hover {
+  color: color-mix(in srgb, var(--success-color, #16a34a) 50%, transparent);
+}
+.sb-hover\:success-75:hover {
+  color: color-mix(in srgb, var(--success-color, #16a34a) 75%, transparent);
+}
+.sb-hover\:info-25:hover {
+  color: color-mix(in srgb, var(--info-color, #2563eb) 25%, transparent);
+}
+.sb-hover\:info-50:hover {
+  color: color-mix(in srgb, var(--info-color, #2563eb) 50%, transparent);
+}
+.sb-hover\:info-75:hover {
+  color: color-mix(in srgb, var(--info-color, #2563eb) 75%, transparent);
+}
+.sb-hover\:black-25:hover {
+  color: color-mix(in srgb, var(--black-color, #000000) 25%, transparent);
+}
+.sb-hover\:black-50:hover {
+  color: color-mix(in srgb, var(--black-color, #000000) 50%, transparent);
+}
+.sb-hover\:black-75:hover {
+  color: color-mix(in srgb, var(--black-color, #000000) 75%, transparent);
+}
+.sb-hover\:white-25:hover {
+  color: color-mix(in srgb, var(--white-color, #ffffff) 25%, transparent);
+}
+.sb-hover\:white-50:hover {
+  color: color-mix(in srgb, var(--white-color, #ffffff) 50%, transparent);
+}
+.sb-hover\:white-75:hover {
+  color: color-mix(in srgb, var(--white-color, #ffffff) 75%, transparent);
+}
+.sb-hover\:emphasis-25:hover {
+  color: color-mix(in srgb, var(--emphasis-color, #8b5cf6) 25%, transparent);
+}
+.sb-hover\:emphasis-50:hover {
+  color: color-mix(in srgb, var(--emphasis-color, #8b5cf6) 50%, transparent);
+}
+.sb-hover\:emphasis-75:hover {
+  color: color-mix(in srgb, var(--emphasis-color, #8b5cf6) 75%, transparent);
+}
+.sb-hover\:subtle-25:hover {
+  color: color-mix(in srgb, var(--subtle-color, #f3f4f6) 25%, transparent);
+}
+.sb-hover\:subtle-50:hover {
+  color: color-mix(in srgb, var(--subtle-color, #f3f4f6) 50%, transparent);
+}
+.sb-hover\:subtle-75:hover {
+  color: color-mix(in srgb, var(--subtle-color, #f3f4f6) 75%, transparent);
+}
+.sb-hover\:distinct-25:hover {
+  color: color-mix(in srgb, var(--distinct-color, #06b6d4) 25%, transparent);
+}
+.sb-hover\:distinct-50:hover {
+  color: color-mix(in srgb, var(--distinct-color, #06b6d4) 50%, transparent);
+}
+.sb-hover\:distinct-75:hover {
+  color: color-mix(in srgb, var(--distinct-color, #06b6d4) 75%, transparent);
+}
+.sb-hover\:aether-25:hover {
+  color: color-mix(in srgb, var(--aether-color, #c026d3) 25%, transparent);
+}
+.sb-hover\:aether-50:hover {
+  color: color-mix(in srgb, var(--aether-color, #c026d3) 50%, transparent);
+}
+.sb-hover\:aether-75:hover {
+  color: color-mix(in srgb, var(--aether-color, #c026d3) 75%, transparent);
+}
+.sb-hover\:artifact-25:hover {
+  color: color-mix(in srgb, var(--artifact-color, #a16207) 25%, transparent);
+}
+.sb-hover\:artifact-50:hover {
+  color: color-mix(in srgb, var(--artifact-color, #a16207) 50%, transparent);
+}
+.sb-hover\:artifact-75:hover {
+  color: color-mix(in srgb, var(--artifact-color, #a16207) 75%, transparent);
+}
+.sb-hover\:sylvan-25:hover {
+  color: color-mix(in srgb, var(--sylvan-color, #3f6212) 25%, transparent);
+}
+.sb-hover\:sylvan-50:hover {
+  color: color-mix(in srgb, var(--sylvan-color, #3f6212) 50%, transparent);
+}
+.sb-hover\:sylvan-75:hover {
+  color: color-mix(in srgb, var(--sylvan-color, #3f6212) 75%, transparent);
+}
+.sb-hover\:danger-25:hover {
+  color: color-mix(in srgb, var(--danger-color, #a80000) 25%, transparent);
+}
+.sb-hover\:danger-50:hover {
+  color: color-mix(in srgb, var(--danger-color, #a80000) 50%, transparent);
+}
+.sb-hover\:danger-75:hover {
+  color: color-mix(in srgb, var(--danger-color, #a80000) 75%, transparent);
+}
+
+/* Border Colors */
+.sb-border-black-25 {
+  border-color: rgba(0, 0, 0, 0.25);
+}
+.sb-border-black-50 {
+  border-color: rgba(0, 0, 0, 0.5);
+}
+.sb-border-black-75 {
+  border-color: rgba(0, 0, 0, 0.75);
+}
+.sb-border-black {
+  border-color: #000;
+}
+.sb-border-white-25 {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.sb-border-white-50 {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.sb-border-white-75 {
+  border-color: rgba(255, 255, 255, 0.75);
+}
+.sb-border-white {
+  border-color: #fff;
+}
+.sb-border-primary {
+  border-color: var(--primary-color, #3b82f6);
+}
+.sb-border-secondary {
+  border-color: var(--secondary-color, #6b7280);
+}
+.sb-border-accent {
+  border-color: var(--accent-color, #f59e0b);
+}
+.sb-border-neutral {
+  border-color: var(--neutral-color, #2563eb);
+}
+.sb-border-error {
+  border-color: var(--error-color, #dc2626);
+}
+.sb-border-warning {
+  border-color: var(--warning-color, #f59e0b);
+}
+.sb-border-success {
+  border-color: var(--success-color, #16a34a);
+}
+.sb-border-info {
+  border-color: var(--info-color, #2563eb);
+}
+.sb-border-emphasis {
+  border-color: var(--emphasis-color, #8b5cf6);
+}
+.sb-border-subtle {
+  border-color: var(--subtle-color, #f3f4f6);
+}
+.sb-border-distinct {
+  border-color: var(--distinct-color, #06b6d4);
+}
+.sb-border-aether {
+  border-color: var(--aether-color, #c026d3);
+}
+.sb-border-artifact {
+  border-color: var(--artifact-color, #a16207);
+}
+.sb-border-sylvan {
+  border-color: var(--sylvan-color, #3f6212);
+}
+.sb-border-danger {
+  border-color: var(--danger-color, #a80000);
+}
+
+/* Theme Variannts with opacity for border colors */
+.sb-border-primary-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--primary-color, #3b82f6) 25%,
+    transparent
+  );
+}
+.sb-border-primary-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--primary-color, #3b82f6) 50%,
+    transparent
+  );
+}
+.sb-border-primary-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--primary-color, #3b82f6) 75%,
+    transparent
+  );
+}
+.sb-border-secondary-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--secondary-color, #6b7280) 25%,
+    transparent
+  );
+}
+.sb-border-secondary-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--secondary-color, #6b7280) 50%,
+    transparent
+  );
+}
+.sb-border-secondary-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--secondary-color, #6b7280) 75%,
+    transparent
+  );
+}
+.sb-border-accent-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--accent-color, #f59e0b) 25%,
+    transparent
+  );
+}
+.sb-border-accent-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--accent-color, #f59e0b) 50%,
+    transparent
+  );
+}
+.sb-border-accent-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--accent-color, #f59e0b) 75%,
+    transparent
+  );
+}
+.sb-border-neutral-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--neutral-color, #2563eb) 25%,
+    transparent
+  );
+}
+.sb-border-neutral-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--neutral-color, #2563eb) 50%,
+    transparent
+  );
+}
+.sb-border-neutral-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--neutral-color, #2563eb) 75%,
+    transparent
+  );
+}
+.sb-border-error-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--error-color, #dc2626) 25%,
+    transparent
+  );
+}
+.sb-border-error-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--error-color, #dc2626) 50%,
+    transparent
+  );
+}
+.sb-border-error-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--error-color, #dc2626) 75%,
+    transparent
+  );
+}
+.sb-border-warning-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--warning-color, #f59e0b) 25%,
+    transparent
+  );
+}
+.sb-border-warning-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--warning-color, #f59e0b) 50%,
+    transparent
+  );
+}
+.sb-border-warning-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--warning-color, #f59e0b) 75%,
+    transparent
+  );
+}
+.sb-border-success-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--success-color, #16a34a) 25%,
+    transparent
+  );
+}
+.sb-border-success-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--success-color, #16a34a) 50%,
+    transparent
+  );
+}
+.sb-border-success-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--success-color, #16a34a) 75%,
+    transparent
+  );
+}
+.sb-border-info-25 {
+  border-color: color-mix(in srgb, var(--info-color, #2563eb) 25%, transparent);
+}
+.sb-border-info-50 {
+  border-color: color-mix(in srgb, var(--info-color, #2563eb) 50%, transparent);
+}
+.sb-border-info-75 {
+  border-color: color-mix(in srgb, var(--info-color, #2563eb) 75%, transparent);
+}
+
+.sb-border-transparent {
+  border-color: transparent;
+}
+.sb-border-emphasis-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--emphasis-color, #8b5cf6) 25%,
+    transparent
+  );
+}
+.sb-border-emphasis-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--emphasis-color, #8b5cf6) 50%,
+    transparent
+  );
+}
+.sb-border-emphasis-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--emphasis-color, #8b5cf6) 75%,
+    transparent
+  );
+}
+.sb-border-subtle-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--subtle-color, #f3f4f6) 25%,
+    transparent
+  );
+}
+.sb-border-subtle-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--subtle-color, #f3f4f6) 50%,
+    transparent
+  );
+}
+.sb-border-subtle-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--subtle-color, #f3f4f6) 75%,
+    transparent
+  );
+}
+.sb-border-distinct-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--distinct-color, #06b6d4) 25%,
+    transparent
+  );
+}
+.sb-border-distinct-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--distinct-color, #06b6d4) 50%,
+    transparent
+  );
+}
+.sb-border-distinct-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--distinct-color, #06b6d4) 75%,
+    transparent
+  );
+}
+.sb-border-aether-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--aether-color, #c026d3) 25%,
+    transparent
+  );
+}
+.sb-border-aether-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--aether-color, #c026d3) 50%,
+    transparent
+  );
+}
+.sb-border-aether-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--aether-color, #c026d3) 75%,
+    transparent
+  );
+}
+.sb-border-artifact-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--artifact-color, #a16207) 25%,
+    transparent
+  );
+}
+.sb-border-artifact-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--artifact-color, #a16207) 50%,
+    transparent
+  );
+}
+.sb-border-artifact-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--artifact-color, #a16207) 75%,
+    transparent
+  );
+}
+.sb-border-sylvan-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--sylvan-color, #3f6212) 25%,
+    transparent
+  );
+}
+.sb-border-sylvan-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--sylvan-color, #3f6212) 50%,
+    transparent
+  );
+}
+.sb-border-sylvan-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--sylvan-color, #3f6212) 75%,
+    transparent
+  );
+}
+.sb-border-danger-25 {
+  border-color: color-mix(
+    in srgb,
+    var(--danger-color, #a80000) 25%,
+    transparent
+  );
+}
+.sb-border-danger-50 {
+  border-color: color-mix(
+    in srgb,
+    var(--danger-color, #a80000) 50%,
+    transparent
+  );
+}
+.sb-border-danger-75 {
+  border-color: color-mix(
+    in srgb,
+    var(--danger-color, #a80000) 75%,
+    transparent
+  );
+}
+
+/* hover border variants */
+.sb-hover\:border-primary:hover {
+  border-color: var(--primary-color, #3b82f6);
+}
+.sb-hover\:border-secondary:hover {
+  border-color: var(--secondary-color, #6b7280);
+}
+.sb-hover\:border-accent:hover {
+  border-color: var(--accent-color, #f59e0b);
+}
+.sb-hover\:border-neutral:hover {
+  border-color: var(--neutral-color, #2563eb);
+}
+.sb-hover\:border-error:hover {
+  border-color: var(--error-color, #dc2626);
+}
+.sb-hover\:border-warning:hover {
+  border-color: var(--warning-color, #f59e0b);
+}
+.sb-hover\:border-success:hover {
+  border-color: var(--success-color, #16a34a);
+}
+.sb-hover\:border-info:hover {
+  border-color: var(--info-color, #2563eb);
+}
+.sb-hover\:border-emphasis:hover {
+  border-color: var(--emphasis-color, #8b5cf6);
+}
+.sb-hover\:border-subtle:hover {
+  border-color: var(--subtle-color, #f3f4f6);
+}
+.sb-hover\:border-distinct:hover {
+  border-color: var(--distinct-color, #06b6d4);
+}
+.sb-hover\:border-aether:hover {
+  border-color: var(--aether-color, #c026d3);
+}
+
+/* hover variants with opacity for border colors */
+.sb-hover\:border-primary-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--primary-color, #3b82f6) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-primary-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--primary-color, #3b82f6) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-primary-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--primary-color, #3b82f6) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-secondary-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--secondary-color, #6b7280) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-secondary-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--secondary-color, #6b7280) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-secondary-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--secondary-color, #6b7280) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-accent-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--accent-color, #f59e0b) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-accent-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--accent-color, #f59e0b) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-accent-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--accent-color, #f59e0b) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-neutral-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--neutral-color, #2563eb) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-neutral-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--neutral-color, #2563eb) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-neutral-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--neutral-color, #2563eb) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-error-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--error-color, #dc2626) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-error-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--error-color, #dc2626) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-error-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--error-color, #dc2626) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-warning-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--warning-color, #f59e0b) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-warning-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--warning-color, #f59e0b) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-warning-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--warning-color, #f59e0b) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-success-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--success-color, #16a34a) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-success-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--success-color, #16a34a) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-success-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--success-color, #16a34a) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-info-25:hover {
+  border-color: color-mix(in srgb, var(--info-color, #2563eb) 25%, transparent);
+}
+.sb-hover\:border-info-50:hover {
+  border-color: color-mix(in srgb, var(--info-color, #2563eb) 50%, transparent);
+}
+.sb-hover\:border-info-75:hover {
+  border-color: color-mix(in srgb, var(--info-color, #2563eb) 75%, transparent);
+}
+.sb-hover\:border-black-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--black-color, #000000) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-black-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--black-color, #000000) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-black-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--black-color, #000000) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-white-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--white-color, #ffffff) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-white-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--white-color, #ffffff) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-white-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--white-color, #ffffff) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-emphasis-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--emphasis-color, #8b5cf6) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-emphasis-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--emphasis-color, #8b5cf6) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-emphasis-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--emphasis-color, #8b5cf6) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-subtle-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--subtle-color, #f3f4f6) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-subtle-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--subtle-color, #f3f4f6) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-subtle-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--subtle-color, #f3f4f6) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-distinct-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--distinct-color, #06b6d4) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-distinct-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--distinct-color, #06b6d4) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-distinct-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--distinct-color, #06b6d4) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-aether-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--aether-color, #c026d3) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-aether-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--aether-color, #c026d3) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-aether-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--aether-color, #c026d3) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-artifact-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--artifact-color, #a16207) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-artifact-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--artifact-color, #a16207) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-artifact-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--artifact-color, #a16207) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-sylvan-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--sylvan-color, #3f6212) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-sylvan-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--sylvan-color, #3f6212) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-sylvan-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--sylvan-color, #3f6212) 75%,
+    transparent
+  );
+}
+.sb-hover\:border-danger-25:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--danger-color, #a80000) 25%,
+    transparent
+  );
+}
+.sb-hover\:border-danger-50:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--danger-color, #a80000) 50%,
+    transparent
+  );
+}
+.sb-hover\:border-danger-75:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--danger-color, #a80000) 75%,
+    transparent
+  );
+}
