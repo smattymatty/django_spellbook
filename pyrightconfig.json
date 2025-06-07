@@ -1,0 +1,7 @@
+{
+  "venvPath": ".",
+  "venv": "venv",
+  "pythonVersion": "3.10",
+  //"include": ["./django-spellbook-docs-site/**/*.py"],
+  "exclude": ["venv/**", "**/test*.py", "**/tests/**", "**/locust_test/**"]
+}
