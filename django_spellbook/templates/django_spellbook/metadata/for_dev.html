@@ -1,5 +1,6 @@
 <div class="sb-metadata sb-metadata-dev sb-rounded sb-border sb-border-info-25 sb-p-3 sb-my-4 sb-bg-info-25 sb-w-full">
   <h3 class="sb-metadata-title sb-text-lg sb-mb-2 sb-font-bold sb-info">Developer Metadata</h3>
+  {% if metadata.author %}<p class="sb-metadata-author sb-text-sm sb-mb-3 sb-text-secondary">by {{ metadata.author }}</p>{% endif %}
 
   <div class="sb-metadata-grid sb-grid sb-grid-cols-1 sb-md:grid-cols-2 sb-gap-2">
 

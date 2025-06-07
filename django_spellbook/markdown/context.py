@@ -20,6 +20,7 @@ class SpellbookContext:
     modified: Optional[datetime] = None
     is_public: bool = True
     tags: List[str] = field(default_factory=list)
+    author: Optional[str] = None
     custom_meta: Dict[str, any] = field(default_factory=dict)
     toc: Dict[str, Dict] = field(default_factory=dict)
     next_page: Optional[str] = None
@@ -74,6 +75,7 @@ class SpellbookContext:
             'raw_content': self.get_safe_attr('raw_content', ''),
             'is_public': self.get_safe_attr('is_public', True),
             'tags': self.get_safe_attr('tags', []),
+            'author': self.get_safe_attr('author', None),
             'custom_meta': self.get_safe_attr('custom_meta', {}),
             'namespace': content_app,
             'url_name': url_name,
