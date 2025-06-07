@@ -14,7 +14,7 @@ MODIFIED_KEYS = ['modified', 'modified_at', 'updated', 'updated_at']
 
 # --- Keys to exclude from custom_meta ---
 # Includes standard keys and the date aliases we might consume
-RESERVED_META_KEYS = ['title', 'is_public', 'tags'] + PUBLISHED_KEYS + MODIFIED_KEYS
+RESERVED_META_KEYS = ['title', 'is_public', 'tags', 'author'] + PUBLISHED_KEYS + MODIFIED_KEYS
 # Make the check case-insensitive later for robustness
 LOWERCASE_RESERVED_META_KEYS = [k.lower() for k in RESERVED_META_KEYS]
 
@@ -116,6 +116,8 @@ class FrontMatterParser:
             is_public=multi_bool(self.metadata.get('is_public', True)),
             # Ensure tags is always a list
             tags=self.metadata.get('tags', []) if isinstance(self.metadata.get('tags'), list) else [],
+            # Extract author from metadata
+            author=self.metadata.get('author'),
             custom_meta=custom_meta_data,
             toc={},  # This will be filled by the command later
             next_page=None, # Filled later

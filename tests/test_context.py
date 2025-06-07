@@ -86,3 +86,41 @@ class TestSpellBookErrors(TestCase):
             
         self.assertIn("Raw content is empty", str(cm.exception))
         
+    def test_prepare_metadata_with_author(self):
+        """Test prepare_metadata method includes author field."""
+        context = SpellbookContext(
+            title="Test Page",
+            published=datetime.datetime(2023, 1, 1),
+            modified=datetime.datetime(2023, 2, 1),
+            url_path="test/page",
+            raw_content="Test content with some words",
+            is_public=True,
+            tags=["test", "example"],
+            author="Jane Doe",
+            custom_meta={"key": "value"}
+        )
+        
+        metadata = context.prepare_metadata("test_app", "test/page")
+        
+        self.assertEqual(metadata['author'], "Jane Doe")
+        self.assertIn('author', metadata)
+        
+    def test_prepare_metadata_without_author(self):
+        """Test prepare_metadata method when author is None."""
+        context = SpellbookContext(
+            title="Test Page",
+            published=datetime.datetime(2023, 1, 1),
+            modified=datetime.datetime(2023, 2, 1),
+            url_path="test/page",
+            raw_content="Test content with some words",
+            is_public=True,
+            tags=["test", "example"],
+            author=None,
+            custom_meta={"key": "value"}
+        )
+        
+        metadata = context.prepare_metadata("test_app", "test/page")
+        
+        self.assertIsNone(metadata['author'])
+        self.assertIn('author', metadata)
+        
