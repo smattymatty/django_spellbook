@@ -109,6 +109,7 @@ Content"""
         self.assertEqual(context.custom_meta, {'custom_field': 'value'})
         self.assertEqual(context.url_path, '/test/url')
         self.assertEqual(context.raw_content, 'Content')
+        self.assertIsNone(context.author)  # No author specified
 
     def test_default_values(self):
         """Test default values in context generation"""
@@ -120,6 +121,7 @@ Content"""
         self.assertTrue(context.is_public)
         self.assertEqual(context.tags, [])
         self.assertEqual(context.custom_meta, {})
+        self.assertIsNone(context.author)  # Default author should be None
 
     def test_unicode_handling(self):
         """Test handling of Unicode characters in front matter"""
@@ -144,6 +146,127 @@ Content"""
 
         self.assertEqual(context.title, 'Test Title')
         self.assertEqual(context.url_path, 'test-url-path/test-url-path-2')
+
+    def test_author_parsing_string(self):
+        """Test parsing author as a string from front matter"""
+        content = """---
+title: Test Article
+author: Jane Doe
+tags:
+  - example
+custom_field: value
+---
+Article content"""
+        parser = FrontMatterParser(content, self.temp_file)
+        context = parser.get_context('/test/url')
+
+        self.assertEqual(context.author, 'Jane Doe')
+        self.assertEqual(context.title, 'Test Article')
+        self.assertEqual(context.tags, ['example'])
+        # Author should be excluded from custom_meta
+        self.assertEqual(context.custom_meta, {'custom_field': 'value'})
+        self.assertNotIn('author', context.custom_meta)
+
+    def test_author_parsing_quoted_string(self):
+        """Test parsing author as a quoted string from front matter"""
+        content = """---
+title: Test Article
+author: "Dr. John Smith"
+---
+Article content"""
+        parser = FrontMatterParser(content, self.temp_file)
+        context = parser.get_context('/test/url')
+
+        self.assertEqual(context.author, 'Dr. John Smith')
+        self.assertEqual(context.custom_meta, {})
+
+    def test_author_parsing_with_special_characters(self):
+        """Test parsing author with special characters"""
+        content = """---
+title: Test Article
+author: "María José García-López"
+---
+Article content"""
+        parser = FrontMatterParser(content, self.temp_file)
+        context = parser.get_context('/test/url')
+
+        self.assertEqual(context.author, 'María José García-López')
+
+    def test_author_case_insensitive_exclusion(self):
+        """Test that author is excluded from custom_meta regardless of case"""
+        content = """---
+title: Test Article
+Author: Jane Doe
+AUTHOR: John Doe
+author: Bob Smith
+custom_field: value
+---
+Article content"""
+        parser = FrontMatterParser(content, self.temp_file)
+        context = parser.get_context('/test/url')
+
+        # Only lowercase 'author' should be recognized
+        self.assertEqual(context.author, 'Bob Smith')
+        # All variations should be excluded from custom_meta due to case-insensitive checking
+        expected_custom_meta = {'custom_field': 'value'}
+        self.assertEqual(context.custom_meta, expected_custom_meta)
+        self.assertNotIn('author', context.custom_meta)
+        self.assertNotIn('Author', context.custom_meta)
+        self.assertNotIn('AUTHOR', context.custom_meta)
+
+    def test_author_none_value(self):
+        """Test author field when explicitly set to null/None"""
+        content = """---
+title: Test Article
+author: null
+---
+Article content"""
+        parser = FrontMatterParser(content, self.temp_file)
+        context = parser.get_context('/test/url')
+
+        self.assertIsNone(context.author)
+
+    def test_author_empty_string(self):
+        """Test author field when set to empty string"""
+        content = """---
+title: Test Article
+author: ""
+---
+Article content"""
+        parser = FrontMatterParser(content, self.temp_file)
+        context = parser.get_context('/test/url')
+
+        self.assertEqual(context.author, "")
+
+    def test_author_with_all_metadata_fields(self):
+        """Test author parsing alongside all other metadata fields"""
+        content = """---
+title: Comprehensive Test
+author: Jane Doe
+is_public: true
+published: 2024-01-15
+modified: 2024-01-20
+tags:
+  - test
+  - comprehensive
+custom_field: custom_value
+another_field: another_value
+---
+Test content"""
+        parser = FrontMatterParser(content, self.temp_file)
+        context = parser.get_context('/test/url')
+
+        self.assertEqual(context.title, 'Comprehensive Test')
+        self.assertEqual(context.author, 'Jane Doe')
+        self.assertTrue(context.is_public)
+        self.assertEqual(context.tags, ['test', 'comprehensive'])
+        # Verify author is not in custom_meta but other custom fields are
+        expected_custom_meta = {
+            'custom_field': 'custom_value',
+            'another_field': 'another_value'
+        }
+        self.assertEqual(context.custom_meta, expected_custom_meta)
+        self.assertNotIn('author', context.custom_meta)
 
 
 class TestMultiBool(unittest.TestCase):
