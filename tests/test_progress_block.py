@@ -405,12 +405,12 @@ class TestProgressBarBlockErrorHandling(TestCase):
             with open(output_html_path, 'w', encoding='utf-8') as f:
                 f.write(actual_html)
 
-            """if not golden_html_path.exists():
+            if not golden_html_path.exists():
                 os.makedirs(golden_html_path.parent, exist_ok=True)
                 normalized_for_golden = self._normalize_html_ids(actual_html)
                 with open(golden_html_path, 'w', encoding='utf-8') as f:
                     f.write(normalized_for_golden)
-                self.fail(f"Golden HTML file for error case CREATED: {golden_html_path}. Verify and re-run.")"""
+                self.fail(f"Golden HTML file for error case CREATED: {golden_html_path}. Verify and re-run.")
 
             with open(golden_html_path, 'r', encoding='utf-8') as f:
                 expected_html_raw = f.read()

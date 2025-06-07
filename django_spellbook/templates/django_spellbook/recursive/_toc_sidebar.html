@@ -1,6 +1,6 @@
 {% load spellbook_tags %}
 {% for key, data in items.items %}
-    <li class="toc-item {% if data.url == current_url %}active{% endif %}">
+    <li class="toc-item{% if data.url == current_url %} active{% endif %}" data-toc-id="{{ key }}">
         <div class="toc-item-header">
             {% if data.children %}
                 <button class="toc-toggle" aria-label="Toggle section">
