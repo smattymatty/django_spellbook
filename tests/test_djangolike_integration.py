@@ -88,11 +88,10 @@ class TestDjangoLikeIntegrationWithParser(TestCase):
 
     # --- Assertions Targeting Specific Remaining Issues ---
 
-    @unittest.expectedFailure
     def test_markdown_lists_inside_custom_tag(self):
         """
         BUG CHECK: Asserts Markdown lists render correctly inside custom tags.
-        (Currently fails - list renders as literal text with <br /> inside <p>).
+        (Fixed - list now renders as proper HTML <ul>/<li> tags).
         """
         expected_list_html = '<ul>\n<li>As should lists.</li>\n<li>Item two.</li>\n</ul>'
         section_regex = r'<section\s+.*?class="hero".*?id="hero-section".*?>(.*?)<\/section>'
@@ -154,20 +153,19 @@ class TestDjangoLikeIntegrationWithParser(TestCase):
         self.assertFalse('{% endaside %}' in self.html_output, "Found literal '{% endaside %}' in output.")
         self.assertFalse('{% endarticle %}' in self.html_output, "Found literal '{% endarticle %}' in output.")
 
-    @unittest.expectedFailure
     def test_heading_inside_custom_tag(self):
         """
         BUG CHECK: Asserts H2 renders correctly inside the article tag.
-        (Currently fails - renders as literal '##' inside <p>).
+        (Fixed - heading now renders as proper HTML <h2> tag).
         """
         article_regex = r'<article\s+.*?id="post-body".*?>(.*?)<\/article>'
         match = re.search(article_regex, self.html_output, re.DOTALL)
         self.assertTrue(match, "Could not find the article tag.")
         article_content = match.group(1) if match else ""
-        # This assertion will fail
-        self.assertIn('<h2>Sub-heading Inside Article</h2>', article_content, "H2 did not render correctly inside article.")
-        # Check for the incorrect rendering
-        self.assertIn('<p>## Sub-heading Inside Article<br />', article_content, "H2 seems to be rendering literally inside <p> tag.")
+        # Check for correct H2 rendering (may include id attribute from toc extension)
+        self.assertTrue('<h2' in article_content and 'Sub-heading Inside Article</h2>' in article_content, "H2 did not render correctly inside article.")
+        # Check for the incorrect rendering is NOT present
+        self.assertNotIn('<p>## Sub-heading Inside Article<br />', article_content, "H2 should not render literally inside <p> tag.")
 
 
     def test_aside_content_is_paragraph(self):

@@ -1,0 +1,128 @@
+<p><div
+class="sb-progress-container sb-shadow-md sb-w-full "
+id="progress-container-NORMALIZED_ID"
+>
+
+
+<div class="sb-progress-label-external sb-mb-1 
+sb-text-md
+">
+Processing...
+</div>
+
+
+
+<div
+class="sb-progress sb-w-full sb-overflow-hidden 
+sb-bg-white-50 
+sb-h-8 
+" 
+>
+
+<div
+class="sb-progress-bar sb-h-full sb-flex sb-items-center sb-justify-center 
+sb-bg-info 
+
+sb-progress-bar-striped 
+sb-progress-bar-animated" 
+role="progressbar"
+style="width: 60.0%;"
+aria-valuenow="60.0"
+aria-valuemin="0"
+aria-valuemax="100"
+>
+
+
+</div>
+</div>
+</div>
+</p>
+<div class="sb-progress-popover-content
+sb-bg-white
+sb-black
+
+" 
+id="popover-content-NORMALIZED_ID"
+style="display: none;"
+>
+<p>Processing data... {نواتج التعلم}</p>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+// Handle multiple progress bars on a page if `id` attribute might not be unique or forloop.counter is used
+const progressContainers = document.querySelectorAll('.sb-progress-container');
+
+progressContainers.forEach(container => {
+const containerId = container.id; // e.g., "progress-container-1"
+// Derive popoverId based on containerId. This assumes a consistent naming pattern.
+// If your id on sb-progress-container can be arbitrary (e.g., from block kwargs),
+// you might need a data-attribute to link them or adjust this logic.
+// For now, assuming the forloop.counter pattern in IDs.
+const popoverIdSuffix = containerId.split('-').pop(); // Extracts "1" from "progress-container-1"
+const popover = document.getElementById(`popover-content-${popoverIdSuffix}`);
+
+if (!popover) {
+// console.warn(`Popover not found for container ${containerId}`);
+return; // Skip if corresponding popover isn't found
+}
+
+let popoverVisible = false; // Track visibility to avoid redundant style changes
+
+container.addEventListener('mouseenter', function(event) {
+if (!popoverVisible) {
+popover.style.display = 'block';
+popover.classList.add('sb-animate-fade-in');
+popoverVisible = true;
+}
+// Initial position update on enter
+updatePopoverPosition(event);
+});
+
+container.addEventListener('mousemove', function(event) {
+if (popoverVisible) {
+updatePopoverPosition(event);
+}
+});
+
+container.addEventListener('mouseleave', function() {
+if (popoverVisible) {
+popover.style.display = 'none';
+popoverVisible = false;
+}
+});
+
+function updatePopoverPosition(mouseEvent) {
+// Offset from the mouse cursor
+const offsetX = 15; // pixels to the right
+const offsetY = 15; // pixels below
+
+let newX = mouseEvent.clientX + offsetX;
+let newY = mouseEvent.clientY + offsetY;
+
+// Boundary checks to keep popover within viewport
+const popoverRect = popover.getBoundingClientRect(); // Get its dimensions once visible
+
+// Adjust if too far right
+if (newX + popoverRect.width > window.innerWidth) {
+newX = mouseEvent.clientX - popoverRect.width - offsetX; // Position to the left
+}
+// Adjust if too far down
+if (newY + popoverRect.height > window.innerHeight) {
+newY = mouseEvent.clientY - popoverRect.height - offsetY; // Position above
+}
+// Adjust if too far left (after potentially flipping)
+if (newX < 0) {
+newX = offsetX;
+}
+// Adjust if too far up (after potentially flipping)
+if (newY < 0) {
+newY = offsetY;
+}
+
+popover.style.left = newX + 'px';
+popover.style.top = newY + 'px';
+}
+});
+});
+</script>
