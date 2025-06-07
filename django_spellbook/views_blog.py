@@ -6,7 +6,7 @@ TOC = {'title': 'root', 'url': '', 'children': {'first-post': {'title': 'First P
 
 
 def view_first_post(request):
-    context = {'title': 'First Post', 'url_path': 'first-post', 'raw_content': '# Blog Begins\nThis is our first blog post.', 'published': None, 'modified': None, 'is_public': True, 'tags': [], 'custom_meta': {}, 'next_page': None, 'prev_page': None, 'word_count': 8, 'reading_time_minutes': 1}
+    context = {'title': 'First Post', 'url_path': 'first-post', 'raw_content': '# Blog Begins\nThis is our first blog post.', 'published': None, 'modified': None, 'is_public': True, 'tags': [], 'author': None, 'custom_meta': {}, 'next_page': None, 'prev_page': None, 'word_count': 8, 'reading_time_minutes': 1}
     context['toc'] = TOC 
     context['current_url'] = 'first-post'
     context['metadata'] = {
@@ -17,6 +17,7 @@ def view_first_post(request):
         'raw_content': '# Blog Begins\nThis is our first blog post.',
         'is_public': True,
         'tags': [],
+        'author': None,
         'custom_meta': {},
         'namespace': 'blog',
         'url_name': 'first-post',

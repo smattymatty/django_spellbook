@@ -46,7 +46,7 @@ class TestSpellbookMarkdownEngine(unittest.TestCase):
             )
         # else:
             print(f"DEBUG: Registry after clear: {SpellBlockRegistry._registry}")
-    
+
     @classmethod
     def setUpClass(cls):
         """
@@ -139,7 +139,7 @@ class TestSpellbookMarkdownEngine(unittest.TestCase):
             raise AttributeError(
                 "SpellBlockRegistry._registry is not a dictionary or does not exist. Cannot register test blocks."
             )
-        
+
         # print(f"DEBUG: Registry after manual registration in setUp: {SpellBlockRegistry._registry}")
 
 
@@ -193,7 +193,7 @@ class TestSpellbookMarkdownEngine(unittest.TestCase):
         This test assumes _parse_spellblock_arguments in engine.py is FIXED to strip quotes.
         If not, the expected_kwargs values and direct parser assertions will need to include quotes.
         """
-        
+
         # Part 1: Test argument parsing through the full rendering pipeline
         # Structure: (markdown_input_string, expected_kwargs_dict, block_raw_content_string_or_None)
         render_test_cases = [
@@ -235,12 +235,12 @@ class TestSpellbookMarkdownEngine(unittest.TestCase):
                 # write to file for debugging
                 with open(f"tests/templates/engine/args_{block_raw_content}.html", "w") as f:
                     f.write(html_output)
-                    
+
                 # Verify the prefix before the block is rendered
                 if md_input.startswith('{نواتج التعلم}'):
                     self.assertIn("<p>{نواتج التعلم}</p>", html_output) # Check prefix is a separate paragraph
                     # Ensure the div is NOT considered inside the prefix paragraph:
-                    self.assertNotIn("<p>{نواتج التعلم}<div", html_output.replace("\n", "").replace(" ", "")) 
+                    self.assertNotIn("<p>{نواتج التعلم}<div", html_output.replace("\n", "").replace(" ", ""))
 
 
                 # Check for each expected kwarg in the rendered HTML
@@ -252,9 +252,9 @@ class TestSpellbookMarkdownEngine(unittest.TestCase):
                     for key, value in sorted_expected_kwargs:
                         # The template renders as: <li>key: [value]</li>
                         expected_li = f"<li>{key}: [{value}]</li>"
-                        self.assertIn(expected_li, html_output, 
+                        self.assertIn(expected_li, html_output,
                                       f"Failed for input: {md_input}\nExpected: {expected_li}")
-                
+
                 # Check for content if provided
                 if block_raw_content is not None: # None indicates self-closing or no content section
                     # ArgsTestBlock inherits process_content from BasicSpellBlock,
@@ -268,7 +268,7 @@ class TestSpellbookMarkdownEngine(unittest.TestCase):
                         # For now, assuming simple content becomes a paragraph:
                         temp_engine_for_content = SpellbookMarkdownEngine(reporter=self.reporter) # Fresh engine for isolation
                         processed_content_html = temp_engine_for_content.parse_and_render(block_raw_content).strip()
-                    
+
                     if processed_content_html: # Only assert if we expect content output
                         # The template wraps content in <div class="content-wrapper"><p>Content:</p>{{ content|safe }}</div>
                         self.assertIn(f"<p>Content:</p>\n", html_output,
@@ -349,23 +349,7 @@ class TestSpellbookMarkdownEngine(unittest.TestCase):
         markdown_text = '{نواتج التعلم}{~ errorblock ~}Content{ناتج التعلم}{~~}'
 
         engine_fail.parse_and_render(markdown_text)
-        
+
         log_output = self.reporter_stdout.getvalue()
-        
+
         self.assertIn("'errorblock' not found in registry.", log_output)
-
-    def test_specific_files(self):
-        from django_spellbook.parsers import render_spellbook_markdown_to_html
-
-        """Test that specific files are parsed and rendered."""
-        files_to_parse = [
-            "tests/markdown_testers/edulite_proposal_1.md",
-        ]
-
-        for file_path in files_to_parse:
-            with open(file_path, "r") as f:
-                markdown_text = f.read()
-            html = render_spellbook_markdown_to_html(markdown_text)
-            # create an html file for each file parsed
-            with open(f"tests/html_testers/spec/{(file_path.split('/')[-1])[:-3]}.html", "w") as f:
-                f.write(html)

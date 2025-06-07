@@ -7,7 +7,6 @@ ENV/
 .env
 
 # tests
-tests/html_goldens/
 tests/html_testers/
 
 # Coverage

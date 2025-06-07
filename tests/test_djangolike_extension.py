@@ -45,7 +45,7 @@ class TestDjangoLikeTagProcessor(TestCase):
         text = '{% div #myid %}content{% enddiv %}'
         html = self.md.convert(text)
         self.assertIn('<div id="myid">\n<p>content</p>\n</div>', html)
-        
+
     def test_id_shortcut_with_explicit_id(self):
         """Test ID shortcut syntax"""
         text = '{% div id="myid" %}content{% enddiv %}'
@@ -118,7 +118,7 @@ class TestDjangoLikeTagProcessor(TestCase):
         self.assertIn('<django-tag>{% for item in items %}</django-tag>', html)
         self.assertIn('<django-tag>{% endfor %}</django-tag>', html)
         self.assertIn('<django-tag>{% endif %}</django-tag>', html)
-        
+
     #@unittest.expectedFailure
     def test_django_block_with_markdown(self):
         """Test Django block tags with markdown content"""
@@ -200,7 +200,7 @@ remaining content'''
         self.assertIn('more content', html)
         self.assertNotIn('{% endspan %}', html)
         self.assertNotIn('{% enddiv %}', html)
-    
+
     def test_clean_end_tags_removal_with_unexpected_end(self):
         """Test complete removal of end tags from content"""
         text = '''{% div %}
@@ -218,7 +218,7 @@ remaining content'''
             first content
             {% enddiv %}
             second content
-            
+
             third content'''
         html = self.md.convert(text)
         self.assertIn('<div>', html)
@@ -378,7 +378,7 @@ Block 2 span content. {% endspan %} Block 2 div content.
 
         # Check structure and content
         self.assertIn('<div>', html)
-        self.assertIn('<p>Block 1 content. </p>', html) # Content before span
+        self.assertIn('<p>Block 1 content.</p>', html) # Content before span
         self.assertIn('<span>', html)
         self.assertIn('<p>Block 2 span content.</p>', html) # Span content from next block
         self.assertIn('</span>', html)
@@ -417,7 +417,7 @@ Content after block.''' # {% enddiv %} starts the second block
         self.assertNotIn('{% enddiv %}', html)
         # Check ordering (approximate)
         self.assertTrue(html.find('</div>') < html.find('<p>Content after block.</p>'))
-        
+
     # Add this test method to your TestDjangoLikeTagProcessorCoverage class
 
     def test_elif_end_match_after_nested_tag(self):

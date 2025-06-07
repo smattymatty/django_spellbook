@@ -165,42 +165,88 @@ class DjangoLikeTagProcessor(BlockProcessor):
 
         if content_result.inner_content:
             inner_content = content_result.inner_content
-            modified_content = ""
-            last_pos = 0
-
-            # --- Insert blank lines before non-inline block tags ---
-            # Iterate through potential start tags within the inner content
-            for match in self.RE_START.finditer(inner_content):
-                tag_name = match.group(1)
-                # Check if it's a block tag (Django built-in or custom/unknown)
-                # AND not already preceded by two+ newlines
-                is_block_tag_for_splitting = (
-                    tag_name not in self.DJANGO_INLINE_TAGS and
-                    not tag_name.startswith('end')
+            
+            # Split content into proper blocks while preserving list structure
+            # The key insight: markdown needs blank lines to separate blocks properly
+            lines = inner_content.split('\n')
+            blocks_to_parse = []
+            current_block_lines = []
+            in_list = False
+            
+            i = 0
+            while i < len(lines):
+                line = lines[i]
+                stripped = line.strip()
+                
+                # Check if this line starts a list
+                is_list_item = stripped.startswith(('- ', '* ', '+ ')) or (
+                    stripped and stripped[0].isdigit() and '. ' in stripped[:4]
                 )
-                start_pos = match.start()
-
-                if is_block_tag_for_splitting:
-                    preceding_text = inner_content[last_pos:start_pos]
-                    # Add preceding text. Add extra newline if needed to ensure separation.
-                    modified_content += preceding_text
-                    if not preceding_text.endswith('\n\n') and preceding_text.strip():
-                        # Add a blank line if there isn't one already and it's not just whitespace
-                        if not preceding_text.endswith('\n'):
-                            modified_content += '\n' # Ensure at least one newline before the blank one
-                        modified_content += '\n'
-
-                    modified_content += match.group(0) # Add the tag itself
-                    last_pos = match.end()
-                # If it's an inline tag, we don't add blank lines; it will be handled by appending the rest later
-
-            modified_content += inner_content[last_pos:] # Add the remainder
-
-            split_blocks = modified_content.split('\n\n') # Split by blank lines
-
+                
+                # If we hit an empty line, end current block
+                if not stripped:
+                    if current_block_lines:
+                        blocks_to_parse.append('\n'.join(current_block_lines))
+                        current_block_lines = []
+                        in_list = False
+                    i += 1
+                    continue
+                
+                # If we transition from non-list to list, end current block
+                if is_list_item and not in_list and current_block_lines:
+                    blocks_to_parse.append('\n'.join(current_block_lines))
+                    current_block_lines = []
+                
+                # If we transition from list to non-list, end current block  
+                if not is_list_item and in_list and current_block_lines:
+                    blocks_to_parse.append('\n'.join(current_block_lines))
+                    current_block_lines = []
+                
+                current_block_lines.append(line)
+                in_list = is_list_item
+                i += 1
+            
+            # Add final block
+            if current_block_lines:
+                blocks_to_parse.append('\n'.join(current_block_lines))
+            
+            # Process Django tags to ensure proper spacing  
+            final_blocks = []
+            for block in blocks_to_parse:
+                if not block.strip():
+                    continue
+                    
+                # Handle Django tags in blocks
+                if self.RE_START.search(block):
+                    modified_content = ""
+                    last_pos = 0
+                    
+                    for match in self.RE_START.finditer(block):
+                        tag_name = match.group(1)
+                        is_block_tag = (
+                            tag_name not in self.DJANGO_INLINE_TAGS and
+                            not tag_name.startswith('end')
+                        )
+                        
+                        if is_block_tag:
+                            # Add content before tag
+                            preceding = block[last_pos:match.start()].strip()
+                            if preceding:
+                                final_blocks.append(preceding)
+                            # Add tag as separate block
+                            final_blocks.append(match.group(0))
+                            last_pos = match.end()
+                    
+                    # Add remaining content
+                    remaining = block[last_pos:].strip()
+                    if remaining:
+                        final_blocks.append(remaining)
+                else:
+                    final_blocks.append(block)
+            
             # Use temporary parent for safety
             temp_parent = ElementTree.Element('div')
-            self.parser.parseBlocks(temp_parent, split_blocks) # Use parseBlocks with the split list
+            self.parser.parseBlocks(temp_parent, final_blocks)
 
             # Transfer children
             for child in list(temp_parent):
