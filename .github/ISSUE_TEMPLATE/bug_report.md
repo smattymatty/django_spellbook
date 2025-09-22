@@ -2,7 +2,7 @@
 name: Bug Report Template
 about: Define a bug, it's replication steps, error messages, and any extra information needed.
 title: 'Bug Report: Title'
-labels: 'bug,
+labels: 'bug'
 assignees: ''
 ---
 # Bug Report Template
