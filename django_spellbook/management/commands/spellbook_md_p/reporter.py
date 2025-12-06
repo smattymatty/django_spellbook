@@ -109,15 +109,7 @@ class MarkdownReporter:
             )
             if failed_pairs:
                 message += f"Failed pairs: {', '.join(f'{src} → {dst} (prefix: {prefix})' for src, dst, prefix in failed_pairs)}"
-        # Add spellblock statistics to the report
-        if self.spellblocks:
-            message += "\n\nSpellblock Usage:\n"
-            for block in self.spellblocks:
-                message += f"- {block.name} -"
-                message += "\n"
-        else:
-            message += "\nNo spellblocks were discovered during processing.\n"
-        
+
         output.write(self.style.WARNING(message) if hasattr(output, 'write') else message)
         return message
 

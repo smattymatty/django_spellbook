@@ -106,8 +106,26 @@ def spellbook_url(url_path: str) -> str:
 
 @register.inclusion_tag('django_spellbook/data/styles.html')
 def spellbook_styles():
-    """Include the spellbook styles in the page"""
-    return {}
+    """
+    Include the spellbook styles in the page with dynamic theme support.
+    
+    This tag generates CSS variables from Django settings and passes them
+    to the template for inclusion before the static CSS files.
+    """
+    from django.conf import settings
+    from django_spellbook.theme import generate_theme_css
+    
+    # Get theme configuration from settings
+    theme_config = getattr(settings, 'SPELLBOOK_THEME', None)
+    
+    # Generate theme CSS variables
+    # Always generate CSS (even with defaults) to ensure variables are available
+    theme_css = generate_theme_css(theme_config)
+    
+    # Return context for the template
+    return {
+        'theme_css': theme_css
+    }
 
 
 @register.simple_tag

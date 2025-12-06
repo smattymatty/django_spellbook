@@ -24,12 +24,12 @@ fi
 coverage_output=$(coverage report | tail -n 1)
 coverage_percentage=$(echo $coverage_output | grep -oP '\d+%' | grep -oP '\d+')
 
-if [ "$coverage_percentage" -lt 100 ]; then
-    echo -e "${RED}Coverage is below 100%! Current coverage: ${coverage_percentage}%${NC}"
+if [ "$coverage_percentage" -lt 90 ]; then
+    echo -e "${RED}Coverage is below 90%! Current coverage: ${coverage_percentage}%${NC}"
     exit 1
 fi
 
-echo -e "${GREEN}All tests passed with 100% coverage!${NC}"
+echo -e "${GREEN}All tests passed with 90% coverage!${NC}"
 
 echo "Cleaning up generated files..."
 

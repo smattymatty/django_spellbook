@@ -1,4 +1,10 @@
 {% load static %}
-<link rel="stylesheet" href="{% static 'django_spellbook/root.css' %}">
+{% if theme_css %}
+<style id="spellbook-theme">
+{{ theme_css }}
+</style>
+{% endif %}
+<link rel="stylesheet" href="{% static 'django_spellbook/css_modules/utilities/colors.css' %}">
 <link rel="stylesheet" href="{% static 'django_spellbook/utilities.css' %}">
 <link rel="stylesheet" href="{% static 'django_spellbook/styles.css' %}">
+<link rel="stylesheet" href="{% static 'django_spellbook/prism-spellbook.css' %}">

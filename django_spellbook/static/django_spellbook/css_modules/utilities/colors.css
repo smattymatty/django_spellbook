@@ -75,6 +75,13 @@
 .sb-bg-danger {
   background-color: var(--danger-color, #a80000);
 }
+/* System Colors */
+.sb-bg-background {
+  background-color: var(--background-color, #ffffff);
+}
+.sb-bg-surface {
+  background-color: var(--surface-color, #f9fafb);
+}
 /* variable background colors with opacity variants */
 .sb-bg-primary-25 {
   background-color: color-mix(
@@ -874,6 +881,125 @@
 .sb-danger {
   color: var(--danger-color, #a80000);
 }
+
+/* Text Color Utilities with text- prefix */
+.sb-text-black {
+  color: #000;
+}
+.sb-text-white {
+  color: #fff;
+}
+.sb-text-primary {
+  color: var(--primary-color, #3b82f6);
+}
+.sb-text-secondary {
+  color: var(--secondary-color, #6b7280);
+}
+.sb-text-accent {
+  color: var(--accent-color, #f59e0b);
+}
+.sb-text-neutral {
+  color: var(--neutral-color, #2563eb);
+}
+.sb-text-error {
+  color: var(--error-color, #dc2626);
+}
+.sb-text-warning {
+  color: var(--warning-color, #f59e0b);
+}
+.sb-text-success {
+  color: var(--success-color, #16a34a);
+}
+.sb-text-info {
+  color: var(--info-color, #2563eb);
+}
+.sb-text-text {
+  color: var(--text-color, #1f2937);
+}
+.sb-text-text-secondary {
+  color: var(--text-secondary-color, #6b7280);
+}
+.sb-text-background {
+  color: var(--background-color, #ffffff);
+}
+.sb-text-surface {
+  color: var(--surface-color, #f9fafb);
+}
+
+/* Text colors with opacity variants */
+.sb-text-primary-25 {
+  color: color-mix(in srgb, var(--primary-color, #3b82f6) 25%, transparent);
+}
+.sb-text-primary-50 {
+  color: color-mix(in srgb, var(--primary-color, #3b82f6) 50%, transparent);
+}
+.sb-text-primary-75 {
+  color: color-mix(in srgb, var(--primary-color, #3b82f6) 75%, transparent);
+}
+.sb-text-secondary-25 {
+  color: color-mix(in srgb, var(--secondary-color, #6b7280) 25%, transparent);
+}
+.sb-text-secondary-50 {
+  color: color-mix(in srgb, var(--secondary-color, #6b7280) 50%, transparent);
+}
+.sb-text-secondary-75 {
+  color: color-mix(in srgb, var(--secondary-color, #6b7280) 75%, transparent);
+}
+.sb-text-accent-25 {
+  color: color-mix(in srgb, var(--accent-color, #f59e0b) 25%, transparent);
+}
+.sb-text-accent-50 {
+  color: color-mix(in srgb, var(--accent-color, #f59e0b) 50%, transparent);
+}
+.sb-text-accent-75 {
+  color: color-mix(in srgb, var(--accent-color, #f59e0b) 75%, transparent);
+}
+.sb-text-neutral-25 {
+  color: color-mix(in srgb, var(--neutral-color, #2563eb) 25%, transparent);
+}
+.sb-text-neutral-50 {
+  color: color-mix(in srgb, var(--neutral-color, #2563eb) 50%, transparent);
+}
+.sb-text-neutral-75 {
+  color: color-mix(in srgb, var(--neutral-color, #2563eb) 75%, transparent);
+}
+.sb-text-success-25 {
+  color: color-mix(in srgb, var(--success-color, #16a34a) 25%, transparent);
+}
+.sb-text-success-50 {
+  color: color-mix(in srgb, var(--success-color, #16a34a) 50%, transparent);
+}
+.sb-text-success-75 {
+  color: color-mix(in srgb, var(--success-color, #16a34a) 75%, transparent);
+}
+.sb-text-warning-25 {
+  color: color-mix(in srgb, var(--warning-color, #f59e0b) 25%, transparent);
+}
+.sb-text-warning-50 {
+  color: color-mix(in srgb, var(--warning-color, #f59e0b) 50%, transparent);
+}
+.sb-text-warning-75 {
+  color: color-mix(in srgb, var(--warning-color, #f59e0b) 75%, transparent);
+}
+.sb-text-error-25 {
+  color: color-mix(in srgb, var(--error-color, #dc2626) 25%, transparent);
+}
+.sb-text-error-50 {
+  color: color-mix(in srgb, var(--error-color, #dc2626) 50%, transparent);
+}
+.sb-text-error-75 {
+  color: color-mix(in srgb, var(--error-color, #dc2626) 75%, transparent);
+}
+.sb-text-info-25 {
+  color: color-mix(in srgb, var(--info-color, #2563eb) 25%, transparent);
+}
+.sb-text-info-50 {
+  color: color-mix(in srgb, var(--info-color, #2563eb) 50%, transparent);
+}
+.sb-text-info-75 {
+  color: color-mix(in srgb, var(--info-color, #2563eb) 75%, transparent);
+}
+
 /* hovered colors */
 .sb-hover\:primary:hover {
   color: var(--primary-color, #3b82f6);
