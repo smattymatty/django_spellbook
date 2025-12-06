@@ -48,8 +48,8 @@ class TOCGenerator:
             if part not in current.children:
                 current.children[part] = TOCEntry(
                     title=part.replace('-', ' ').title(),
-                    # Just use the directory name
-                    url=url.replace("-", "_"),
+                    # Parent directories have no URL (only leaf pages do)
+                    url="",
                 )
             current = current.children[part]
 

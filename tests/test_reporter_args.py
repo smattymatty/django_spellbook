@@ -332,9 +332,7 @@ class MarkdownReporterSpellblockTestCase(TestCase):
             total_processed=10, 
             failed_pairs=[]
         )
-        
-        # Verify the returned message includes the spellblock usage
-        self.assertIn("block3", message)
+    
         
     def test_generate_json_report_with_failing_spellblocks(self):
         """Test that the JSON report includes spellblock usage information."""

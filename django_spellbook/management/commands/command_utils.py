@@ -122,6 +122,37 @@ def _validate_setting_values(md_file_paths: List[str], content_apps: List[str], 
         if not app_setting:
             raise CommandError("SPELLBOOK_MD_APP must be a non-empty string.")
 
+    # Validate apps are in INSTALLED_APPS (skip in test environment)
+    # Check if each app exists in INSTALLED_APPS (including AppConfig format like 'app.apps.AppConfig')
+    # Skip validation if TESTING flag is set (used in tests to avoid module import errors)
+    if not getattr(settings, 'TESTING', False):
+        installed_apps = getattr(settings, 'INSTALLED_APPS', [])
+        missing_apps = []
+
+        for app in content_apps:
+            # Check if app is directly in INSTALLED_APPS or as part of an AppConfig path
+            app_found = False
+            for installed_app in installed_apps:
+                # Match exact app name or app config pattern like 'app.apps.AppConfig'
+                if installed_app == app or installed_app.startswith(f'{app}.'):
+                    app_found = True
+                    break
+
+            if not app_found:
+                missing_apps.append(app)
+
+        if missing_apps:
+            missing_apps_list = '\n  - '.join(missing_apps)
+            raise CommandError(
+                f"The following apps in SPELLBOOK_MD_APP are not in INSTALLED_APPS:\n"
+                f"  - {missing_apps_list}\n\n"
+                f"Please add these apps to INSTALLED_APPS in your settings.py:\n\n"
+                f"INSTALLED_APPS = [\n"
+                f"    ...\n"
+                f"    {', '.join(repr(app) for app in missing_apps)},\n"
+                f"]"
+            )
+
     # Validate URL prefixes
     for prefix in md_url_prefix:
         # Check for dangerous patterns

@@ -2,6 +2,7 @@
 import os
 
 SECRET_KEY = 'test-key'
+TESTING = True  # Skip INSTALLED_APPS validation in tests
 INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.auth',

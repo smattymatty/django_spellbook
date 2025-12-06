@@ -64,16 +64,19 @@ class TestNormalizeSettings(TestCase):
 class TestValidateSpellbookSettings(TestCase):
     """Tests for validate_spellbook_settings function."""
 
-    @override_settings(SPELLBOOK_MD_PATH='/test/path', SPELLBOOK_MD_APP='test_app')
+    @override_settings(
+        SPELLBOOK_MD_PATH='/test/path',
+        SPELLBOOK_MD_APP='test_app'
+    )
     def test_settings_with_new_names(self):
         """Test validation with new setting names."""
         md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
-        
+
         self.assertEqual(md_paths, ['/test/path'])
         self.assertEqual(md_apps, ['test_app'])
         self.assertEqual(md_url_prefixes, [''])
-    
-    
+
+
     @override_settings(
         SPELLBOOK_MD_PATH=['/path1', '/path2'],
         SPELLBOOK_MD_APP=['app1', 'app2']
@@ -139,8 +142,47 @@ class TestValidateSettingValues(TestCase):
         """Test validation with empty app."""
         with self.assertRaises(CommandError) as context:
             _validate_setting_values(['/path1', '/path2'], ['app1', ''], ['test_prefix', ''], [None, None])
-        
+
         self.assertIn("SPELLBOOK_MD_APP must be a non-empty string", str(context.exception))
+
+    @override_settings(INSTALLED_APPS=['django_spellbook'], TESTING=False)
+    def test_app_not_in_installed_apps(self):
+        """Test validation catches when app is not in INSTALLED_APPS."""
+        with self.assertRaises(CommandError) as context:
+            _validate_setting_values(['/path1'], ['missing_app'], ['prefix'], [None])
+
+        error_message = str(context.exception)
+        self.assertIn("not in INSTALLED_APPS", error_message)
+        self.assertIn("missing_app", error_message)
+
+    @override_settings(INSTALLED_APPS=['django_spellbook', 'django.contrib.auth', 'django.contrib.contenttypes'], TESTING=False)
+    def test_multiple_apps_some_not_installed(self):
+        """Test validation catches when some apps are not in INSTALLED_APPS."""
+        with self.assertRaises(CommandError) as context:
+            _validate_setting_values(
+                ['/path1', '/path2', '/path3'],
+                ['django.contrib.auth', 'app2', 'django.contrib.contenttypes'],
+                ['prefix1', 'prefix2', 'prefix3'],
+                [None, None, None]
+            )
+
+        error_message = str(context.exception)
+        self.assertIn("not in INSTALLED_APPS", error_message)
+        self.assertIn("app2", error_message)
+        # django.contrib.auth and django.contrib.contenttypes are installed, so they should not be in the error
+        self.assertNotIn("django.contrib.auth", error_message.split("not in INSTALLED_APPS")[1])
+        self.assertNotIn("django.contrib.contenttypes", error_message.split("not in INSTALLED_APPS")[1])
+
+    @override_settings(INSTALLED_APPS=['django_spellbook', 'django.contrib.auth', 'django.contrib.contenttypes'], TESTING=False)
+    def test_all_apps_in_installed_apps(self):
+        """Test validation passes when all apps are in INSTALLED_APPS."""
+        # This should not raise any exceptions
+        _validate_setting_values(
+            ['/path1', '/path2'],
+            ['django.contrib.auth', 'django.contrib.contenttypes'],
+            ['prefix1', 'prefix2'],
+            [None, None]
+        )
 
 
 class TestSetupDirectoryStructure(TestCase):
@@ -399,31 +441,33 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
     @override_settings(
         SPELLBOOK_MD_PATH='/test/path',
         SPELLBOOK_MD_APP='test_app',
-        SPELLBOOK_MD_BASE_TEMPLATE='base.html'
+        SPELLBOOK_MD_BASE_TEMPLATE='base.html',
+        TESTING=True
     )
     def test_with_single_base_template(self):
         """Test validation with a single base template."""
         md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
-        
+
         self.assertEqual(md_paths, ['/test/path'])
         self.assertEqual(md_apps, ['test_app'])
         self.assertEqual(md_url_prefixes, [''])
         self.assertEqual(base_templates, ['base.html'])
-    
+
     @override_settings(
         SPELLBOOK_MD_PATH=['/path1', '/path2'],
         SPELLBOOK_MD_APP=['app1', 'app2'],
-        SPELLBOOK_MD_BASE_TEMPLATE=['base1.html', 'base2.html']
+        SPELLBOOK_MD_BASE_TEMPLATE=['base1.html', 'base2.html'],
+        TESTING=True
     )
     def test_with_multiple_base_templates(self):
         """Test validation with multiple base templates."""
         md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
-        
+
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
         self.assertEqual(md_url_prefixes, ['', 'app2'])
         self.assertEqual(base_templates, ['base1.html', 'base2.html'])
-    
+
     @override_settings(
         SPELLBOOK_MD_PATH=['/path1', '/path2', '/path3'],
         SPELLBOOK_MD_APP=['app1', 'app2', 'app3'],
@@ -432,7 +476,7 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
     def test_single_template_for_multiple_paths(self):
         """Test validation with a single template for multiple paths."""
         md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
-        
+
         self.assertEqual(md_paths, ['/path1', '/path2', '/path3'])
         self.assertEqual(md_apps, ['app1', 'app2', 'app3'])
         self.assertEqual(md_url_prefixes, ['', 'app2', 'app3'])
@@ -459,12 +503,12 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
     def test_with_custom_url_prefixes_and_none_base_template(self):
         """Test validation with custom URL prefixes and None base template."""
         md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
-        
+
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
         self.assertEqual(md_url_prefixes, ['custom1', 'custom2'])
         self.assertEqual(base_templates, [None, None])
-    
+
     @override_settings(
         SPELLBOOK_MD_PATH=['/path1', '/path2'],
         SPELLBOOK_MD_APP=['app1', 'app2'],
@@ -473,12 +517,12 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
     def test_with_mixed_none_and_string_templates(self):
         """Test validation with mixed None and string templates."""
         md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
-        
+
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
         self.assertEqual(md_url_prefixes, ['', 'app2'])
         self.assertEqual(base_templates, ['base1.html', None])
-    
+
     @override_settings(
         SPELLBOOK_MD_PATH=['/path1', '/path2'],
         SPELLBOOK_MD_APP=['app1', 'app2'],
@@ -487,12 +531,12 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
     def test_with_empty_string_base_template(self):
         """Test validation with empty string base template."""
         md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
-        
+
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
         self.assertEqual(md_url_prefixes, ['', 'app2'])
         self.assertEqual(base_templates, ['', ''])
-    
+
     @override_settings(
         SPELLBOOK_MD_PATH='/single/path',
         SPELLBOOK_MD_APP='single_app',
@@ -510,6 +554,7 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
 class TestValidateSettingValuesWithDangerousTemplates(TestCase):
     """Tests for _validate_setting_values function with focus on dangerous base templates."""
 
+    @override_settings(TESTING=True)
     def test_valid_template_paths(self):
         """Test validation with valid template paths."""
         # These should not raise any exceptions
@@ -521,7 +566,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
             'base-custom.html',
             None  # None is always valid
         ]
-        
+
         for template in valid_templates:
             _validate_setting_values(
                 ['/test/path'],
@@ -530,6 +575,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
                 [template]
             )
     
+    @override_settings(TESTING=True)
     def test_path_traversal_attempts(self):
         """Test validation catches path traversal attempts."""
         dangerous_traversal_templates = [
@@ -540,7 +586,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
             'theme/../../../../etc/shadow',
             'subfolder/./../../secret.txt'
         ]
-        
+
         for template in dangerous_traversal_templates:
             with self.assertRaises(CommandError) as context:
                 _validate_setting_values(
@@ -551,6 +597,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
                 )
             self.assertIn("dangerous characters", str(context.exception).lower())
     
+    @override_settings(TESTING=True)
     def test_absolute_paths(self):
         """Test validation catches absolute paths."""
         absolute_path_templates = [
@@ -560,7 +607,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
             'C:\\Windows\\System32\\config.sys',  # Windows path
             '\\\\server\\share\\file.html'  # UNC path
         ]
-        
+
         for template in absolute_path_templates:
             with self.assertRaises(CommandError) as context:
                 _validate_setting_values(
@@ -571,6 +618,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
                 )
             self.assertIn("contains potentially dangerous characters", str(context.exception).lower())
     
+    @override_settings(TESTING=True)
     def test_command_injection_attempts(self):
         """Test validation catches command injection attempts."""
         command_injection_templates = [
@@ -582,7 +630,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
             'base.html > /etc/passwd',
             '`rm -rf /`'
         ]
-        
+
         for template in command_injection_templates:
             with self.assertRaises(CommandError) as context:
                 _validate_setting_values(
@@ -593,6 +641,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
                 )
             self.assertIn("dangerous characters", str(context.exception).lower())
     
+    @override_settings(TESTING=True)
     def test_special_character_templates(self):
         """Test validation catches templates with special characters."""
         special_char_templates = [
@@ -605,7 +654,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
             'base*wildcard.html',  # Wildcard character
             'base(parenthesis).html'  # Parentheses
         ]
-        
+
         for template in special_char_templates:
             with self.assertRaises(CommandError) as context:
                 _validate_setting_values(
@@ -616,6 +665,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
                 )
             self.assertIn("dangerous characters", str(context.exception).lower())
     
+    @override_settings(TESTING=True)
     def test_non_string_templates(self):
         """Test validation catches non-string templates."""
         non_string_templates = [
@@ -625,7 +675,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
             {'template': 'value'},
             object()
         ]
-        
+
         for template in non_string_templates:
             with self.assertRaises(CommandError) as context:
                 _validate_setting_values(
@@ -636,6 +686,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
                 )
             self.assertIn("must be None or a string", str(context.exception))
     
+    @override_settings(TESTING=True)
     def test_empty_string_template(self):
         """Test validation handles empty string templates."""
         # This might be valid or invalid depending on your implementation
@@ -651,6 +702,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
             # If it should raise an exception, assert the error message
             self.assertIn("empty", str(e).lower())
     
+    @override_settings(TESTING=True)
     def test_unusual_unicode_characters(self):
         """Test validation with unusual Unicode characters."""
         unicode_templates = [
@@ -661,7 +713,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
             'base—emdash.html',        # Em dash
             'base\u3164invisible.html' # Hangul filler (appears as whitespace)
         ]
-        
+
         for template in unicode_templates:
             # This might be valid or invalid depending on implementation
             try:
@@ -676,6 +728,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
                 # If not allowed, verify the error message
                 self.assertIn("dangerous", str(e).lower())
     
+    @override_settings(TESTING=True)
     def test_multiple_templates_one_invalid(self):
         """Test validation when only one template in a list is invalid."""
         with self.assertRaises(CommandError) as context:

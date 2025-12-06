@@ -83,32 +83,36 @@ class ViewGenerator:
             view_name = generate_view_name(remove_leading_dash(processed_file.relative_url))
             if not view_name:
                 raise ValueError(f"Could not generate valid view name from URL: {processed_file.relative_url}")
-                
+
             template_path = get_template_path(self.content_app, processed_file.relative_url)
             clean_url = get_clean_url(processed_file.relative_url)
-                
+
+            # Generate the URL name for matching with TOC
+            url_name = clean_url.replace('/', '_')
+            namespaced_url = f"{self.content_app}:{url_name}"
+
             # Create metadata dictionary
             metadata = self._prepare_metadata(processed_file)
             metadata_repr = self.convert_metadata_to_string(metadata)
-            
+
             context_dict = self._prepare_context_dict(processed_file.context)
             try:
                 # Test representation for syntax/injection issues
                 context_str = repr(context_dict)
-                
+
                 self.check_for_dangerous_content(context_str)
-                        
+
             except Exception as e:
                 logger.error(f"Context dictionary security validation failed: {str(e)}")
                 # Use a fallback empty context for safety
                 context_dict = {}
-        
-            
+
+
             return f"""
 def {view_name}(request):
     context = {context_dict}
-    context['toc'] = TOC 
-    context['current_url'] = '{clean_url}'
+    context['toc'] = TOC
+    context['current_url'] = '{namespaced_url}'
     context['metadata'] = {metadata_repr}
     return render(request, '{template_path}', context)
 """
