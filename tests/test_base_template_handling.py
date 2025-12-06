@@ -70,12 +70,12 @@ class TestBaseTemplateHandling(TestCase):
     def test_validate_spellbook_settings_with_base_template(self):
         """Test validate_spellbook_settings with base template setting."""
         md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
-        
+
         self.assertEqual(md_paths, ['/test/path'])
         self.assertEqual(md_apps, ['test_app'])
         self.assertEqual(md_url_prefixes, [''])
         self.assertEqual(base_templates, ['custom_base.html'])
-    
+
     @override_settings(
         SPELLBOOK_MD_PATH=['/path1', '/path2'],
         SPELLBOOK_MD_APP=['app1', 'app2'],
@@ -84,11 +84,11 @@ class TestBaseTemplateHandling(TestCase):
     def test_validate_spellbook_settings_with_multiple_base_templates(self):
         """Test validate_spellbook_settings with multiple base templates."""
         md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
-        
+
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
         self.assertEqual(base_templates, ['base1.html', 'base2.html'])
-    
+
     @override_settings(
         SPELLBOOK_MD_PATH=['/path1', '/path2'],
         SPELLBOOK_MD_APP=['app1', 'app2'],
@@ -97,7 +97,7 @@ class TestBaseTemplateHandling(TestCase):
     def test_validate_spellbook_settings_with_shared_base_template(self):
         """Test validate_spellbook_settings with a shared base template."""
         md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
-        
+
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
         self.assertEqual(base_templates, ['shared_base.html', 'shared_base.html'])
