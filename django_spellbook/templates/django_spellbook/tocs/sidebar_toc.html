@@ -1,5 +1,5 @@
 {% load spellbook_tags %}
-<div class="toc-wrapper toc-no-transition">
+<div class="toc-wrapper toc-no-transition toc-mobile-border">
     {% if toc.children %}
         <ul class="toc-list">
             {% include "django_spellbook/recursive/_toc_sidebar.html" with items=toc.children %}
@@ -26,19 +26,17 @@
 
   .toc-sublist {
     margin-left: 1.5rem;
-    border-left: 1px solid #00000044;
+    border-left-width: 1px;
+    border-left-style: solid;
     overflow: hidden;
     transition: max-height 0.3s ease-out;
   }
 
   .toc-sublist .toc-sublist {
     margin-left: 1rem; /* Slightly smaller indent for deeper levels */
-    border-left-style: dashed; 
+    border-left-style: dashed;
   }
 
-  .toc-sublist .toc-sublist .toc-sublist {
-    border-left-color: #15151575; 
-  }
   .toc-item,
   .toc-subitem {
     margin: 0.5rem 0;
@@ -46,7 +44,6 @@
 
   .toc-link {
     text-decoration: none;
-    color: #555;
     display: block;
     padding: 0.25rem 0.5rem !important;
     width: 100%;
@@ -54,14 +51,8 @@
     transition: all 0.2s ease;
   }
 
-  .toc-link:hover {
-    background-color: #f5f5f555;
-    color: #000;
-  }
-
   .toc-section {
     font-weight: 600;
-    color: #333;
     display: block;
     padding: 0.25rem 0.5rem;
     margin-top: 1rem;
@@ -69,22 +60,17 @@
 
   .toc-item.active div a,
   .toc-subitem.active div a {
-    background-color: #b1b1b18f !important;
-    color: #363636;
     font-weight: 500;
   }
 
-  .toc-item.active div a:hover,
-  .toc-subitem.active div a:hover {
-    background-color: #bebebe9a !important;
-    color: #242424;
-  }
-
   @media (max-width: 767px) {
+    .toc-mobile-border {
+      border: 1px solid var(--neutral-color-25);
+    }
+
     .toc-wrapper {
       max-height: 300px;
       overflow-y: auto;
-      border: 1px solid #eee;
       border-radius: 4px;
       padding: 0.5rem;
     }

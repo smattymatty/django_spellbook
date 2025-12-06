@@ -2,7 +2,7 @@ from setuptools import setup, find_namespace_packages
 
 setup(
     name='django-spellbook',
-    version='0.1.17b11',  # Increment version
+    version='0.1.17b15',  # Increment version
     author='Mathew Storm',
     author_email='mathewstormdev@gmail.com',
     description='A Django library for creating and managing content blocks in markdown for developers and bloggers',

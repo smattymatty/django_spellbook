@@ -26,10 +26,10 @@ class TestNormalizeSettings(TestCase):
     def test_normalize_string_values(self):
         """Test normalizing string values."""
         md_paths, md_apps, base_templates = normalize_settings('/test/path', 'test_app', None)
-        
+
         self.assertEqual(md_paths, ['/test/path'])
         self.assertEqual(md_apps, ['test_app'])
-        self.assertEqual(base_templates, [None])
+        self.assertEqual(base_templates, ['django_spellbook/bases/sidebar_left.html'])
     
     def test_normalize_path_object(self):
         """Test normalizing Path object."""
@@ -47,10 +47,10 @@ class TestNormalizeSettings(TestCase):
             ['app1', 'app2'],
             None
         )
-        
+
         self.assertEqual(md_paths, ['/test/path1', '/test/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
-        self.assertEqual(base_templates, [None, None])
+        self.assertEqual(base_templates, ['django_spellbook/bases/sidebar_left.html', 'django_spellbook/bases/sidebar_left.html'])
     
     def test_normalize_mixed_values(self):
         """Test normalizing mixed values (string and list)."""
@@ -421,8 +421,8 @@ class TestNormalizeSettingsBaseTemplate(TestCase):
             [],
             None
         )
-        # Should result in empty list since there are no paths
-        self.assertEqual(base_templates, [None])
+        # Should use default template even with empty paths
+        self.assertEqual(base_templates, ['django_spellbook/bases/sidebar_left.html'])
 
     def test_string_base_template_with_no_paths(self):
         """Test string base_template with empty path list."""
@@ -501,13 +501,13 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
         SPELLBOOK_MD_BASE_TEMPLATE=None
     )
     def test_with_custom_url_prefixes_and_none_base_template(self):
-        """Test validation with custom URL prefixes and None base template."""
+        """Test validation with custom URL prefixes and None base template (defaults to sidebar_left.html)."""
         md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
 
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
         self.assertEqual(md_url_prefixes, ['custom1', 'custom2'])
-        self.assertEqual(base_templates, [None, None])
+        self.assertEqual(base_templates, ['django_spellbook/bases/sidebar_left.html', 'django_spellbook/bases/sidebar_left.html'])
 
     @override_settings(
         SPELLBOOK_MD_PATH=['/path1', '/path2'],

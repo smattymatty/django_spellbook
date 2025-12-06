@@ -114,7 +114,7 @@ class TestURLPrefixEdgeCasesIntegration(TestCase):
 
         # All prefixes should have slashes removed
         self.assertEqual(url_prefixes, ['prefix1', 'prefix2', 'prefix3'])
-        self.assertEqual(base_templates, [None, None, None])
+        self.assertEqual(base_templates, ['django_spellbook/bases/sidebar_left.html', 'django_spellbook/bases/sidebar_left.html', 'django_spellbook/bases/sidebar_left.html'])
 
     @override_settings(
         SPELLBOOK_MD_PATH=['/path1', '/path2', '/path3'],
@@ -154,7 +154,7 @@ class TestURLPrefixEdgeCasesIntegration(TestCase):
 
         # Empty prefixes should be preserved
         self.assertEqual(url_prefixes, ['', ''])
-        self.assertEqual(base_templates, [None, None])
+        self.assertEqual(base_templates, ['django_spellbook/bases/sidebar_left.html', 'django_spellbook/bases/sidebar_left.html'])
 
 
 class TestURLPrefixDefaultsIntegration(TestCase):

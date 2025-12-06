@@ -34,3 +34,6 @@ TEMPLATES = [
     },
 ]
 
+# Required for templates that use static files
+STATIC_URL = '/static/'
+

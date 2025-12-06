@@ -27,11 +27,12 @@ def normalize_settings(setting_path, setting_app, setting_base_template):
     
     # Normalize base_templates to a list
     if setting_base_template is None:
-        # If None, create a list of None values matching the number of sources
+        # Use built-in sidebar template as default for better out-of-box experience
+        default_template = 'django_spellbook/bases/sidebar_left.html'
         if md_apps:
-            base_templates = [None] * len(md_apps)
+            base_templates = [default_template] * len(md_apps)
         else:
-            base_templates = [None]
+            base_templates = [default_template]
     elif isinstance(setting_base_template, str):
         # If a string, use the same template for all sources
         base_templates = [setting_base_template] * len(md_apps)

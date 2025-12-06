@@ -25,7 +25,9 @@
           top: 1rem;
           max-height: calc(100vh - 2rem);
           overflow-y: auto;
-          border-right: 1px solid #302929;
+          overflow-x: hidden;
+          word-wrap: break-word;
+          border-right: 1px solid var(--neutral-color-25, #e5e7eb);
           grid-column: 1;
         }
 
@@ -45,7 +47,9 @@
         }
 
         .spellbook-toc {
-          border-bottom: 1px solid #342f2f;
+          overflow-x: hidden;
+          word-wrap: break-word;
+          border-bottom: 1px solid var(--neutral-color-25, #e5e7eb);
           padding-bottom: 1rem;
           margin-bottom: 1rem;
         }
@@ -61,6 +65,15 @@
         margin: 0.5rem 0;
       }
 
+      .spellbook-toc a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .spellbook-toc a:hover {
+        color: var(--primary-color);
+      }
+
       /* Content styles */
       .spellbook-content {
         max-width: 100%;
@@ -68,16 +81,16 @@
       }
 
       .spellbook-content p {
-        opacity: 0.8;
+        color: var(--text-secondary-color);
       }
 
       .spellbook-content h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6 {
-        opacity: 0.85;
+      .spellbook-content h2,
+      .spellbook-content h3,
+      .spellbook-content h4,
+      .spellbook-content h5,
+      .spellbook-content h6 {
+        color: var(--text-color);
       }
 
       .spellbook-content h2 {
@@ -101,26 +114,33 @@
       }
 
       .spellbook-content pre {
-        background-color: #000000;
+        background-color: var(--surface-color);
         padding: 1rem;
-        color: #fff;
+        color: var(--text-color);
+        border: 1px solid var(--neutral-color-25);
+        border-radius: var(--sb-border-radius-md);
       }
 
       .spellbook-content code {
-        background-color: #000000;
+        background-color: var(--surface-color);
         padding: 0.1rem 0.2rem;
         margin: 0 0.2rem;
-        color: #fff;
+        color: var(--text-color);
+        border-radius: var(--sb-border-radius-sm);
       }
         </style>
     </head>
-    <body>
+    <body class="sb-bg-background sb-text-text">
         <div class="spellbook-container">
             <div class="spellbook-layout">
                 <nav class="spellbook-toc">
                     {% include "django_spellbook/tocs/sidebar_toc.html" %}
                 </nav>
                 <main class="spellbook-content">
+                    {% show_metadata %}
+                    {% if user.is_staff %}
+                        {% show_metadata "for_dev" %}
+                    {% endif %}
                     {% block spellbook_md %}{% endblock %}
                 </main>
             </div>

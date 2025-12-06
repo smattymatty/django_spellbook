@@ -191,14 +191,29 @@ SPELLBOOK_MD_APP = 'my_app'
 
 - `SPELLBOOK_MD_PATH`: Specifies the path where markdown files are stored.
 - `SPELLBOOK_MD_APP`: Sets the app where processed markdown files will be saved.
-- `SPELLBOOK_MD_BASE_TEMPLATE`: If specified, this base template will wrap all markdown-rendered templates, allowing for consistent styling across your markdown content.
+- `SPELLBOOK_MD_BASE_TEMPLATE`: Base template that wraps markdown-rendered content. **Defaults to `'django_spellbook/bases/sidebar_left.html'`** which provides a professional layout with TOC, themes, and responsive design out-of-the-box.
 
+**Using the Default (Recommended for Quick Start):**
 ```python
-# settings.py
+# settings.py - minimal configuration uses built-in template automatically
+SPELLBOOK_MD_PATH = BASE_DIR / 'docs'
+SPELLBOOK_MD_APP = 'my_app'
+# No need to specify SPELLBOOK_MD_BASE_TEMPLATE - uses sidebar_left.html by default!
+```
+
+**Customizing the Base Template:**
+```python
+# settings.py - use your own custom base template
 SPELLBOOK_MD_BASE_TEMPLATE = 'my_app/sb_base.html'
 ```
 
-The base template must have a block named `spellbook_md` that will be used to wrap the rendered markdown content. Here is a basic example of a base template:
+**Opting Out (Raw HTML Only):**
+```python
+# settings.py - explicitly set to None for no template wrapper
+SPELLBOOK_MD_BASE_TEMPLATE = None
+```
+
+The base template (whether default or custom) must have a block named `spellbook_md` that will be used to wrap the rendered markdown content. Here is a basic example of a custom base template:
 
 ```html
 <!-- my_app/sb_base.html -->

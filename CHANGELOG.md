@@ -7,28 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.17] - TBD
 
-### Fixed
-
-#### Table of Contents External Link Navigation
-- **Fixed TOC not expanding from external links** - Visiting a page from outside the site (bookmarks, search engines, direct links) now properly highlights and expands the TOC to show your current location
-- **Fixed URL matching** - View generator now uses Django namespaced URLs (`docs:Commands_spellbook_md`) instead of path-style URLs (`Commands/spellbook_md`) to match the TOC structure
-- **Fixed parent/child URL duplication** - Parent directories no longer share URLs with their child pages, eliminating confusion about which item should be active
-- **Removed jarring page load animation** - TOC now expands instantly on page load (no visible transition), but user interactions still animate smoothly
-- **Modern JavaScript architecture** - Extracted 200+ lines of inline JavaScript into a clean ES module (`toc.mjs`) for better maintainability
-
 ### Changed
 
-#### Test Infrastructure
-- **Added TESTING flag** - Tests now use `TESTING=True` in `tests/settings.py` to skip INSTALLED_APPS validation, preventing 100+ spurious test failures
-- **Fixed test decorators** - Added `TESTING=True` to `@override_settings` decorators across test suite
-- **All 674 tests passing** - Went from 102 failures → 0 failures with the new testing approach
+#### Beautiful Documentation Out of the Box
+Running `python manage.py spellbook_md` now gives you a gorgeous, professional documentation site **automatically** - no configuration needed!
 
-### Technical Details
-- `view_generator.py` - Views now pass namespaced URLs in context
-- `toc.py` - Parent directories have empty URLs; only leaf pages have URLs
-- `toc.mjs` - New ES module with smart expansion logic and no-transition on initial load
-- `sidebar_toc.html` - Added `toc-no-transition` class to prevent jarring animations
-- Test files updated to use TESTING flag for clean test runs
+**What you get instantly:**
+- **Sidebar table of contents** that's always visible
+- **Full theme support** - all 9 built-in themes work immediately
+- **Responsive design** - looks great on mobile and desktop
+- **Metadata display** - frontmatter data beautifully presented
+
+**Before:** Raw HTML with no styling
+**Now:** Production-ready documentation site
+
+**Want to customize?** You still can! Set `SPELLBOOK_MD_BASE_TEMPLATE` in your settings to use your own template, or set it to `None` if you just want the raw HTML.
+
+### Fixed
+
+#### Themes Now Work Everywhere
+Fixed a bug where **only metadata boxes** changed colors when switching themes. Now **everything** responds to your theme:
+- Table of contents text and borders
+- Body text and headings
+- Code blocks and inline code
+- All UI elements
+
+**Before:** Switching themes only changed metadata colors, rest stayed the same
+**Now:** Entire page transforms with your chosen theme
+
+#### Long Words No Longer Break Layout
+Fixed annoying horizontal scrollbar that appeared when table of contents had long words with underscores (like `really_long_function_name_with_underscores`).
+
+**Before:** Long words caused horizontal scrolling in sidebar
+**Now:** Long words wrap gracefully, no scrollbar
+
+#### Table of Contents Highlights Your Location
+When you visit a page from a bookmark, search engine, or direct link, the table of contents now **automatically expands and highlights** your current location.
+
+**Before:** TOC stayed collapsed when visiting from external links
+**Now:** TOC opens to show exactly where you are
+
+#### Smoother Page Loading
+Removed the jarring "expanding" animation when pages first load. TOC now appears instantly in the correct state, while clicks still animate smoothly.
+
+**Before:** Distracting flash of animation on every page load
+**Now:** Clean, instant page loads with smooth interactions
 
 ## [0.1.16] - 2025-08-21
 

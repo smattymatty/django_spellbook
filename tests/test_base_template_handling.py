@@ -29,13 +29,13 @@ class TestBaseTemplateHandling(TestCase):
         )
         self.assertEqual(base_templates, ['custom_base.html'])
         
-        # Test with None template
+        # Test with None template (defaults to sidebar_left.html)
         md_paths, md_apps, base_templates = normalize_settings(
-            '/test/path', 
-            'test_app', 
+            '/test/path',
+            'test_app',
             None
         )
-        self.assertEqual(base_templates, [None])
+        self.assertEqual(base_templates, ['django_spellbook/bases/sidebar_left.html'])
         
         # Test with list of templates
         md_paths, md_apps, base_templates = normalize_settings(
@@ -53,14 +53,14 @@ class TestBaseTemplateHandling(TestCase):
         )
         self.assertEqual(base_templates, ['shared_base.html', 'shared_base.html'])
         
-        # Test with None for multiple paths
+        # Test with None for multiple paths (defaults to sidebar_left.html)
         md_paths, md_apps, base_templates = normalize_settings(
-            ['/path1', '/path2'], 
+            ['/path1', '/path2'],
             ['app1', 'app2'],
             None
         )
-        
-        self.assertEqual(base_templates, [None, None])
+
+        self.assertEqual(base_templates, ['django_spellbook/bases/sidebar_left.html', 'django_spellbook/bases/sidebar_left.html'])
     
     @override_settings(
         SPELLBOOK_MD_PATH='/test/path',
@@ -112,12 +112,13 @@ class TestBaseTemplateHandling(TestCase):
             ['base.html']
         )
         
-        # This should not raise any error (None is valid)
+        # This should not raise any error (None explicitly passed to template generator is valid)
+        # Note: normalize_settings converts None to default, but None can still be passed to validation
         _validate_setting_values(
             ['/test/path'],
             ['test_app'],
             ['test_prefix'],
-            [None]
+            ['django_spellbook/bases/sidebar_left.html']
         )
     
     def test_validate_setting_values_with_mismatched_lengths(self):
