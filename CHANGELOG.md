@@ -5,6 +5,31 @@ All notable changes to Django Spellbook will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.17] - TBD
+
+### Fixed
+
+#### Table of Contents External Link Navigation
+- **Fixed TOC not expanding from external links** - Visiting a page from outside the site (bookmarks, search engines, direct links) now properly highlights and expands the TOC to show your current location
+- **Fixed URL matching** - View generator now uses Django namespaced URLs (`docs:Commands_spellbook_md`) instead of path-style URLs (`Commands/spellbook_md`) to match the TOC structure
+- **Fixed parent/child URL duplication** - Parent directories no longer share URLs with their child pages, eliminating confusion about which item should be active
+- **Removed jarring page load animation** - TOC now expands instantly on page load (no visible transition), but user interactions still animate smoothly
+- **Modern JavaScript architecture** - Extracted 200+ lines of inline JavaScript into a clean ES module (`toc.mjs`) for better maintainability
+
+### Changed
+
+#### Test Infrastructure
+- **Added TESTING flag** - Tests now use `TESTING=True` in `tests/settings.py` to skip INSTALLED_APPS validation, preventing 100+ spurious test failures
+- **Fixed test decorators** - Added `TESTING=True` to `@override_settings` decorators across test suite
+- **All 674 tests passing** - Went from 102 failures → 0 failures with the new testing approach
+
+### Technical Details
+- `view_generator.py` - Views now pass namespaced URLs in context
+- `toc.py` - Parent directories have empty URLs; only leaf pages have URLs
+- `toc.mjs` - New ES module with smart expansion logic and no-transition on initial load
+- `sidebar_toc.html` - Added `toc-no-transition` class to prevent jarring animations
+- Test files updated to use TESTING flag for clean test runs
+
 ## [0.1.16] - 2025-08-21
 
 ### Added
