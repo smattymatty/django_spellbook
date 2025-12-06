@@ -40,7 +40,7 @@ Some text here.
 - List item 1  ← Now renders correctly as a list!
 ```
 
-This was caused by the `nl2br` extension converting newlines to `<br/>` tags before list detection. Created a custom `ListAwareNl2BrExtension` that intelligently skips newlines before list markers.
+This was caused by the `sane_lists` extension requiring blank lines before lists. Removed `sane_lists` to allow more flexible list rendering that matches modern markdown behavior.
 
 #### Themes Now Work Everywhere
 Fixed a bug where **only metadata boxes** changed colors when switching themes. Now **everything** responds to your theme:

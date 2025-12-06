@@ -2,6 +2,7 @@
 
 from .extensions.django_like import DjangoLikeTagExtension
 from .extensions.list_aware_nl2br import ListAwareNl2BrExtension
+from .preprocessors.list_fixer import ListFixerExtension
 from ..blocks import SpellBlockRegistry
 from typing import Dict, Any, Optional, List, Tuple
 from django.template.loader import render_to_string
@@ -42,11 +43,12 @@ class MarkdownParser:
         self.html = markdown.markdown(
             self.processed_text,
             extensions=[
+                ListFixerExtension(),  # Preprocessor: adds blank lines before lists
                 DjangoLikeTagExtension(),
                 'markdown.extensions.fenced_code',
                 'markdown.extensions.tables',
                 ListAwareNl2BrExtension(),
-                'markdown.extensions.sane_lists',
+                # Note: sane_lists removed to allow lists without blank lines before them
                 # toc
                 'markdown.extensions.toc',
             ],
@@ -97,11 +99,12 @@ class BlockProcessor:
         self.pattern = re.compile(
             r'{~\s*(\w+)(?:\s+([^~]*?))?\s*~}(.*?){~~}', re.DOTALL)
         self.markdown_extensions = [
+            ListFixerExtension(),  # Preprocessor: adds blank lines before lists
             DjangoLikeTagExtension(),
             'markdown.extensions.fenced_code',
             'markdown.extensions.tables',
             ListAwareNl2BrExtension(),
-            'markdown.extensions.sane_lists',
+            # Note: sane_lists removed to allow lists without blank lines before them
             # toc
             'markdown.extensions.toc',
         ]

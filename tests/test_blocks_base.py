@@ -5,6 +5,7 @@ from django.template.loader import render_to_string
 from django_spellbook.blocks.base import BasicSpellBlock
 from django_spellbook.markdown.extensions.django_like import DjangoLikeTagExtension
 from django_spellbook.markdown.extensions.list_aware_nl2br import ListAwareNl2BrExtension
+from django_spellbook.markdown.preprocessors.list_fixer import ListFixerExtension
 
 from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
 from io import StringIO
@@ -67,19 +68,19 @@ class TestBasicSpellBlock(TestCase):
         # Verify the content matches
         self.assertEqual(args[0], self.test_content + '')
         
-        # Verify extensions list length
+        # Verify extensions list length (8 extensions: ListFixer added, sane_lists removed)
         extensions = kwargs['extensions']
         self.assertEqual(len(extensions), 8)
-        
-        # Verify the type of the first two extensions
-        self.assertIsInstance(extensions[0], DjangoLikeTagExtension)
+
+        # Verify the type of the first extensions
+        self.assertIsInstance(extensions[0], ListFixerExtension)
+        self.assertIsInstance(extensions[1], DjangoLikeTagExtension)
 
         # Verify the remaining extensions match exactly
-        self.assertEqual(extensions[1], 'markdown.extensions.fenced_code')
-        self.assertEqual(extensions[2], 'markdown.extensions.tables')
-        self.assertIsInstance(extensions[3], ListAwareNl2BrExtension)
-        self.assertEqual(extensions[4:], [
-            'markdown.extensions.sane_lists',
+        self.assertEqual(extensions[2], 'markdown.extensions.fenced_code')
+        self.assertEqual(extensions[3], 'markdown.extensions.tables')
+        self.assertIsInstance(extensions[4], ListAwareNl2BrExtension)
+        self.assertEqual(extensions[5:], [
             'markdown.extensions.footnotes',
             'markdown.extensions.attr_list',
             'markdown.extensions.toc',
@@ -162,10 +163,16 @@ class TestBasicSpellBlock(TestCase):
         required_extension_strings = [
             'markdown.extensions.fenced_code',
             'markdown.extensions.tables',
-            'markdown.extensions.sane_lists',
+            # Note: sane_lists removed to allow lists without blank lines
         ]
         for ext in required_extension_strings:
             self.assertIn(ext, extensions)
+
+        # Verify ListFixerExtension is present
+        has_list_fixer = any(
+            isinstance(ext, ListFixerExtension) for ext in extensions
+        )
+        self.assertTrue(has_list_fixer, "ListFixerExtension should be present")
 
         # Verify ListAwareNl2BrExtension is present
         has_nl2br_extension = any(

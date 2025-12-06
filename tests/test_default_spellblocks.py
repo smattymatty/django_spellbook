@@ -117,8 +117,10 @@ class TestCardBlock(TestCase):  # Change to Django's TestCase
         context = block.get_context()
 
         self.assertIn("<h1 id=\"heading\">Heading</h1>", context['content'])
-        self.assertIn("<li>List item 1</li>", context['content'])
-        self.assertIn("<li>List item 2</li>", context['content'])
+        # With the markdown preprocessor adding blank lines before lists,
+        # list items now contain <p> tags
+        self.assertIn("<li>\n<p>List item 1</p>", context['content'])
+        self.assertIn("<li>\n<p>List item 2</p>", context['content'])
 
     # Patch at the correct location
     @patch('django_spellbook.blocks.base.render_to_string')

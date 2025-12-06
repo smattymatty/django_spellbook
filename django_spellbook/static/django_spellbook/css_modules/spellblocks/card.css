@@ -1,0 +1,83 @@
+/* Card SpellBlock Styles */
+/* Modular CSS for card components */
+
+/* Base Card Container */
+.sb-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 90%;
+  margin: auto;
+  margin-bottom:0.5rem;
+  word-wrap: break-word;
+  background-color: var(--card-bg, var(--surface-color, #ffffff));
+  background-clip: border-box;
+  border: 1px solid var(--card-border, color-mix(in srgb, var(--neutral-color) 15%, transparent));
+  border-radius: 0.375rem;
+  transition: all 0.3s ease-in-out;
+  box-shadow: var(--card-shadow, 0 0.125rem 0.25rem color-mix(in srgb, black 7.5%, transparent));
+}
+
+.sb-card:hover {
+  box-shadow: var(--card-shadow-hover, 0 0.5rem 1rem color-mix(in srgb, black 15%, transparent));
+  transform: translateY(-2px);
+}
+
+/* Card Header */
+.sb-card-header {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0;
+  background-color: var(--card-header-bg, color-mix(in srgb, var(--neutral-color) 10%, var(--surface-color, #ffffff)));
+  border-bottom: 1px solid var(--card-header-border, color-mix(in srgb, var(--neutral-color) 20%, transparent));
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+}
+
+.sb-card-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--card-title-color, var(--text-color, #1f2937));
+}
+
+/* Card Body */
+.sb-card-body {
+  flex: 1 1 auto;
+  padding: 1rem;
+  color: var(--card-text-color, var(--text-color, #1f2937));
+}
+
+/* Card Footer */
+.sb-card-footer {
+  padding: 0.75rem 1rem;
+  background-color: var(--card-footer-bg, color-mix(in srgb, var(--neutral-color) 10%, var(--surface-color, #ffffff)));
+  border-top: 1px solid var(--card-footer-border, color-mix(in srgb, var(--neutral-color) 20%, transparent));
+  border-bottom-left-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+}
+
+/* Card Link Styling - Ensures readability across all themes */
+.sb-card a {
+  color: var(--card-link-color, var(--primary-color, #60a5fa));
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  font-weight: 500;
+  transition: color 0.2s ease-in-out, text-decoration-color 0.2s ease-in-out;
+}
+
+.sb-card a:hover {
+  color: var(--card-link-hover-color, var(--accent-color, #fbbf24));
+  text-decoration-thickness: 2px;
+}
+
+.sb-card a:visited {
+  color: var(--card-link-visited-color, var(--emphasis-color, #a78bfa));
+}
+
+.sb-card a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 2px;
+}

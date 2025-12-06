@@ -1,6 +1,8 @@
 /* Root Variables */
 /* Import Modular CSS */
 @import 'css_modules/spellblocks/alert.css';
+@import 'css_modules/spellblocks/card.css';
+@import 'css_modules/spellblocks/accordion.css';
 
 :root {
     --sb-btn-default-color: var(--sb-primary-color);
@@ -8,58 +10,40 @@
     --sb-btn-default-border: var(--sb-primary-border);
 }
 
-/* Card Block */
-.sb-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  max-width: 90%;
-  margin: auto;
-  margin-bottom:0.5rem;
-  word-wrap: break-word;
-  background-color: var(--card-bg, var(--surface-color, #ffffff));
-  background-clip: border-box;
-  border: 1px solid var(--card-border, color-mix(in srgb, var(--neutral-color) 15%, transparent));
-  border-radius: 0.375rem;
-  transition: all 0.3s ease-in-out;
-  box-shadow: var(--card-shadow, 0 0.125rem 0.25rem color-mix(in srgb, black 7.5%, transparent));
-}
-
-.sb-card:hover {
-  box-shadow: var(--card-shadow-hover, 0 0.5rem 1rem color-mix(in srgb, black 15%, transparent));
-  transform: translateY(-2px);
-}
-
-.sb-card-header {
-  padding: 0.75rem 1rem;
-  margin-bottom: 0;
-  background-color: var(--card-header-bg, color-mix(in srgb, var(--neutral-color) 10%, var(--surface-color, #ffffff)));
-  border-bottom: 1px solid var(--card-header-border, color-mix(in srgb, var(--neutral-color) 20%, transparent));
-  border-top-left-radius: 0.375rem;
-  border-top-right-radius: 0.375rem;
-}
-
-.sb-card-title {
-  margin: 0;
-  font-size: 1.25rem;
+/* Content Link Styling - Only for spellbook content, not navigation */
+/* Target links within spellbook content containers */
+.sb-content a,
+.sb-markdown-content a,
+.sb-blockquote a {
+  color: var(--link-color, var(--primary-color, #60a5fa));
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
   font-weight: 500;
-  color: var(--card-title-color, var(--text-color, #1f2937));
+  transition: color 0.2s ease-in-out, text-decoration-color 0.2s ease-in-out;
 }
 
-.sb-card-body {
-  flex: 1 1 auto;
-  padding: 1rem;
-  color: var(--card-text-color, var(--text-color, #1f2937));
+.sb-content a:hover,
+.sb-markdown-content a:hover,
+.sb-blockquote a:hover {
+  color: var(--link-hover-color, var(--accent-color, #fbbf24));
+  text-decoration-thickness: 2px;
 }
 
-.sb-card-footer {
-  padding: 0.75rem 1rem;
-  background-color: var(--card-footer-bg, color-mix(in srgb, var(--neutral-color) 10%, var(--surface-color, #ffffff)));
-  border-top: 1px solid var(--card-footer-border, color-mix(in srgb, var(--neutral-color) 20%, transparent));
-  border-bottom-left-radius: 0.375rem;
-  border-bottom-right-radius: 0.375rem;
+.sb-content a:visited,
+.sb-markdown-content a:visited,
+.sb-blockquote a:visited {
+  color: var(--link-visited-color, var(--emphasis-color, #a78bfa));
 }
+
+.sb-content a:focus-visible,
+.sb-markdown-content a:focus-visible,
+.sb-blockquote a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* Quote Block */
 .sb-blockquote {
   position: relative;
@@ -360,104 +344,9 @@
   }
 }
 
-/* Accordion Block */
-.sb-accordion {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  max-width: 90%;
-  margin: auto;
-  margin-bottom: 1.5rem;
-  background-color: var(--surface-color);
-  border: 1px solid color-mix(in srgb, var(--neutral-color) 15%, transparent);
-  border-radius: 0.375rem;
-  transition: all 0.5s ease-in-out;
-  box-shadow: 0 0.125rem 0.25rem color-mix(in srgb, var(--text-color) 7.5%, transparent);
-  overflow: hidden;
-}
-
-.sb-accordion:hover {
-  box-shadow: 0 0.25rem 0.5rem color-mix(in srgb, var(--text-color) 10%, transparent);
-}
-
-.sb-accordion-toggle {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--text-color);
-  text-align: left;
-  background-color: var(--surface-color);
-  border: none;
-  border-bottom: 1px solid transparent;
-  cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
-}
-
-.sb-accordion-toggle:hover {
-  background-color: color-mix(in srgb, var(--surface-color) 90%, var(--text-color));
-}
-
-.sb-accordion-toggle[aria-expanded="true"] {
-  background-color: color-mix(in srgb, var(--surface-color) 70%, var(--text-color));
-  border-bottom: 1px solid color-mix(in srgb, var(--surface-color) 15%, transparent);
-}
-
-.sb-accordion-title {
-  font-weight: 500;
-}
-
-.sb-accordion-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sb-accordion-icon .sb-icon-plus {
-  display: block;
-}
-
-.sb-accordion-icon .sb-icon-minus {
-  display: none;
-}
-
-.sb-accordion-toggle[aria-expanded="true"] .sb-icon-plus {
-  display: none;
-}
-
-.sb-accordion-toggle[aria-expanded="true"] .sb-icon-minus {
-  display: block;
-}
-
-.sb-accordion-content {
-  max-height: 0;
-  overflow: scroll;
-  transition: max-height 0.7s ease-in-out;
-}
-
-.sb-accordion-toggle[aria-expanded="true"] + .sb-accordion-content {
-  /* max-height: dynamically set based on content height */
-  max-height: 30rem;
-}
-
-@media (max-width: 768px) {
-  .sb-accordion-toggle[aria-expanded="true"] + .sb-accordion-content {
-    /* max-height: dynamically set based on content height */
-    max-height: 24rem;
-  }
-}
-
 /* ==========================================================================
    ProgressBar Component
    ========================================================================== */
-
-.sb-accordion-body {
-  padding: 1rem;
-}
 
 .sb-progress-container {
   /* Primary container, width is handled by sb-w-full utility */

@@ -16,6 +16,7 @@ from django_spellbook.blocks import SpellBlockRegistry, BasicSpellBlock
 from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
 from django_spellbook.markdown.extensions.django_like import DjangoLikeTagExtension
 from django_spellbook.markdown.extensions.list_aware_nl2br import ListAwareNl2BrExtension
+from django_spellbook.markdown.preprocessors.list_fixer import ListFixerExtension
 from django_spellbook.management.commands.spellbook_md_p.discovery import discover_blocks
 from django_spellbook.markdown.attribute_parser import parse_spellblock_style_attributes
 
@@ -95,11 +96,12 @@ class SpellbookMarkdownEngine:
 
         if markdown_extensions is None:
             self.markdown_extensions: List[Any] = [
+                ListFixerExtension(),  # Preprocessor: adds blank lines before lists
                 DjangoLikeTagExtension(),
                 'markdown.extensions.fenced_code',
                 'markdown.extensions.tables',
                 ListAwareNl2BrExtension(),
-                'markdown.extensions.sane_lists',
+                # Note: sane_lists removed to allow lists without blank lines before them
                 'markdown.extensions.footnotes',
                 'markdown.extensions.attr_list',
                 'markdown.extensions.toc',
