@@ -1,0 +1,278 @@
+/**
+ * Prism.js Django Spellbook Theme
+ * A dynamic theme that adapts to the current Django Spellbook theme and mode
+ */
+
+/* Base styling for all code */
+code[class*="language-"],
+pre[class*="language-"] {
+    color: var(--prism-text, var(--text-color, #ccc));
+    background: transparent;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    font-size: 1em;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: 0.5em 0;
+    overflow: auto;
+    background: var(--prism-code-bg, var(--surface-color, #2d2d2d));
+    border: 1px solid var(--prism-border, color-mix(in srgb, var(--neutral-color, #999) 20%, transparent));
+    border-radius: var(--sb-border-radius-md, 0.375rem);
+    box-shadow: var(--prism-shadow, 0 2px 4px color-mix(in srgb, black 10%, transparent));
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: 0.1em 0.3em;
+    border-radius: 0.3em;
+    white-space: normal;
+    background: var(--prism-inline-bg, color-mix(in srgb, var(--surface-color, #2d2d2d) 50%, var(--background-color, #1a1a1a)));
+    border: 1px solid var(--prism-inline-border, color-mix(in srgb, var(--neutral-color, #999) 15%, transparent));
+}
+
+/* Selection */
+pre[class*="language-"]::-moz-selection,
+pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection,
+code[class*="language-"] ::-moz-selection {
+    background: var(--prism-selection, color-mix(in srgb, var(--primary-color, #3b82f6) 30%, transparent));
+}
+
+pre[class*="language-"]::selection,
+pre[class*="language-"] ::selection,
+code[class*="language-"]::selection,
+code[class*="language-"] ::selection {
+    background: var(--prism-selection, color-mix(in srgb, var(--primary-color, #3b82f6) 30%, transparent));
+}
+
+/* Token styles - High specificity to override utility classes */
+.token.comment,
+.token.block-comment,
+.token.prolog,
+.token.doctype,
+.token.cdata,
+pre[class*="language-"] .token.comment,
+pre[class*="language-"] .token.block-comment,
+pre[class*="language-"] .token.prolog,
+pre[class*="language-"] .token.doctype,
+pre[class*="language-"] .token.cdata {
+    color: var(--prism-comment, var(--text-secondary-color, #999)) !important;
+    font-style: italic;
+}
+
+.token.punctuation {
+    color: var(--prism-punctuation, var(--neutral-color, #ccc)) !important;
+}
+
+.token.tag,
+.token.attr-name,
+.token.namespace,
+.token.deleted {
+    color: var(--prism-tag, var(--error-color, #e2777a)) !important;
+}
+
+.token.function-name {
+    color: var(--prism-function-name, var(--info-color, #6196cc)) !important;
+}
+
+.token.boolean,
+.token.number {
+    color: var(--prism-number, var(--warning-color, #f08d49)) !important;
+}
+
+.token.function {
+    color: var(--prism-function, var(--info-color, #f08d49)) !important;
+}
+
+.token.property,
+.token.class-name,
+.token.constant,
+.token.symbol {
+    color: var(--prism-property, var(--secondary-color, #f8c555)) !important;
+}
+
+.token.selector,
+.token.important,
+.token.atrule,
+.token.keyword,
+.token.builtin {
+    color: var(--prism-keyword, var(--primary-color, #cc99cd)) !important;
+    font-weight: 600;
+}
+
+.token.string,
+.token.char,
+.token.attr-value,
+.token.regex,
+.token.variable {
+    color: var(--prism-string, var(--success-color, #7ec699)) !important;
+}
+
+.token.operator,
+.token.entity,
+.token.url {
+    color: var(--prism-operator, var(--accent-color, #67cdcc)) !important;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+.token.inserted {
+    color: var(--prism-inserted, var(--success-color, green)) !important;
+    background: var(--prism-inserted-bg, color-mix(in srgb, var(--success-color, green) 15%, transparent));
+}
+
+.token.deleted {
+    color: var(--prism-deleted, var(--error-color, red)) !important;
+    background: var(--prism-deleted-bg, color-mix(in srgb, var(--error-color, red) 15%, transparent));
+}
+
+/* Line Numbers Plugin Support */
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em;
+    letter-spacing: -1px;
+    border-right: 1px solid var(--prism-line-number-border, color-mix(in srgb, var(--neutral-color, #999) 30%, transparent));
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.line-numbers-rows > span {
+    display: block;
+    counter-increment: linenumber;
+}
+
+.line-numbers-rows > span:before {
+    content: counter(linenumber);
+    color: var(--prism-line-number, var(--text-secondary-color, #999));
+    display: block;
+    padding-right: 0.8em;
+    text-align: right;
+}
+
+/* Line Highlight Plugin Support */
+pre[data-line] {
+    position: relative;
+}
+
+.line-highlight {
+    position: absolute;
+    left: 0;
+    right: 0;
+    padding: inherit 0;
+    margin-top: 1em;
+    background: var(--prism-line-highlight, color-mix(in srgb, var(--primary-color, #3b82f6) 15%, transparent));
+    pointer-events: none;
+    line-height: inherit;
+    white-space: pre;
+}
+
+/* Custom scrollbar for code blocks */
+pre[class*="language-"]::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+pre[class*="language-"]::-webkit-scrollbar-track {
+    background: var(--prism-scrollbar-track, color-mix(in srgb, var(--neutral-color, #999) 10%, transparent));
+    border-radius: 5px;
+}
+
+pre[class*="language-"]::-webkit-scrollbar-thumb {
+    background: var(--prism-scrollbar-thumb, color-mix(in srgb, var(--neutral-color, #999) 30%, transparent));
+    border-radius: 5px;
+}
+
+pre[class*="language-"]::-webkit-scrollbar-thumb:hover {
+    background: var(--prism-scrollbar-thumb-hover, color-mix(in srgb, var(--neutral-color, #999) 50%, transparent));
+}
+
+/* Toolbar Plugin Support (for copy button etc) */
+div.code-toolbar {
+    position: relative;
+}
+
+div.code-toolbar > .toolbar {
+    position: absolute;
+    top: 0.3em;
+    right: 0.2em;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+div.code-toolbar:hover > .toolbar {
+    opacity: 1;
+}
+
+div.code-toolbar > .toolbar .toolbar-item {
+    display: inline-block;
+}
+
+div.code-toolbar > .toolbar a,
+div.code-toolbar > .toolbar button {
+    color: white;
+    background: var(--prism-toolbar-button-bg, var(--primary-color, #3b82f6));
+    border: none;
+    border-radius: var(--sb-border-radius-sm, 0.125rem);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+div.code-toolbar > .toolbar a:hover,
+div.code-toolbar > .toolbar button:hover {
+    background: var(--prism-toolbar-button-hover, color-mix(in srgb, var(--primary-color, #3b82f6) 80%, black));
+    transform: scale(1.05);
+}
+
+/* Language label */
+.code-toolbar .toolbar-item span {
+    color: var(--prism-language-label, var(--text-secondary-color, #999));
+    background: var(--prism-language-label-bg, color-mix(in srgb, var(--neutral-color, #999) 20%, transparent));
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--sb-border-radius-sm, 0.125rem);
+    font-size: 0.75rem;
+}

@@ -70,6 +70,65 @@ Warning: This is an important notice!
 
 Be sure to include the `{% spellbook_styles %}` tag in your base template if you want to use the built-in styles.
 
+### Theme System
+
+Django Spellbook includes a powerful theme system that lets you configure your entire site's color scheme through Python settings. No CSS knowledge required!
+
+#### Quick Start with Built-in Themes
+
+```python
+# settings.py
+from django_spellbook.theme import THEMES
+
+# Choose from 9 magical themes
+SPELLBOOK_THEME = THEMES['arcane']     # Deep purple magic
+# SPELLBOOK_THEME = THEMES['celestial']  # Divine blues and gold
+# SPELLBOOK_THEME = THEMES['forest']     # Woodland greens
+# SPELLBOOK_THEME = THEMES['ocean']      # Deep sea blues
+# SPELLBOOK_THEME = THEMES['phoenix']    # Fire colors
+# SPELLBOOK_THEME = THEMES['shadow']     # Monochrome
+# SPELLBOOK_THEME = THEMES['enchanted']  # Magical pinks
+# SPELLBOOK_THEME = THEMES['pastel']     # Soft colors
+```
+
+#### Custom Theme Configuration
+
+```python
+# settings.py
+SPELLBOOK_THEME = {
+    'colors': {
+        'primary': '#8B008B',      # Dark magenta
+        'secondary': '#4B0082',    # Indigo
+        'accent': '#FFD700',       # Gold
+        'error': '#DC143C',        # Crimson
+        # ... customize any color
+    },
+    'custom_colors': {
+        'magic': '#9D4EDD',        # Use as sb-bg-magic
+        'spell': '#C77DFF',        # Use as sb-text-spell
+        # ... add your own color names
+    }
+}
+```
+
+Then in your templates:
+```html
+{% load spellbook_tags %}
+<!DOCTYPE html>
+<html>
+<head>
+    {% spellbook_styles %}  <!-- Loads theme + all styles -->
+</head>
+<body>
+    <div class="sb-bg-primary sb-text-white sb-p-4">
+        Theme colors work everywhere!
+    </div>
+</body>
+</html>
+```
+
+All SpellBlocks and utility classes automatically adapt to your chosen theme. Change one setting, and your entire site updates!
+
 ![Example of alert spellblocks](https://i.imgur.com/wRzMKZv.png)
 
 ```markdown

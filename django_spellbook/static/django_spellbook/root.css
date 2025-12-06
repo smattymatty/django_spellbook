@@ -1,19 +1,4 @@
 :root {
-  --primary-color: #3b82f6;
-  --secondary-color: #6b7280;
-  --accent-color: #f59e0b;
-  --neutral-color: #2563eb;
-  --error-color: #dc2626;
-  --warning-color: #f59e0b;
-  --success-color: #16a34a;
-  --info-color: #2563eb;
-  --emphasis-color: #8b5cf6;
-  --subtle-color: #f3f4f6;
-  --distinct-color: #06b6d4;
-  --aether-color: #c026d3;
-  --artifact-color: #a16207;
-  --sylvan-color: #3f6212;
-  --danger-color: #a80000;
   --sb-border-radius-sm: 0.125rem;
   --sb-border-radius-md: 0.375rem;
   --sb-border-radius-lg: 0.5rem;

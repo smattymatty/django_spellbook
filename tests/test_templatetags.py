@@ -92,9 +92,15 @@ class TestSpellbookUrl(TestCase):
 
 class TestSpellbookStyles(TestCase):
     def test_spellbook_styles_tag(self):
-        """Test that spellbook_styles tag returns an empty dictionary"""
+        """Test that spellbook_styles tag returns context with theme_css"""
         result = spellbook_styles()
-        self.assertEqual(result, {})
+        # Should return a dictionary with theme_css key
+        self.assertIsInstance(result, dict)
+        self.assertIn('theme_css', result)
+        # Theme CSS should be a string containing CSS variables
+        self.assertIsInstance(result['theme_css'], str)
+        self.assertIn(':root {', result['theme_css'])
+        self.assertIn('--primary-color:', result['theme_css'])
 
 
 class TestDashStrip(TestCase):

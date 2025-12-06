@@ -24,39 +24,39 @@
 }
 
 .sb-alert-info {
-  background-color: color-mix(in srgb, var(--info-color) 15%, white);
-  border-color: color-mix(in srgb, var(--info-color) 25%, white);
-  color: color-mix(in srgb, var(--info-color) 70%, black);
+  background-color: var(--alert-info-bg, color-mix(in srgb, var(--info-color) 15%, white));
+  border-color: var(--alert-info-border, color-mix(in srgb, var(--info-color) 25%, white));
+  color: var(--alert-info-text, color-mix(in srgb, var(--info-color) 70%, black));
 }
 
 .sb-alert-warning {
-  background-color: color-mix(in srgb, var(--warning-color) 15%, white);
-  border-color: color-mix(in srgb, var(--warning-color) 25%, white);
-  color: color-mix(in srgb, var(--warning-color) 70%, black);
+  background-color: var(--alert-warning-bg, color-mix(in srgb, var(--warning-color) 15%, white));
+  border-color: var(--alert-warning-border, color-mix(in srgb, var(--warning-color) 25%, white));
+  color: var(--alert-warning-text, color-mix(in srgb, var(--warning-color) 70%, black));
 }
 
 .sb-alert-success {
-  background-color: color-mix(in srgb, var(--success-color) 15%, white);
-  border-color: color-mix(in srgb, var(--success-color) 25%, white);
-  color: color-mix(in srgb, var(--success-color) 70%, black);
+  background-color: var(--alert-success-bg, color-mix(in srgb, var(--success-color) 15%, white));
+  border-color: var(--alert-success-border, color-mix(in srgb, var(--success-color) 25%, white));
+  color: var(--alert-success-text, color-mix(in srgb, var(--success-color) 70%, black));
 }
 
 .sb-alert-danger {
-  background-color: color-mix(in srgb, var(--error-color) 15%, white);
-  border-color: color-mix(in srgb, var(--error-color) 25%, white);
-  color: color-mix(in srgb, var(--error-color) 70%, black);
+  background-color: var(--alert-danger-bg, color-mix(in srgb, var(--error-color) 15%, white));
+  border-color: var(--alert-danger-border, color-mix(in srgb, var(--error-color) 25%, white));
+  color: var(--alert-danger-text, color-mix(in srgb, var(--error-color) 70%, black));
 }
 
 .sb-alert-primary {
-  background-color: color-mix(in srgb, var(--primary-color) 15%, white);
-  border-color: color-mix(in srgb, var(--primary-color) 25%, white);
-  color: color-mix(in srgb, var(--primary-color) 70%, black);
+  background-color: var(--alert-primary-bg, color-mix(in srgb, var(--primary-color) 15%, white));
+  border-color: var(--alert-primary-border, color-mix(in srgb, var(--primary-color) 25%, white));
+  color: var(--alert-primary-text, color-mix(in srgb, var(--primary-color) 70%, black));
 }
 
 .sb-alert-secondary {
-  background-color: color-mix(in srgb, var(--secondary-color) 15%, white);
-  border-color: color-mix(in srgb, var(--secondary-color) 25%, white);
-  color: color-mix(in srgb, var(--secondary-color) 70%, black);
+  background-color: var(--alert-secondary-bg, color-mix(in srgb, var(--secondary-color) 15%, white));
+  border-color: var(--alert-secondary-border, color-mix(in srgb, var(--secondary-color) 25%, white));
+  color: var(--alert-secondary-text, color-mix(in srgb, var(--secondary-color) 70%, black));
 }
 
 /* Card Block */
@@ -67,45 +67,49 @@
   min-width: 0;
   max-width: 90%;
   margin: auto;
+  margin-bottom:0.5rem;
   word-wrap: break-word;
-  background-color: white;
+  background-color: var(--card-bg, var(--surface-color, #ffffff));
   background-clip: border-box;
-  border: 1px solid color-mix(in srgb, var(--neutral-color) 15%, transparent);
+  border: 1px solid var(--card-border, color-mix(in srgb, var(--neutral-color) 15%, transparent));
   border-radius: 0.375rem;
   transition: all 0.3s ease-in-out;
-  box-shadow: 0 0.125rem 0.25rem color-mix(in srgb, black 7.5%, transparent);
+  box-shadow: var(--card-shadow, 0 0.125rem 0.25rem color-mix(in srgb, black 7.5%, transparent));
 }
 
 .sb-card:hover {
-  box-shadow: 0 0.5rem 1rem color-mix(in srgb, black 15%, transparent);
+  box-shadow: var(--card-shadow-hover, 0 0.5rem 1rem color-mix(in srgb, black 15%, transparent));
   transform: translateY(-2px);
 }
 
 .sb-card-header {
   padding: 0.75rem 1rem;
   margin-bottom: 0;
-  background-color: color-mix(in srgb, var(--neutral-color) 3%, white);
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--neutral-color) 15%, transparent);
+  background-color: var(--card-header-bg, color-mix(in srgb, var(--neutral-color) 10%, var(--surface-color, #ffffff)));
+  border-bottom: 1px solid var(--card-header-border, color-mix(in srgb, var(--neutral-color) 20%, transparent));
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
 }
 
 .sb-card-title {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 500;
-  color: color-mix(in srgb, var(--neutral-color) 99%, black);
+  color: var(--card-title-color, var(--text-color, #1f2937));
 }
 
 .sb-card-body {
   flex: 1 1 auto;
   padding: 1rem;
+  color: var(--card-text-color, var(--text-color, #1f2937));
 }
 
 .sb-card-footer {
   padding: 0.75rem 1rem;
-  background-color: color-mix(in srgb, var(--neutral-color) 3%, white);
-  border-top: 1px solid
-    color-mix(in srgb, var(--neutral-color) 33%, transparent);
+  background-color: var(--card-footer-bg, color-mix(in srgb, var(--neutral-color) 10%, var(--surface-color, #ffffff)));
+  border-top: 1px solid var(--card-footer-border, color-mix(in srgb, var(--neutral-color) 20%, transparent));
+  border-bottom-left-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
 }
 /* Quote Block */
 .sb-blockquote {
@@ -234,8 +238,6 @@
   font-weight: 500;
   line-height: 1;
   border-radius: 9999px;
-  background-color: color-mix(in srgb, var(--neutral-color) 10%, white);
-  color: color-mix(in srgb, var(--neutral-color) 70%, black);
   transition: all 0.2s ease;
 }
 
@@ -305,17 +307,17 @@
 }
 
 .sb-metadata:hover {
-  box-shadow: 0 0.25rem 0.5rem color-mix(in srgb, black 7.5%, transparent);
+  box-shadow: 0 0.25rem 0.5rem color-mix(in srgb, var(--neutral-color, #6b7280) 15%, transparent);
 }
 
 .sb-metadata-user {
   border-color: color-mix(in srgb, var(--secondary-color) 25%, transparent);
-  background-color: color-mix(in srgb, var(--secondary-color) 5%, white);
+  background-color: color-mix(in srgb, var(--secondary-color) 10%, var(--surface-color, var(--background-color, #ffffff)));
 }
 
 .sb-metadata-dev {
   border-color: color-mix(in srgb, var(--info-color) 25%, transparent);
-  background-color: color-mix(in srgb, var(--info-color) 5%, white);
+  background-color: color-mix(in srgb, var(--info-color) 10%, var(--surface-color, var(--background-color, #ffffff)));
 }
 
 .sb-metadata-title {
@@ -337,7 +339,7 @@
 
 .sb-metadata-label {
   font-weight: 600;
-  color: color-mix(in srgb, var(--secondary-color) 70%, black);
+  color: var(--secondary-color, #64748b);
   white-space: nowrap;
 }
 
@@ -347,7 +349,7 @@
 
 .sb-metadata-code {
   font-family: monospace;
-  background-color: color-mix(in srgb, black 5%, transparent);
+  background-color: color-mix(in srgb, var(--neutral-color, #6b7280) 10%, transparent);
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
   word-break: break-all;
@@ -418,16 +420,16 @@
   max-width: 90%;
   margin: auto;
   margin-bottom: 1.5rem;
-  background-color: white;
+  background-color: var(--surface-color);
   border: 1px solid color-mix(in srgb, var(--neutral-color) 15%, transparent);
   border-radius: 0.375rem;
   transition: all 0.5s ease-in-out;
-  box-shadow: 0 0.125rem 0.25rem color-mix(in srgb, black 7.5%, transparent);
+  box-shadow: 0 0.125rem 0.25rem color-mix(in srgb, var(--text-color) 7.5%, transparent);
   overflow: hidden;
 }
 
 .sb-accordion:hover {
-  box-shadow: 0 0.25rem 0.5rem color-mix(in srgb, black 10%, transparent);
+  box-shadow: 0 0.25rem 0.5rem color-mix(in srgb, var(--text-color) 10%, transparent);
 }
 
 .sb-accordion-toggle {
@@ -438,9 +440,9 @@
   padding: 0.75rem 1rem;
   font-size: 1rem;
   font-weight: 500;
-  color: color-mix(in srgb, var(--neutral-color) 90%, black);
+  color: var(--text-color);
   text-align: left;
-  background-color: color-mix(in srgb, var(--neutral-color) 5%, white);
+  background-color: var(--surface-color);
   border: none;
   border-bottom: 1px solid transparent;
   cursor: pointer;
@@ -448,12 +450,12 @@
 }
 
 .sb-accordion-toggle:hover {
-  background-color: color-mix(in srgb, var(--neutral-color) 10%, white);
+  background-color: color-mix(in srgb, var(--surface-color) 90%, var(--text-color));
 }
 
 .sb-accordion-toggle[aria-expanded="true"] {
-  background-color: color-mix(in srgb, var(--neutral-color) 15%, white);
-  border-bottom: 1px solid color-mix(in srgb, var(--neutral-color) 15%, transparent);
+  background-color: color-mix(in srgb, var(--surface-color) 70%, var(--text-color));
+  border-bottom: 1px solid color-mix(in srgb, var(--surface-color) 15%, transparent);
 }
 
 .sb-accordion-title {
@@ -951,7 +953,7 @@
         cursor: pointer;
         user-select: none;
         background-color: transparent;
-        border: 1px solid transparent; /* Base border, color variants will override color */
+        border: 2px solid transparent; /* Base border, color variants will override color */
         padding: 0.5rem 1rem;
         font-size: 1rem;
         border-radius: var(--sb-border-radius-md, 0.375rem);
@@ -1326,6 +1328,44 @@
     }
     .sb-btn-danger:active {
         background-color: #8a0000;
+        transform: scale(0.98);
+    }
+    
+    /* Outline Button */
+    .sb-btn-outline {
+        color: var(--primary-color, #3b82f6);
+        background-color: transparent;
+        border: 2px solid var(--primary-color, #3b82f6);
+    }
+    .sb-btn-outline:hover {
+        color: white;
+        background-color: var(--primary-color, #3b82f6);
+        border-color: var(--primary-color, #3b82f6);
+        transform: scale(1.05);
+    }
+    .sb-btn-outline:focus-visible {
+        box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.5);
+    }
+    .sb-btn-outline:active {
+        transform: scale(0.98);
+    }
+    
+    /* Ghost Button */
+    .sb-btn-ghost {
+        color: var(--text-color, #1f2937);
+        background-color: transparent;
+        border-color: transparent;
+    }
+    .sb-btn-ghost:hover {
+        color: var(--primary-color, #3b82f6);
+        background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
+        border-color: transparent;
+        transform: scale(1.05);
+    }
+    .sb-btn-ghost:focus-visible {
+        box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+    }
+    .sb-btn-ghost:active {
         transform: scale(0.98);
     }
 
