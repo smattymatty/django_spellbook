@@ -1,0 +1,138 @@
+/* Alert SpellBlock Styles */
+/* Modular CSS for alert components */
+
+/* Base Alert Container */
+.sb-alert {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  max-width: 90%;
+  margin: auto;
+  margin-bottom: 1rem;
+}
+
+/* Alert Icon */
+.sb-alert-icon {
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+/* Alert Link Styling - Ensures readability across all themes */
+.sb-alert a {
+  /* Use a brighter link color that adapts to the theme */
+  color: var(--alert-link-color, var(--primary-color, #60a5fa));
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  font-weight: 500;
+  transition: color 0.2s ease-in-out, text-decoration-color 0.2s ease-in-out;
+}
+
+.sb-alert a:hover {
+  color: var(--alert-link-hover-color, var(--accent-color, #fbbf24));
+  text-decoration-thickness: 2px;
+}
+
+.sb-alert a:visited {
+  color: var(--alert-link-visited-color, var(--emphasis-color, #a78bfa));
+}
+
+.sb-alert a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Alert Type Variants */
+.sb-alert-info {
+  background-color: var(--alert-info-bg, color-mix(in srgb, var(--info-color) 15%, white));
+  border-color: var(--alert-info-border, color-mix(in srgb, var(--info-color) 25%, white));
+  color: var(--alert-info-text, color-mix(in srgb, var(--info-color) 70%, black));
+}
+
+/* Info alert links - use brighter blue for dark backgrounds */
+.sb-alert-info a {
+  color: var(--alert-info-link-color, #60a5fa);
+}
+
+.sb-alert-info a:hover {
+  color: var(--alert-info-link-hover-color, #93c5fd);
+}
+
+.sb-alert-warning {
+  background-color: var(--alert-warning-bg, color-mix(in srgb, var(--warning-color) 15%, white));
+  border-color: var(--alert-warning-border, color-mix(in srgb, var(--warning-color) 25%, white));
+  color: var(--alert-warning-text, color-mix(in srgb, var(--warning-color) 70%, black));
+}
+
+/* Warning alert links - use brighter amber/yellow */
+.sb-alert-warning a {
+  color: var(--alert-warning-link-color, #fbbf24);
+}
+
+.sb-alert-warning a:hover {
+  color: var(--alert-warning-link-hover-color, #fcd34d);
+}
+
+.sb-alert-success {
+  background-color: var(--alert-success-bg, color-mix(in srgb, var(--success-color) 15%, white));
+  border-color: var(--alert-success-border, color-mix(in srgb, var(--success-color) 25%, white));
+  color: var(--alert-success-text, color-mix(in srgb, var(--success-color) 70%, black));
+}
+
+/* Success alert links - use brighter green/cyan */
+.sb-alert-success a {
+  color: var(--alert-success-link-color, #34d399);
+}
+
+.sb-alert-success a:hover {
+  color: var(--alert-success-link-hover-color, #6ee7b7);
+}
+
+.sb-alert-danger {
+  background-color: var(--alert-danger-bg, color-mix(in srgb, var(--error-color) 15%, white));
+  border-color: var(--alert-danger-border, color-mix(in srgb, var(--error-color) 25%, white));
+  color: var(--alert-danger-text, color-mix(in srgb, var(--error-color) 70%, black));
+}
+
+/* Danger alert links - use brighter red/pink */
+.sb-alert-danger a {
+  color: var(--alert-danger-link-color, #fca5a5);
+}
+
+.sb-alert-danger a:hover {
+  color: var(--alert-danger-link-hover-color, #fecaca);
+}
+
+.sb-alert-primary {
+  background-color: var(--alert-primary-bg, color-mix(in srgb, var(--primary-color) 15%, white));
+  border-color: var(--alert-primary-border, color-mix(in srgb, var(--primary-color) 25%, white));
+  color: var(--alert-primary-text, color-mix(in srgb, var(--primary-color) 70%, black));
+}
+
+/* Primary alert links - use brighter blue/purple based on theme */
+.sb-alert-primary a {
+  color: var(--alert-primary-link-color, #a78bfa);
+}
+
+.sb-alert-primary a:hover {
+  color: var(--alert-primary-link-hover-color, #c4b5fd);
+}
+
+.sb-alert-secondary {
+  background-color: var(--alert-secondary-bg, color-mix(in srgb, var(--secondary-color) 15%, white));
+  border-color: var(--alert-secondary-border, color-mix(in srgb, var(--secondary-color) 25%, white));
+  color: var(--alert-secondary-text, color-mix(in srgb, var(--secondary-color) 70%, black));
+}
+
+/* Secondary alert links - use lighter gray/blue */
+.sb-alert-secondary a {
+  color: var(--alert-secondary-link-color, #9ca3af);
+}
+
+.sb-alert-secondary a:hover {
+  color: var(--alert-secondary-link-hover-color, #d1d5db);
+}

@@ -1,62 +1,11 @@
 /* Root Variables */
+/* Import Modular CSS */
+@import 'css_modules/spellblocks/alert.css';
+
 :root {
     --sb-btn-default-color: var(--sb-primary-color);
     --sb-btn-default-bg: var(--sb-primary-bg);
     --sb-btn-default-border: var(--sb-primary-border);
-}
-
-/* Alert Block */
-.sb-alert {
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid transparent;
-  border-radius: 0.375rem;
-  font-size: 1rem;
-  line-height: 1.5;
-  max-width: 90%;
-  margin: auto;
-  margin-bottom: 1rem;
-}
-
-.sb-alert-icon {
-  display: inline-block;
-  margin-right: 0.5rem;
-}
-
-.sb-alert-info {
-  background-color: var(--alert-info-bg, color-mix(in srgb, var(--info-color) 15%, white));
-  border-color: var(--alert-info-border, color-mix(in srgb, var(--info-color) 25%, white));
-  color: var(--alert-info-text, color-mix(in srgb, var(--info-color) 70%, black));
-}
-
-.sb-alert-warning {
-  background-color: var(--alert-warning-bg, color-mix(in srgb, var(--warning-color) 15%, white));
-  border-color: var(--alert-warning-border, color-mix(in srgb, var(--warning-color) 25%, white));
-  color: var(--alert-warning-text, color-mix(in srgb, var(--warning-color) 70%, black));
-}
-
-.sb-alert-success {
-  background-color: var(--alert-success-bg, color-mix(in srgb, var(--success-color) 15%, white));
-  border-color: var(--alert-success-border, color-mix(in srgb, var(--success-color) 25%, white));
-  color: var(--alert-success-text, color-mix(in srgb, var(--success-color) 70%, black));
-}
-
-.sb-alert-danger {
-  background-color: var(--alert-danger-bg, color-mix(in srgb, var(--error-color) 15%, white));
-  border-color: var(--alert-danger-border, color-mix(in srgb, var(--error-color) 25%, white));
-  color: var(--alert-danger-text, color-mix(in srgb, var(--error-color) 70%, black));
-}
-
-.sb-alert-primary {
-  background-color: var(--alert-primary-bg, color-mix(in srgb, var(--primary-color) 15%, white));
-  border-color: var(--alert-primary-border, color-mix(in srgb, var(--primary-color) 25%, white));
-  color: var(--alert-primary-text, color-mix(in srgb, var(--primary-color) 70%, black));
-}
-
-.sb-alert-secondary {
-  background-color: var(--alert-secondary-bg, color-mix(in srgb, var(--secondary-color) 15%, white));
-  border-color: var(--alert-secondary-border, color-mix(in srgb, var(--secondary-color) 25%, white));
-  color: var(--alert-secondary-text, color-mix(in srgb, var(--secondary-color) 70%, black));
 }
 
 /* Card Block */
