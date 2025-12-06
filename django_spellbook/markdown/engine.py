@@ -15,6 +15,7 @@ from django.template.exceptions import TemplateDoesNotExist
 from django_spellbook.blocks import SpellBlockRegistry, BasicSpellBlock
 from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
 from django_spellbook.markdown.extensions.django_like import DjangoLikeTagExtension
+from django_spellbook.markdown.extensions.list_aware_nl2br import ListAwareNl2BrExtension
 from django_spellbook.management.commands.spellbook_md_p.discovery import discover_blocks
 from django_spellbook.markdown.attribute_parser import parse_spellblock_style_attributes
 
@@ -97,7 +98,7 @@ class SpellbookMarkdownEngine:
                 DjangoLikeTagExtension(),
                 'markdown.extensions.fenced_code',
                 'markdown.extensions.tables',
-                'markdown.extensions.nl2br', 
+                ListAwareNl2BrExtension(),
                 'markdown.extensions.sane_lists',
                 'markdown.extensions.footnotes',
                 'markdown.extensions.attr_list',

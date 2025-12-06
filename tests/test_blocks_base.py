@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.template.loader import render_to_string
 from django_spellbook.blocks.base import BasicSpellBlock
 from django_spellbook.markdown.extensions.django_like import DjangoLikeTagExtension
+from django_spellbook.markdown.extensions.list_aware_nl2br import ListAwareNl2BrExtension
 
 from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
 from io import StringIO
@@ -70,14 +71,14 @@ class TestBasicSpellBlock(TestCase):
         extensions = kwargs['extensions']
         self.assertEqual(len(extensions), 8)
         
-        # Verify the type of the first extension
+        # Verify the type of the first two extensions
         self.assertIsInstance(extensions[0], DjangoLikeTagExtension)
-        
+
         # Verify the remaining extensions match exactly
-        self.assertEqual(extensions[1:], [
-            'markdown.extensions.fenced_code',
-            'markdown.extensions.tables',
-            'markdown.extensions.nl2br',
+        self.assertEqual(extensions[1], 'markdown.extensions.fenced_code')
+        self.assertEqual(extensions[2], 'markdown.extensions.tables')
+        self.assertIsInstance(extensions[3], ListAwareNl2BrExtension)
+        self.assertEqual(extensions[4:], [
             'markdown.extensions.sane_lists',
             'markdown.extensions.footnotes',
             'markdown.extensions.attr_list',
@@ -158,11 +159,16 @@ class TestBasicSpellBlock(TestCase):
         # Verify all required extensions are included
         _, kwargs = mock_markdown.call_args
         extensions = kwargs.get('extensions', [])
-        required_extensions = [
+        required_extension_strings = [
             'markdown.extensions.fenced_code',
             'markdown.extensions.tables',
-            'markdown.extensions.nl2br',
             'markdown.extensions.sane_lists',
         ]
-        for ext in required_extensions:
+        for ext in required_extension_strings:
             self.assertIn(ext, extensions)
+
+        # Verify ListAwareNl2BrExtension is present
+        has_nl2br_extension = any(
+            isinstance(ext, ListAwareNl2BrExtension) for ext in extensions
+        )
+        self.assertTrue(has_nl2br_extension, "ListAwareNl2BrExtension should be present")

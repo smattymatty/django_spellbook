@@ -75,11 +75,10 @@ class TestDjangoLikeIntegrationWithParser(TestCase):
                 print(f"\n[Test Warning] Error reading OPTIMAL golden file {cls.golden_html_path}: {e}. Golden test will fail.")
 
     # --- Golden File Test (Ultimate Goal) ---
-    @unittest.expectedFailure
     def test_against_optimal_golden_file(self):
         """Compares the generated HTML against the OPTIMAL golden file."""
         self.assertIsNotNone(self.expected_html, f"OPTIMAL Golden file could not be loaded: {self.golden_html_path}")
-        # This test WILL FAIL until all processor bugs and MD rendering issues are fixed.
+        # This test compares against the golden file to ensure markdown rendering is correct
         self.assertMultiLineEqual(
             self.html_output.strip(),
             self.expected_html.strip(),

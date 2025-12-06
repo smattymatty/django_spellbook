@@ -25,6 +25,23 @@ Running `python manage.py spellbook_md` now gives you a gorgeous, professional d
 
 ### Fixed
 
+#### Markdown Lists Work Without Blank Lines
+Fixed the annoying bug where markdown lists needed a blank line before them to render properly. Now lists work like GitHub-Flavored Markdown:
+
+**Before:**
+```markdown
+Some text here.
+- List item 1  ← Would NOT render as a list
+```
+
+**After:**
+```markdown
+Some text here.
+- List item 1  ← Now renders correctly as a list!
+```
+
+This was caused by the `nl2br` extension converting newlines to `<br/>` tags before list detection. Created a custom `ListAwareNl2BrExtension` that intelligently skips newlines before list markers.
+
 #### Themes Now Work Everywhere
 Fixed a bug where **only metadata boxes** changed colors when switching themes. Now **everything** responds to your theme:
 - Table of contents text and borders

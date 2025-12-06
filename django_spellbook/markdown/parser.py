@@ -1,6 +1,7 @@
 # django_spellbook/markdown/parser.py
 
 from .extensions.django_like import DjangoLikeTagExtension
+from .extensions.list_aware_nl2br import ListAwareNl2BrExtension
 from ..blocks import SpellBlockRegistry
 from typing import Dict, Any, Optional, List, Tuple
 from django.template.loader import render_to_string
@@ -44,10 +45,10 @@ class MarkdownParser:
                 DjangoLikeTagExtension(),
                 'markdown.extensions.fenced_code',
                 'markdown.extensions.tables',
-                'markdown.extensions.nl2br',
+                ListAwareNl2BrExtension(),
                 'markdown.extensions.sane_lists',
                 # toc
-                'markdown.extensions.toc', 
+                'markdown.extensions.toc',
             ],
         )
         self.reporter: MarkdownReporter = reporter
@@ -99,7 +100,7 @@ class BlockProcessor:
             DjangoLikeTagExtension(),
             'markdown.extensions.fenced_code',
             'markdown.extensions.tables',
-            'markdown.extensions.nl2br',
+            ListAwareNl2BrExtension(),
             'markdown.extensions.sane_lists',
             # toc
             'markdown.extensions.toc',
