@@ -14,7 +14,7 @@ MODIFIED_KEYS = ['modified', 'modified_at', 'updated', 'updated_at']
 
 # --- Keys to exclude from custom_meta ---
 # Includes standard keys and the date aliases we might consume
-RESERVED_META_KEYS = ['title', 'is_public', 'tags', 'author'] + PUBLISHED_KEYS + MODIFIED_KEYS
+RESERVED_META_KEYS = ['title', 'is_public', 'tags', 'author', 'prev', 'next'] + PUBLISHED_KEYS + MODIFIED_KEYS
 # Make the check case-insensitive later for robustness
 LOWERCASE_RESERVED_META_KEYS = [k.lower() for k in RESERVED_META_KEYS]
 
@@ -102,6 +102,10 @@ class FrontMatterParser:
             if k.lower() not in LOWERCASE_RESERVED_META_KEYS
         }
 
+        # --- Extract prev/next from frontmatter (optional overrides) ---
+        prev_page = self.metadata.get('prev')  # Can be None or namespaced URL like 'blog:intro'
+        next_page = self.metadata.get('next')  # Can be None or namespaced URL like 'docs:setup'
+
         # --- Create context ---
         return SpellbookContext(
             title=titlefy(remove_leading_dash(
@@ -120,8 +124,8 @@ class FrontMatterParser:
             author=self.metadata.get('author'),
             custom_meta=custom_meta_data,
             toc={},  # This will be filled by the command later
-            next_page=None, # Filled later
-            prev_page=None  # Filled later
+            next_page=next_page,  # From frontmatter or None (will be auto-filled by NavigationBuilder)
+            prev_page=prev_page   # From frontmatter or None (will be auto-filled by NavigationBuilder)
         )
 
 def multi_bool(value):

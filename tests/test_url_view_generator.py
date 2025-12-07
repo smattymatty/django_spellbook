@@ -50,33 +50,38 @@ class TestURLViewGenerator(TestCase):
         self.assertIsNotNone(self.generator.view_generator)
         self.assertIsNotNone(self.generator.file_writer)
 
-    def test_generate_urls_and_views(self):
+    @patch('django_spellbook.management.commands.processing.url_view_generator.NavigationBuilder')
+    def test_generate_urls_and_views(self, mock_nav_builder):
         """Test generating URLs and views."""
         # Configure the mocks
         self.mock_url_gen.generate_url_patterns.return_value = ["url_pattern1", "url_pattern2"]
         self.mock_view_gen.generate_view_functions.return_value = ["view_function1", "view_function2"]
-        
+
         # Create a sample TOC
         toc = {"test": {"title": "Test"}}
-        
+
         # Call the method
         self.generator.generate_urls_and_views([self.processed_file], toc)
-        
+
+        # Verify NavigationBuilder was called
+        mock_nav_builder.build_navigation.assert_called_once_with([self.processed_file], 'test_app')
+
         # Verify the calls to the components
         self.mock_url_gen.generate_url_patterns.assert_called_once_with([self.processed_file])
         self.mock_view_gen.generate_view_functions.assert_called_once_with([self.processed_file])
         self.mock_file_writer.write_urls_file.assert_called_once_with(["url_pattern1", "url_pattern2"])
         self.mock_file_writer.write_views_file.assert_called_once_with(["view_function1", "view_function2"], toc)
 
-    def test_generate_urls_and_views_error(self):
+    @patch('django_spellbook.management.commands.processing.url_view_generator.NavigationBuilder')
+    def test_generate_urls_and_views_error(self, mock_nav_builder):
         """Test error handling in generate_urls_and_views."""
         # Configure the mock to raise an error
         self.mock_url_gen.generate_url_patterns.side_effect = Exception("Test error")
-        
+
         # Call the method - should raise CommandError
         with self.assertRaises(CommandError) as context:
             self.generator.generate_urls_and_views([self.processed_file], {})
-        
+
         # Check error message
         self.assertIn("Failed to generate URLs and views", str(context.exception))
         self.assertIn("Test error", str(context.exception))
@@ -152,7 +157,8 @@ class URLViewGeneratorIntegrationTest(TestCase):
             context=self.context
         )
     
-    def test_actual_urls_file_generation(self):
+    @patch('django_spellbook.management.commands.processing.url_view_generator.NavigationBuilder')
+    def test_actual_urls_file_generation(self, mock_nav_builder):
         """Test the actual generation of the urls.py file with proper URL names"""
         # Process multiple files with different path structures
         processed_files = [
@@ -162,16 +168,19 @@ class URLViewGeneratorIntegrationTest(TestCase):
             self._create_processed_file("blocks/-quote"),
             self._create_processed_file("tech/sustainable-tech")
         ]
-        
+
         # Generate URLs and views
         self.generator.generate_urls_and_views(processed_files, {})
-        
+
+        # Verify NavigationBuilder was called
+        mock_nav_builder.build_navigation.assert_called_once_with(processed_files, 'test_app')
+
         # Verify URL generator was called with the processed files
         self.mock_url_gen_instance.generate_url_patterns.assert_called_once_with(processed_files)
-        
+
         # Verify FileWriter.write_urls_file was called with the expected URL patterns
         self.mock_file_writer_instance.write_urls_file.assert_called_once_with(self.expected_url_patterns)
-        
+
         # Verify the expected URL patterns match what we want
         self.assertIn("path('first_blog/', first_blog, name='first_blog')", self.expected_url_patterns)
         self.assertIn("path('lifestyle/digital-minimalism/', lifestyle_digital_minimalism, name='lifestyle_digital-minimalism')", self.expected_url_patterns)

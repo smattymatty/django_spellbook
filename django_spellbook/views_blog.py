@@ -24,5 +24,7 @@ def view_first_post(request):
         'namespaced_url': 'blog:first-post',
         'word_count': 8,
         'reading_time_minutes': 1,
+        'prev_page': None,
+        'next_page': None,
     }
     return render(request, 'blog/spellbook_md/first-post.html', context)

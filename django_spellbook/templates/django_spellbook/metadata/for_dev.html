@@ -1,15 +1,14 @@
-<div class="sb-metadata sb-metadata-dev sb-rounded sb-border sb-border-info-25 sb-p-3 sb-my-4 sb-bg-info-25 sb-w-full">
-  <h3 class="sb-metadata-title sb-text-lg sb-mb-2 sb-font-bold sb-info">Developer Metadata</h3>
-  {% if metadata.author %}<p class="sb-metadata-author sb-text-sm sb-mb-3 sb-text-secondary">by {{ metadata.author }}</p>{% endif %}
+<div class="sb-metadata sb-metadata-dev sb-rounded sb-border sb-p-3 sb-my-4 sb-bg-secondary-25 sb-w-full">
+  <h3 class="sb-metadata-title sb-text-lg sb-mb-2 sb-font-bold sb-primary">Developer Metadata</h3>
+  {% if metadata.author %}<p class="sb-metadata-author sb-text-sm sb-mb-3 sb-opacity-50">by {{ metadata.author }}</p>{% endif %}
 
   <div class="sb-metadata-grid sb-grid sb-grid-cols-1 sb-md:grid-cols-2 sb-gap-2">
-
 
     {% comment %} URL Path (Grid Item 1 on md+) {% endcomment %}
     {% if metadata.url_path %}
     <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
       <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">URL Path:</span>
-      <code class="sb-metadata-code sb-text-sm sb-bg-black-25 sb-px-1 sb-py-0.5 sb-rounded sb-font-mono">{{ metadata.url_path }}</code>
+      <code class="sb-metadata-code sb-text-sm sb-bg-secondary-10 sb-px-1 sb-py-0.5 sb-rounded sb-font-mono sb-primary">{{ metadata.url_path }}</code>
     </div>
     {% endif %}
 
@@ -17,7 +16,7 @@
     {% if metadata.namespace %}
     <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
       <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">App Name:</span>
-      <code class="sb-metadata-code sb-text-sm sb-bg-black-25 sb-px-1 sb-py-0.5 sb-rounded sb-font-mono">{{ metadata.namespace }}</code>
+      <code class="sb-metadata-code sb-text-sm sb-bg-secondary-10 sb-px-1 sb-py-0.5 sb-rounded sb-font-mono sb-primary">{{ metadata.namespace }}</code>
     </div>
     {% endif %}
 
@@ -25,7 +24,7 @@
     {% if metadata.namespaced_url %}
     <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
       <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">URL Name:</span>
-      <code class="sb-metadata-code sb-text-sm sb-bg-black-25 sb-px-1 sb-py-0.5 sb-rounded sb-font-mono">{{ metadata.namespaced_url }}</code>
+      <code class="sb-metadata-code sb-text-sm sb-bg-secondary-10 sb-px-1 sb-py-0.5 sb-rounded sb-font-mono sb-primary">{{ metadata.namespaced_url }}</code>
     </div>
     {% endif %}
   </div> {# End of sb-metadata-grid #}
