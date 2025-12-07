@@ -81,7 +81,9 @@ class SpellbookContext:
             'url_name': url_name,
             'namespaced_url': f"{content_app}:{url_name}",
             'word_count': self.word_count,
-            'reading_time_minutes': self.reading_time_minutes
+            'reading_time_minutes': self.reading_time_minutes,
+            'prev_page': self.get_safe_attr('prev_page', None),
+            'next_page': self.get_safe_attr('next_page', None)
         }
         
         return metadata

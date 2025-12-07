@@ -9,6 +9,7 @@ from django_spellbook.management.commands.processing.file_processor import Proce
 from django_spellbook.management.commands.processing.url_generator import URLGenerator
 from django_spellbook.management.commands.processing.view_generator import ViewGenerator
 from django_spellbook.management.commands.processing.file_writer import FileWriter
+from django_spellbook.management.commands.processing.navigation import NavigationBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -57,12 +58,17 @@ class URLViewGenerator:
             toc: Table of contents dictionary
         """
         try:
+            # Build navigation links BEFORE generating views
+            # This mutates the ProcessedFile.context objects to add prev_page and next_page
+            logger.info(f"Building navigation for {len(processed_files)} files")
+            NavigationBuilder.build_navigation(processed_files, self.content_app)
+
             # Generate URL patterns
             url_patterns = self.url_generator.generate_url_patterns(processed_files)
-            
+
             # Generate view functions
             view_functions = self.view_generator.generate_view_functions(processed_files)
-            
+
             # Write to files
             self.file_writer.write_urls_file(url_patterns)
             self.file_writer.write_views_file(view_functions, toc)

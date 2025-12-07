@@ -24,5 +24,7 @@ def view_intro(request):
         'namespaced_url': 'docs:intro',
         'word_count': 6,
         'reading_time_minutes': 1,
+        'prev_page': None,
+        'next_page': None,
     }
     return render(request, 'docs/spellbook_md/intro.html', context)
