@@ -306,8 +306,9 @@ class TestNumericFilenameHandling(TestCase):
         with patch('django_spellbook.management.commands.processing.file_writer.write_file', side_effect=capture_call), \
             patch('django_spellbook.management.commands.processing.file_writer.create_file_if_not_exists'), \
             patch('django_spellbook.management.commands.processing.file_writer.get_spellbook_dir', return_value='/app'), \
+            patch('django_spellbook.management.commands.processing.url_view_generator.NavigationBuilder'), \
             patch('os.path.exists', return_value=True):
-            
+
             try:
                 # Call the method directly
                 generator.generate_urls_and_views(files, {})

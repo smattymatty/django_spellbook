@@ -94,21 +94,24 @@ class TestNavigationBuilder(TestCase):
         self.assertEqual(file3.context.prev_page, "blog:02-setup")
         self.assertIsNone(file3.context.next_page)
 
-    def test_index_md_sorted_first(self):
-        """Test that index.md is treated as first file in navigation."""
-        file_index = self._create_processed_file("index.md")
+    def test_alphabetical_sorting(self):
+        """Test that files are sorted alphabetically."""
         file1 = self._create_processed_file("01-intro.md")
         file2 = self._create_processed_file("02-setup.md")
+        file3 = self._create_processed_file("03-usage.md")
 
-        NavigationBuilder.build_navigation([file1, file2, file_index], "blog")
+        # Pass files in random order
+        NavigationBuilder.build_navigation([file2, file3, file1], "blog")
 
-        # index should be first
-        self.assertIsNone(file_index.context.prev_page)
-        self.assertEqual(file_index.context.next_page, "blog:01-intro")
-
-        # 01-intro should have prev to index
-        self.assertEqual(file1.context.prev_page, "blog:index")
+        # Should be sorted alphabetically
+        self.assertIsNone(file1.context.prev_page)
         self.assertEqual(file1.context.next_page, "blog:02-setup")
+
+        self.assertEqual(file2.context.prev_page, "blog:01-intro")
+        self.assertEqual(file2.context.next_page, "blog:03-usage")
+
+        self.assertEqual(file3.context.prev_page, "blog:02-setup")
+        self.assertIsNone(file3.context.next_page)
 
     def test_directory_boundaries_respected(self):
         """Test that files in different directories don't link to each other."""

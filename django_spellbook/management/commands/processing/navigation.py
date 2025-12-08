@@ -18,9 +18,8 @@ class NavigationBuilder:
     Navigation rules:
     1. Files are grouped by content_app AND parent directory
     2. Within each group, files are sorted alphabetically
-    3. index.md is treated as first file (sorted as '00-index.md')
-    4. Frontmatter overrides (prev/next in YAML) take precedence
-    5. Navigation respects app and directory boundaries
+    3. Frontmatter overrides (prev/next in YAML) take precedence
+    4. Navigation respects app and directory boundaries
     """
 
     @staticmethod
@@ -78,7 +77,7 @@ class NavigationBuilder:
             app: Content app name
             all_files: All processed files (for path-based navigation lookup)
         """
-        # Sort files alphabetically, with index.md treated as first
+        # Sort files alphabetically
         sorted_files = sorted(files, key=NavigationBuilder._get_sort_key)
 
         # Build navigation chain
@@ -120,21 +119,16 @@ class NavigationBuilder:
     @staticmethod
     def _get_sort_key(processed_file: ProcessedFile) -> str:
         """
-        Generate sort key for a file, treating index.md as first.
+        Generate sort key for a file.
 
         Args:
             processed_file: Processed markdown file
 
         Returns:
-            String key for sorting (index.md becomes '000-index.md')
+            String key for sorting (lowercase filename)
         """
         filename = Path(processed_file.original_path).name.lower()
-
-        # Treat index.md as '000-index.md' for sorting (sorts before any number)
-        if filename == 'index.md':
-            return '000-index.md'
-        else:
-            return filename
+        return filename
 
     @staticmethod
     def _get_frontmatter_override(processed_file: ProcessedFile, field: str) -> str:
