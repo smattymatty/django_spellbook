@@ -3,7 +3,6 @@ from unittest.mock import patch, Mock
 from django.test import TestCase
 from django.template.loader import render_to_string
 from django_spellbook.blocks.base import BasicSpellBlock
-from django_spellbook.markdown.extensions.django_like import DjangoLikeTagExtension
 from django_spellbook.markdown.extensions.list_aware_nl2br import ListAwareNl2BrExtension
 from django_spellbook.markdown.preprocessors.list_fixer import ListFixerExtension
 
@@ -68,19 +67,18 @@ class TestBasicSpellBlock(TestCase):
         # Verify the content matches
         self.assertEqual(args[0], self.test_content + '')
         
-        # Verify extensions list length (8 extensions: ListFixer added, sane_lists removed)
+        # Verify extensions list length (7 extensions: ListFixer added, DjangoLike removed)
         extensions = kwargs['extensions']
-        self.assertEqual(len(extensions), 8)
+        self.assertEqual(len(extensions), 7)
 
         # Verify the type of the first extensions
         self.assertIsInstance(extensions[0], ListFixerExtension)
-        self.assertIsInstance(extensions[1], DjangoLikeTagExtension)
 
-        # Verify the remaining extensions match exactly
-        self.assertEqual(extensions[2], 'markdown.extensions.fenced_code')
-        self.assertEqual(extensions[3], 'markdown.extensions.tables')
-        self.assertIsInstance(extensions[4], ListAwareNl2BrExtension)
-        self.assertEqual(extensions[5:], [
+        # Verify the remaining extensions match exactly (DjangoLike removed, so indices shifted)
+        self.assertEqual(extensions[1], 'markdown.extensions.fenced_code')
+        self.assertEqual(extensions[2], 'markdown.extensions.tables')
+        self.assertIsInstance(extensions[3], ListAwareNl2BrExtension)
+        self.assertEqual(extensions[4:], [
             'markdown.extensions.footnotes',
             'markdown.extensions.attr_list',
             'markdown.extensions.toc',

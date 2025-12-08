@@ -1,0 +1,3 @@
+{~ main .content ~}
+Main content
+{~~}

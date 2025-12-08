@@ -1,0 +1,3 @@
+{~ section .hero ~}
+Hero content
+{~~}

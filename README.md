@@ -38,14 +38,14 @@ Django Spellbook's markdown processor offers a more flexible and Django-like app
 
 This parser goes beyond the standard markdown syntax by enabling you to include Django-inspired tags directly in your markdown files. This allows for more structured and semantic HTML, especially useful for projects that need finer control over styling and element attributes, like setting classes or IDs directly in markdown. This means you can write markdown that integrates more seamlessly with your Django templates.
 
-### Example: Writing Markdown with Django-like Tags
+### HTML Element SpellBlocks
 
-With Django Spellbook, you can use special tags directly in your markdown:
+Django Spellbook provides HTML element blocks with CSS-style shorthand syntax:
 
 ```markdown
-{% div .my-class #my-id %}
+{~ div .my-class #my-id ~}
 This is a custom div block with a class and an ID.
-{% enddiv %}
+{~~}
 ```
 
 The above will render as HTML with the specified class and ID attributes:
@@ -56,9 +56,40 @@ The above will render as HTML with the specified class and ID attributes:
 </div>
 ```
 
-**Note:** You aren't just limited to class or ID attributes, you can set any attribute you want. `{% div test="value" %}` will render as `<div test="value">`.
+**Shorthand syntax:**
+- `.classname` for classes (can use multiple: `.class1 .class2`)
+- `#id-name` for IDs
+- Any hyphenated attributes: `data-*`, `aria-*`, `hx-*`, etc.
 
-Paired with powerful libraries like HTMX, this can create dynamic and interactive interfaces that are both visually appealing and highly functional without ever having to leave your markdown files.
+**HTMX Integration:**
+```markdown
+{~ button hx-get="/api/users" hx-target="#user-list" hx-swap="innerHTML" ~}
+Load Users
+{~~}
+
+{~ div #user-list .mt-4 ~}
+Users will appear here...
+{~~}
+```
+
+**Alpine.js Integration:**
+```markdown
+{~ div x-data="{ open: false }" ~}
+  {~ button @click="open = !open" .btn ~}
+  Toggle
+  {~~}
+
+  {~ div x-show="open" x-transition ~}
+  Content revealed!
+  {~~}
+{~~}
+```
+
+**Available HTML Elements:**
+- **Block elements:** `div`, `section`, `article`, `aside`, `header`, `footer`, `nav`, `main`, `p`, `span`
+- **Void elements:** `hr`, `br`
+
+Paired with powerful libraries like HTMX and Alpine.js, this creates dynamic and interactive interfaces without ever leaving your markdown files.
 
 ### Example: SpellBlocks, re-usable Content Components
 

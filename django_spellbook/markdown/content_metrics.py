@@ -5,8 +5,11 @@ import re
 def get_word_count(content: str) -> int:
     """
     Calculate the word count of the content, excluding the markup
-    definitions of Spellbook blocks and Django-like tags, but
-    including the content *within* those blocks/tags.
+    definitions of Spellbook blocks, but including the content
+    *within* those blocks.
+
+    Note: Django-like syntax ({% div %}) was removed in 0.2.0.
+    This function maintains backward compatibility for legacy content.
     """
     if not content:
         return 0

@@ -1,6 +1,5 @@
 # django_spellbook/markdown/parser.py
 
-from .extensions.django_like import DjangoLikeTagExtension
 from .extensions.list_aware_nl2br import ListAwareNl2BrExtension
 from .preprocessors.list_fixer import ListFixerExtension
 from ..blocks import SpellBlockRegistry
@@ -44,7 +43,6 @@ class MarkdownParser:
             self.processed_text,
             extensions=[
                 ListFixerExtension(),  # Preprocessor: adds blank lines before lists
-                DjangoLikeTagExtension(),
                 'markdown.extensions.fenced_code',
                 'markdown.extensions.tables',
                 ListAwareNl2BrExtension(),
@@ -100,7 +98,6 @@ class BlockProcessor:
             r'{~\s*(\w+)(?:\s+([^~]*?))?\s*~}(.*?){~~}', re.DOTALL)
         self.markdown_extensions = [
             ListFixerExtension(),  # Preprocessor: adds blank lines before lists
-            DjangoLikeTagExtension(),
             'markdown.extensions.fenced_code',
             'markdown.extensions.tables',
             ListAwareNl2BrExtension(),

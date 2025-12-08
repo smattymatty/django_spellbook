@@ -2,10 +2,177 @@
 import re
 
 from django_spellbook.blocks import BasicSpellBlock, SpellBlockRegistry
-from typing import Optional
+from typing import Optional, Dict, Any
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+# ============================================================================
+# HTML Element Base Class
+# ============================================================================
+
+class HTMLElementBlock(BasicSpellBlock):
+    """
+    Base class for HTML element SpellBlocks.
+
+    This class renders arbitrary HTML elements with dynamic attributes,
+    supporting both void elements (like <hr>) and content-wrapping elements (like <div>).
+
+    Subclasses should define:
+        - name: The SpellBlock name (e.g., 'div', 'section')
+        - tag_name: The HTML tag name (e.g., 'div', 'section')
+        - is_void: True for void elements that don't have closing tags
+
+    Example usage in markdown:
+        {~ div .my-class #my-id hx-get="/api" ~}
+        Content here
+        {~~}
+
+        {~ hr .divider ~}{~~}  # Void element (content ignored)
+    """
+    tag_name: str = None  # Must be set by subclass
+    is_void: bool = False  # True for <hr>, <br>, etc.
+
+    def get_context(self) -> Dict[str, Any]:
+        """
+        Build context for HTML element rendering.
+
+        Returns:
+            Dictionary with:
+            - tag_name: HTML tag name
+            - is_void: Whether element is void
+            - attributes: All kwargs as HTML attributes
+            - content: Processed markdown content (empty for void elements)
+        """
+        if not self.tag_name:
+            raise ValueError(
+                f"{self.__class__.__name__} must define 'tag_name' class attribute"
+            )
+
+        # Validate void elements don't have content
+        if self.is_void and self.content and self.content.strip():
+            logger.error(
+                f"Void element '{self.tag_name}' cannot have content. "
+                f"Content will be ignored: {self.content[:50]}..."
+            )
+            if self.reporter:
+                self.reporter.error(
+                    f"Void element '{self.tag_name}' cannot have content (content ignored)"
+                )
+
+        context = {
+            'tag_name': self.tag_name,
+            'is_void': self.is_void,
+            'attributes': self.kwargs,  # Pass all kwargs as attributes
+            'content': '' if self.is_void else self.process_content(),
+        }
+
+        return context
+
+    def render(self) -> str:
+        """
+        Render the HTML element using the generic template.
+
+        Returns:
+            Rendered HTML string
+        """
+        if not self.template:
+            # Use default template for HTML elements
+            self.template = 'django_spellbook/blocks/html_element.html'
+
+        return super().render()
+
+
+# ============================================================================
+# HTML Element SpellBlocks
+# ============================================================================
+
+# Block-level elements
+@SpellBlockRegistry.register()
+class DivBlock(HTMLElementBlock):
+    """Renders a <div> element with dynamic attributes."""
+    name = 'div'
+    tag_name = 'div'
+    is_void = False
+
+
+@SpellBlockRegistry.register()
+class SectionBlock(HTMLElementBlock):
+    """Renders a <section> element with dynamic attributes."""
+    name = 'section'
+    tag_name = 'section'
+    is_void = False
+
+
+@SpellBlockRegistry.register()
+class ArticleBlock(HTMLElementBlock):
+    """Renders an <article> element with dynamic attributes."""
+    name = 'article'
+    tag_name = 'article'
+    is_void = False
+
+
+@SpellBlockRegistry.register()
+class AsideBlock(HTMLElementBlock):
+    """Renders an <aside> element with dynamic attributes."""
+    name = 'aside'
+    tag_name = 'aside'
+    is_void = False
+
+
+@SpellBlockRegistry.register()
+class HeaderBlock(HTMLElementBlock):
+    """Renders a <header> element with dynamic attributes."""
+    name = 'header'
+    tag_name = 'header'
+    is_void = False
+
+
+@SpellBlockRegistry.register()
+class FooterBlock(HTMLElementBlock):
+    """Renders a <footer> element with dynamic attributes."""
+    name = 'footer'
+    tag_name = 'footer'
+    is_void = False
+
+
+@SpellBlockRegistry.register()
+class NavBlock(HTMLElementBlock):
+    """Renders a <nav> element with dynamic attributes."""
+    name = 'nav'
+    tag_name = 'nav'
+    is_void = False
+
+
+@SpellBlockRegistry.register()
+class MainBlock(HTMLElementBlock):
+    """Renders a <main> element with dynamic attributes."""
+    name = 'main'
+    tag_name = 'main'
+    is_void = False
+
+
+# Void elements
+@SpellBlockRegistry.register()
+class HrBlock(HTMLElementBlock):
+    """Renders a <hr> void element with dynamic attributes."""
+    name = 'hr'
+    tag_name = 'hr'
+    is_void = True
+
+
+@SpellBlockRegistry.register()
+class BrBlock(HTMLElementBlock):
+    """Renders a <br> void element with dynamic attributes."""
+    name = 'br'
+    tag_name = 'br'
+    is_void = True
+
+
+# ============================================================================
+# Existing SpellBlocks
+# ============================================================================
 
 @SpellBlockRegistry.register()
 class AlertBlock(BasicSpellBlock):

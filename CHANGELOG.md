@@ -5,6 +5,64 @@ All notable changes to Django Spellbook will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-12-08
+
+### ⚠️ Breaking Changes
+- **Removed Django-like tag syntax** (`{% div %}`, `{% enddiv %}`)
+- All HTML elements must now use SpellBlock syntax (`{~ div ~}`, `{~~}`)
+- Removed 3 internal markdown extension files (~484 lines)
+- Removed 77 deprecated tests
+
+### Added
+- **10 HTML Element SpellBlocks**: `div`, `section`, `article`, `aside`, `header`, `footer`, `nav`, `main`, `hr`, `br`
+- **CSS-style shorthand syntax**: `.classname` and `#id-name` within SpellBlock tags
+- **Hyphenated attribute support**: Full support for `hx-*`, `data-*`, `aria-*`, `@click`, `:bind`, and other special characters
+- **HTMX integration**: Seamless support for all HTMX attributes
+- **Alpine.js integration**: Native support for Alpine.js directives (`@click`, `x-data`, `x-show`, etc.)
+- **Vue.js integration**: Support for Vue.js binding syntax (`:bind`, `@event`)
+- **Generic HTMLElementBlock base class** for creating custom HTML element blocks
+- **Comprehensive attribute parser** with quote preservation and intelligent shorthand merging
+
+### Changed
+- Enhanced attribute parser to support CSS-style shorthand (`.class`, `#id`)
+- Improved regex to handle special characters in attribute names (`@`, `:`, `-`)
+- Markdown extensions reduced from 8 to 7 (removed DjangoLikeTagExtension)
+- Cleaner codebase: removed 864 lines of deprecated code
+
+### Migration from 0.1.x
+
+**Regex pattern for bulk migration:**
+```
+Find:    {% (\w+) ([^%]*) %}(.*?){% end\1 %}
+Replace: {~ $1 $2 ~}$3{~~}
+```
+
+**Manual migration examples:**
+| Old Syntax (0.1.x) | New Syntax (0.2.0) |
+|--------------------|---------------------|
+| `{% div .my-class %}` | `{~ div .my-class ~}` |
+| `{% div #my-id %}` | `{~ div #my-id ~}` |
+| `{% section %}` | `{~ section ~}` |
+| `{% enddiv %}` | `{~~}` |
+| `{% endsection %}` | `{~~}` |
+
+**What still works:**
+- All existing SpellBlocks (`alert`, `card`, `hero`, `button`, `accordion`, `practice`, `quote`, etc.)
+- SpellBlock syntax `{~ blockname ~}content{~~}`
+- All theme system features
+- All markdown processing features
+- Automatic sitemap generation
+- Prev/next navigation
+
+**Why this change:**
+- More consistent syntax across the entire library
+- Better support for modern frameworks (HTMX, Alpine.js, Vue.js)
+- Cleaner separation from actual Django template tags
+- Improved attribute parsing with CSS-style shorthand
+- Simplified codebase and better maintainability
+
+---
+
 ## [0.1.18] - 2025-12-08
 
 ### Added
