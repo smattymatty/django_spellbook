@@ -1,0 +1,5 @@
+<{{ tag_name }}{% for key, value in attributes.items %} {{ key }}{% if value != key %}="{{ value }}"{% endif %}{% endfor %}>
+{% if not is_void %}
+{{ content|safe }}
+</{{ tag_name }}>
+{% endif %}

@@ -1,0 +1,3 @@
+{~ aside .sidebar ~}
+Sidebar content
+{~~}
