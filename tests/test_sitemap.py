@@ -311,6 +311,120 @@ class TestSitemapGenerator(TestCase):
         self.assertEqual(entry['loc'], "https://example.com/v1/docs/api/")
         self.assertNotIn('//', entry['loc'].replace('https://', ''))
 
+    def test_merge_with_no_existing_sitemap(self):
+        """Test merge when no sitemap exists."""
+        entries = [{'loc': 'https://example.com/page1/'}]
+
+        merged_xml, user_count = self.generator._merge_with_existing(entries)
+
+        self.assertEqual(user_count, 0)
+        self.assertIn('<!-- spellbook:start -->', merged_xml)
+        self.assertIn('<!-- spellbook:end -->', merged_xml)
+        self.assertIn('https://example.com/page1/', merged_xml)
+
+    @patch('pathlib.Path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open, read_data='''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://example.com/user-page/</loc>
+  </url>
+</urlset>''')
+    def test_merge_with_existing_sitemap_no_markers(self, mock_file, mock_exists):
+        """Test merge appends to existing sitemap without markers."""
+        entries = [{'loc': 'https://example.com/spellbook-page/'}]
+
+        merged_xml, user_count = self.generator._merge_with_existing(entries)
+
+        self.assertEqual(user_count, 1)
+        self.assertIn('user-page', merged_xml)
+        self.assertIn('spellbook-page', merged_xml)
+        self.assertIn('<!-- spellbook:start -->', merged_xml)
+        self.assertIn('<!-- spellbook:end -->', merged_xml)
+
+    @patch('pathlib.Path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open, read_data='''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://example.com/user-page/</loc>
+  </url>
+  <!-- spellbook:start -->
+  <url>
+    <loc>https://example.com/old-spellbook-page/</loc>
+  </url>
+  <!-- spellbook:end -->
+</urlset>''')
+    def test_merge_replaces_content_between_markers(self, mock_file, mock_exists):
+        """Test merge replaces content between markers."""
+        entries = [{'loc': 'https://example.com/new-spellbook-page/'}]
+
+        merged_xml, user_count = self.generator._merge_with_existing(entries)
+
+        self.assertEqual(user_count, 1)
+        self.assertIn('user-page', merged_xml)
+        self.assertIn('new-spellbook-page', merged_xml)
+        self.assertNotIn('old-spellbook-page', merged_xml)
+
+    @patch('pathlib.Path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open, read_data='''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://example.com/before/</loc>
+  </url>
+  <!-- spellbook:start -->
+  <!-- spellbook:end -->
+  <url>
+    <loc>https://example.com/after/</loc>
+  </url>
+</urlset>''')
+    def test_merge_preserves_urls_before_and_after_markers(self, mock_file, mock_exists):
+        """Test that URLs before and after markers are preserved."""
+        entries = [{'loc': 'https://example.com/spellbook/'}]
+
+        merged_xml, user_count = self.generator._merge_with_existing(entries)
+
+        self.assertEqual(user_count, 2)
+        self.assertIn('before', merged_xml)
+        self.assertIn('after', merged_xml)
+        self.assertIn('spellbook', merged_xml)
+
+    @patch('pathlib.Path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open, read_data='''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- spellbook:end -->
+  <!-- spellbook:start -->
+</urlset>''')
+    def test_merge_handles_malformed_markers(self, mock_file, mock_exists):
+        """Test that malformed markers trigger regeneration."""
+        entries = [{'loc': 'https://example.com/page/'}]
+
+        merged_xml, user_count = self.generator._merge_with_existing(entries)
+
+        self.assertEqual(user_count, 0)
+        self.assertIn('<!-- spellbook:start -->', merged_xml)
+        self.assertIn('<!-- spellbook:end -->', merged_xml)
+
+    def test_build_spellbook_section(self):
+        """Test building the Spellbook section."""
+        entries = [
+            {'loc': 'https://example.com/page1/', 'lastmod': '2025-12-08'},
+            {'loc': 'https://example.com/page2/', 'changefreq': 'weekly', 'priority': '0.8'}
+        ]
+
+        section = self.generator._build_spellbook_section(entries)
+
+        self.assertIn('<url>', section)
+        self.assertIn('<loc>https://example.com/page1/</loc>', section)
+        self.assertIn('<lastmod>2025-12-08</lastmod>', section)
+        self.assertIn('<loc>https://example.com/page2/</loc>', section)
+        self.assertIn('<changefreq>weekly</changefreq>', section)
+        self.assertIn('<priority>0.8</priority>', section)
+
+    def test_build_spellbook_section_empty(self):
+        """Test building empty Spellbook section."""
+        section = self.generator._build_spellbook_section([])
+
+        self.assertEqual(section, "")
+
 
 class TestSitemapGeneratorEdgeCases(TestCase):
     """Test edge cases and error handling for SitemapGenerator."""
