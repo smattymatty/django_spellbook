@@ -23,16 +23,18 @@ class TestSpellbookMDCommand(TestCase):
         """Test basic successful execution of the command"""
         # Set up mocks
         mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None])
-        
+        # _process_source_destination_pair now returns (count, processed_files)
+        mock_process_pair.return_value = (5, [])
+
         # Execute command
         self.command.handle()
-        
+
         # Verify blocks were discovered
         mock_discover.assert_called_once_with(self.command.reporter)
-        
+
         # Verify settings were validated
         mock_validate.assert_called_once()
-        
+
         # Verify processing was called with correct arguments
         mock_process_pair.assert_called_once_with('/test/path', 'test_app', 'test_prefix', None)
         
@@ -44,10 +46,12 @@ class TestSpellbookMDCommand(TestCase):
         """Test handling of multiple source-destination pairs"""
         # Set up mocks
         mock_validate.return_value = (['/path1', '/path2'], ['app1', 'app2'], ['test', ''], [None, None])
-        
+        # _process_source_destination_pair now returns (count, processed_files)
+        mock_process_pair.return_value = (5, [])
+
         # Execute command
         self.command.handle()
-        
+
         # Verify processing was called twice with correct arguments
         expected_calls = [
             call('/path1', 'app1', 'test', None),

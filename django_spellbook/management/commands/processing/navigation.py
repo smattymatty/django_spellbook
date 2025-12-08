@@ -150,7 +150,14 @@ class NavigationBuilder:
         """
         # The frontmatter parser should have already extracted prev/next
         # and stored them in the context
-        return processed_file.context.get_safe_attr(field + '_page', None)
+        result = processed_file.context.get_safe_attr(field + '_page', None)
+
+        # Ensure result is a string or None (not a Mock or other type)
+        if result is not None and not isinstance(result, str):
+            logger.debug(f"Frontmatter override for {field} is not a string: {type(result).__name__}, treating as None")
+            return None
+
+        return result
 
     @staticmethod
     def _is_namespaced_format(value: str) -> bool:
@@ -172,6 +179,10 @@ class NavigationBuilder:
         Returns:
             True if namespaced format, False if path format
         """
+        # Ensure value is a string
+        if not isinstance(value, str):
+            return False
+
         if ':' not in value:
             return False  # No colon = path format
 
@@ -210,6 +221,11 @@ class NavigationBuilder:
         Returns:
             Namespaced URL string
         """
+        # Ensure value is a string
+        if not isinstance(value, str):
+            logger.warning(f"Navigation value is not a string: {type(value).__name__}")
+            return ""
+
         # Already in namespaced format - use as-is
         if NavigationBuilder._is_namespaced_format(value):
             logger.debug(f"Navigation value '{value}' is already namespaced")

@@ -1,0 +1,122 @@
+/* Base styles */
+.spellbook-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Desktop layout */
+@media (min-width: 768px) {
+  .spellbook-layout {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 800px) 1fr;
+    gap: 2rem;
+  }
+
+  .spellbook-toc {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    border-right: 1px solid var(--neutral-color-25, #e5e7eb);
+    grid-column: 1;
+  }
+
+  .spellbook-content {
+    grid-column: 2;
+    width: 100%;
+    max-width: 800px;
+  }
+}
+
+/* Mobile layout */
+@media (max-width: 767px) {
+  .spellbook-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .spellbook-toc {
+    overflow-x: hidden;
+    word-wrap: break-word;
+    border-bottom: 1px solid var(--neutral-color-25, #e5e7eb);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* TOC styles */
+.spellbook-toc ul {
+  list-style: none;
+  padding-left: 1rem;
+}
+
+.spellbook-toc li {
+  margin: 0.5rem 0;
+}
+
+.spellbook-toc a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.spellbook-toc a:hover {
+  color: var(--primary-color);
+}
+
+/* Content styles */
+.spellbook-content {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.spellbook-content p {
+  color: var(--text-secondary-color);
+}
+
+.spellbook-content h1,
+.spellbook-content h2,
+.spellbook-content h3,
+.spellbook-content h4,
+.spellbook-content h5,
+.spellbook-content h6 {
+  color: var(--text-color);
+}
+
+.spellbook-content h2 {
+  margin-left: 0.25rem;
+}
+
+.spellbook-content h3 {
+  margin-left: 0.5rem;
+}
+
+.spellbook-content h4 {
+  margin-left: 1rem;
+}
+
+.spellbook-content h5 {
+  margin-left: 1.5rem;
+}
+
+.spellbook-content h6 {
+  margin-left: 2rem;
+}
+
+.spellbook-content pre {
+  background-color: var(--surface-color);
+  padding: 1rem;
+  color: var(--text-color);
+  border: 1px solid var(--neutral-color-25);
+  border-radius: var(--sb-border-radius-md);
+}
+
+.spellbook-content code {
+  background-color: var(--surface-color);
+  padding: 0.1rem 0.2rem;
+  margin: 0 0.2rem;
+  color: var(--text-color);
+  border-radius: var(--sb-border-radius-sm);
+}

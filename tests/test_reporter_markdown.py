@@ -29,7 +29,7 @@ class MarkdownReporterTests(TestCase):
         
         # Verify output content (not exact string matching)
         output_text = self.output.getvalue()
-        self.assertIn("Processing Summary", output_text)
+        self.assertIn("--SUMMARY REPORT--", output_text)
         self.assertIn("All 2 source-destination pairs processed successfully", output_text)
         self.assertIn("Total files processed: 8", output_text)  # 5 + 3 = 8
     
@@ -49,7 +49,7 @@ class MarkdownReporterTests(TestCase):
         
         # Verify output content (not exact string matching)
         output_text = self.output.getvalue()
-        self.assertIn("Processing Summary", output_text)
+        self.assertIn("--SUMMARY REPORT--", output_text)
         self.assertIn("1 of 2 pairs processed successfully", output_text)
         self.assertIn("Total files processed: 5", output_text)
         self.assertIn("/path2", output_text)  # Failed path should be mentioned
@@ -71,5 +71,5 @@ class MarkdownReporterTests(TestCase):
         
         # Verify basic output was generated
         output_text = plain_output.getvalue()
-        self.assertIn("Processing Summary", output_text)
+        self.assertIn("--SUMMARY REPORT--", output_text)
         self.assertIn("processed successfully", output_text)
