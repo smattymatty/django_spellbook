@@ -1,0 +1,104 @@
+.toc-wrapper {
+  font-size: 0.95rem;
+}
+
+/* Disable transitions during initial page load */
+.toc-no-transition,
+.toc-no-transition * {
+  transition: none !important;
+}
+
+.toc-list,
+.toc-sublist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.toc-sublist {
+  margin-left: 1.5rem;
+  border-left-width: 1px;
+  border-left-style: solid;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.toc-sublist .toc-sublist {
+  margin-left: 1rem; /* Slightly smaller indent for deeper levels */
+  border-left-style: dashed;
+}
+
+.toc-item,
+.toc-subitem {
+  margin: 0.5rem 0;
+}
+
+.toc-link {
+  text-decoration: none;
+  display: block;
+  padding: 0.25rem 0.5rem !important;
+  width: 100%;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.toc-section {
+  font-weight: 600;
+  display: block;
+  padding: 0.25rem 0.5rem;
+  margin-top: 1rem;
+}
+
+.toc-item.active div a,
+.toc-subitem.active div a {
+  font-weight: 500;
+}
+
+@media (max-width: 767px) {
+  .toc-mobile-border {
+    border: 1px solid var(--neutral-color-25);
+  }
+
+  .toc-wrapper {
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: 4px;
+    padding: 0.5rem;
+  }
+}
+
+.toc-item-header {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+/* Prevent the link from having its own click area */
+.toc-item-header .toc-link {
+  pointer-events: auto;
+  padding: 0;
+}
+.toc-toggle {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toc-arrow {
+  transition: transform 0.3s ease;
+  fill: currentColor;
+}
+
+.toc-toggle.collapsed .toc-arrow {
+  transform: rotate(-90deg);
+}
+
+.toc-sublist.collapsed {
+  max-height: 0;
+}

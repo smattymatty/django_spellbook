@@ -145,7 +145,7 @@ class MarkdownReporterTestCase(TestCase):
         reporter.generate_summary_report(self.sample_results)
         
         output = self.stdout.getvalue()
-        self.assertIn("Processing Summary", output)
+        self.assertIn("--SUMMARY REPORT--", output)
         self.assertIn("2 of 3 pairs processed successfully", output)
         self.assertIn("Total files processed: 8", output)
         self.assertIn("Failed pairs", output)
@@ -194,7 +194,7 @@ class MarkdownReporterTestCase(TestCase):
                 file_content = f.read()
             
             # Check that output was written to file
-            self.assertIn("Processing Summary", file_content)
+            self.assertIn("--SUMMARY REPORT--", file_content)
             self.assertIn("2 of 3 pairs processed successfully", file_content)
             
             # Verify stdout is empty (redirected to file)
@@ -221,7 +221,7 @@ class MarkdownReporterTestCase(TestCase):
             
             output = self.stdout.getvalue()
             self.assertIn("Error opening output file", output)
-            self.assertIn("Processing Summary", output)
+            self.assertIn("--SUMMARY REPORT--", output)
 
     def test_combined_options(self):
         """Test combination of different options."""

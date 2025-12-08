@@ -94,24 +94,33 @@ class MarkdownReporter:
         """
         # First, decide where to output
         output = self.output_file if self.output_file else self.stdout
-        
-        output.write("\nProcessing Summary:\n")
-        message = "--SUMMARY REPORT--\n"
-        if success_count == len(pair_results):
-            message += (
-                f"All {len(pair_results)} source-destination pairs processed successfully. "
-                f"Total files processed: {total_processed}.\n"
-            )
-        else:
-            message += (
-                f"{success_count} of {len(pair_results)} pairs processed successfully. "
-                f"Total files processed: {total_processed}.\n"
-            )
-            if failed_pairs:
-                message += f"Failed pairs: {', '.join(f'{src} → {dst} (prefix: {prefix})' for src, dst, prefix in failed_pairs)}"
 
-        output.write(self.style.WARNING(message) if hasattr(output, 'write') else message)
-        return message
+        # Output header in white (no styling)
+        output.write("\n--SUMMARY REPORT--\n")
+
+        # Build the main message
+        if success_count == len(pair_results):
+            message = (
+                f"All {len(pair_results)} source-destination pairs processed successfully. "
+                f"Total files processed: {total_processed}."
+            )
+            # Success message in green
+            output.write(self.style.SUCCESS(message) if hasattr(self.style, 'SUCCESS') else message)
+        else:
+            message = (
+                f"{success_count} of {len(pair_results)} pairs processed successfully. "
+                f"Total files processed: {total_processed}."
+            )
+            # Partial success in yellow
+            output.write(self.style.WARNING(message) if hasattr(self.style, 'WARNING') else message)
+
+            if failed_pairs:
+                failed_message = f"\nFailed pairs: {', '.join(f'{src} → {dst} (prefix: {prefix})' for src, dst, prefix in failed_pairs)}"
+                output.write(self.style.ERROR(failed_message) if hasattr(self.style, 'ERROR') else failed_message)
+
+        output.write("\n")
+        # Return the summary message (for tests or other use)
+        return f"--SUMMARY REPORT--\n{message}\n"
 
     def _generate_json_report(
         self, 

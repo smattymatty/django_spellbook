@@ -5,6 +5,104 @@ All notable changes to Django Spellbook will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.18] - 2025-12-08
+
+### Added
+
+#### Automatic Sitemap.xml Generation
+Django Spellbook now automatically generates SEO-friendly sitemaps from your markdown content - zero configuration required!
+
+**What you get:**
+- **Automatic sitemap generation** - Runs during `python manage.py spellbook_md`
+- **Smart filtering** - Respects `is_public: false` frontmatter
+- **Date handling** - Uses `modified` date (falls back to `published`) for `<lastmod>`
+- **URL prefix support** - Works with multi-source configurations
+- **Per-page control** - Optional frontmatter overrides for priority and changefreq
+
+**Quick setup:**
+```python
+# settings.py
+SPELLBOOK_SITE_URL = "https://your-site.com"  # Required for sitemap generation
+```
+
+**Advanced configuration (optional):**
+```python
+# settings.py
+SPELLBOOK_SITEMAP_ENABLED = True  # Default: True if SITE_URL is set
+SPELLBOOK_SITEMAP_OUTPUT = "static/sitemap.xml"  # Default: "sitemap.xml"
+```
+
+**Per-page frontmatter options:**
+```yaml
+---
+title: Important Page
+sitemap_priority: 0.9      # 0.0-1.0 (default: omitted)
+sitemap_changefreq: daily  # always, hourly, daily, weekly, monthly, yearly, never
+sitemap_exclude: true      # Exclude from sitemap but keep page public
+---
+```
+
+**How it works:**
+- Automatically generates sitemap.xml after processing all markdown files
+- Filters out pages with `is_public: false`
+- Respects per-page `sitemap_exclude` flag
+- Uses `modified` or `published` dates for `<lastmod>` tag
+- Supports multi-source configurations (all apps in one sitemap)
+- Gracefully skips if `SPELLBOOK_SITE_URL` not configured
+
+**XML Output:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://your-site.com/docs/intro/</loc>
+    <lastmod>2025-12-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>
+```
+
+**Benefits:**
+- ✅ Improves SEO - Search engines discover all your content
+- ✅ Zero maintenance - Updates automatically on every build
+- ✅ Smart defaults - Works great with no configuration
+- ✅ Full control - Per-page overrides when you need them
+
+#### Automatic Prev/Next Page Navigation
+Your documentation and blog posts now have **automatic sequential navigation** - zero configuration required!
+
+**What you get:**
+- **Filesystem-based navigation** - Files automatically link in alphabetical order within directories
+- **Smart `index.md` handling** - Index files always sorted first
+- **Directory boundaries** - Navigation respects folder structure (won't jump between different sections)
+- **Frontmatter overrides** - Manually specify prev/next in YAML when needed
+- **Beautiful UI** - Theme-aware navigation buttons with hover effects
+
+**Example (automatic):**
+```
+docs/
+  index.md        → next: 01-intro
+  01-intro.md     → prev: index, next: 02-setup
+  02-setup.md     → prev: 01-intro, next: 03-usage
+  03-usage.md     → prev: 02-setup
+```
+
+**Example (custom frontmatter):**
+```yaml
+---
+title: Advanced Configuration
+prev: introduction              # Path format
+next: docs:troubleshooting     # Namespaced format
+---
+```
+
+**How it works:**
+- Runs during `python manage.py spellbook_md`
+- Navigation links added to metadata display automatically
+- Supports both path-based (`intro`) and namespaced (`blog:intro`) formats
+- 25 comprehensive tests ensuring reliability
+
 ## [0.1.17] - 2025-12-06
 
 ### Changed

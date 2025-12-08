@@ -147,12 +147,13 @@ class TestBaseTemplateHandling(TestCase):
         """Test that spellbook_md command passes base template to _process_source_destination_pair."""
         # Setup mocks
         mock_validate.return_value = (
-            ['/test/path'], 
-            ['test_app'], 
-            [''], 
+            ['/test/path'],
+            ['test_app'],
+            [''],
             ['custom_base.html']
         )
-        mock_process.return_value = 5  # 5 files processed
+        # _process_source_destination_pair now returns (count, processed_files)
+        mock_process.return_value = (5, [])  # 5 files processed, empty list
         
         # Call command
         out = StringIO()
@@ -172,12 +173,13 @@ class TestBaseTemplateHandling(TestCase):
         """Test that spellbook_md command passes multiple base templates correctly."""
         # Setup mocks
         mock_validate.return_value = (
-            ['/path1', '/path2'], 
-            ['app1', 'app2'], 
-            ['', 'app2'], 
+            ['/path1', '/path2'],
+            ['app1', 'app2'],
+            ['', 'app2'],
             ['base1.html', 'base2.html']
         )
-        mock_process.return_value = 3  # 3 files processed
+        # _process_source_destination_pair now returns (count, processed_files)
+        mock_process.return_value = (3, [])  # 3 files processed, empty list
         
         # Call command
         out = StringIO()
@@ -232,7 +234,8 @@ class TestBaseTemplateHandling(TestCase):
                     url_prefix=url_prefix,
                     base_template=base_template
                 )
-            return 5  # Return number of files processed
+            # _process_source_destination_pair now returns (count, processed_files)
+            return (5, [])  # Return number of files processed and empty list
             
         mock_process.side_effect = side_effect
         

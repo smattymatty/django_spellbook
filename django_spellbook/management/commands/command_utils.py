@@ -45,7 +45,7 @@ def normalize_settings(setting_path, setting_app, setting_base_template):
 def validate_spellbook_settings():
     """
     Validate required settings and support multiple source-destination pairs.
-    
+
     Returns:
         Tuple[List[str], List[str], List[str], List[Optional[str]]]: md_paths, md_apps, md_url_prefix, base_templates.
     """
@@ -54,16 +54,16 @@ def validate_spellbook_settings():
     md_app = getattr(settings, 'SPELLBOOK_MD_APP', None)
     md_url_prefix = getattr(settings, 'SPELLBOOK_MD_URL_PREFIX', None)
     md_base_template = getattr(settings, 'SPELLBOOK_MD_BASE_TEMPLATE', None)
-    
+
     # Normalize settings to lists
     md_file_paths, content_apps, base_templates = normalize_settings(md_path, md_app, md_base_template)
-    
+
     # Normalize URL prefixes
     md_url_prefixes = normalize_url_prefixes(md_url_prefix)
-    
+
     if not content_apps:
         raise CommandError("Missing required settings: SPELLBOOK_MD_APP or SPELLBOOK_CONTENT_APP")
-    
+
     # Generate default URL prefixes if not provided
     if not md_url_prefixes:
         # Generate default prefixes based on app names
@@ -72,10 +72,13 @@ def validate_spellbook_settings():
         else:
             # First app gets empty prefix, others use their app name as prefix
             md_url_prefixes = [''] + content_apps[1:]
-    
+
     # Validate settings
     _validate_setting_values(md_file_paths, content_apps, md_url_prefixes, base_templates)
-    
+
+    # Validate sitemap settings (optional, just log warnings)
+    _validate_sitemap_settings()
+
     return md_file_paths, content_apps, md_url_prefixes, base_templates
 
 def _validate_setting_values(md_file_paths: List[str], content_apps: List[str], md_url_prefix: List[str], base_templates: List[Optional[str]]):
@@ -302,10 +305,10 @@ def normalize_url_prefix(prefix: str) -> str:
 def normalize_url_prefixes(setting_url_prefix) -> List[str]:
     """
     Normalize URL prefixes to a list.
-    
+
     Args:
         setting_url_prefix: URL prefix or list of prefixes
-        
+
     Returns:
         List[str]: Normalized list of URL prefixes
     """
@@ -315,3 +318,69 @@ def normalize_url_prefixes(setting_url_prefix) -> List[str]:
         return [normalize_url_prefix(setting_url_prefix)]
     else:
         return [normalize_url_prefix(p) for p in setting_url_prefix]
+
+
+def _validate_sitemap_settings() -> None:
+    """
+    Validate sitemap settings (optional features, just log warnings).
+
+    Checks:
+    - SPELLBOOK_SITE_URL format if present
+    - SPELLBOOK_SITEMAP_OUTPUT is valid path
+    """
+    site_url = getattr(settings, 'SPELLBOOK_SITE_URL', None)
+
+    if site_url:
+        # Validate URL format
+        if not site_url.startswith(('http://', 'https://')):
+            logger.warning(
+                f"SPELLBOOK_SITE_URL should start with http:// or https://. "
+                f"Got: {site_url}"
+            )
+    else:
+        logger.debug(
+            "SPELLBOOK_SITE_URL not set. Sitemap generation will be skipped. "
+            "Set SPELLBOOK_SITE_URL in settings.py to enable sitemap generation."
+        )
+
+    # Validate output path if specified
+    sitemap_output = getattr(settings, 'SPELLBOOK_SITEMAP_OUTPUT', None)
+    if sitemap_output:
+        from pathlib import Path
+        try:
+            output_path = Path(sitemap_output)
+            if output_path.is_absolute() and not output_path.parent.exists():
+                logger.warning(
+                    f"SPELLBOOK_SITEMAP_OUTPUT directory does not exist: {output_path.parent}. "
+                    "Directory will be created during sitemap generation."
+                )
+        except Exception as e:
+            logger.warning(f"Invalid SPELLBOOK_SITEMAP_OUTPUT: {sitemap_output} - {str(e)}")
+
+
+def get_sitemap_settings() -> dict:
+    """
+    Get sitemap-related settings with defaults.
+
+    Returns:
+        dict with keys: site_url, enabled, output_path, default_changefreq, default_priority
+    """
+    site_url = getattr(settings, 'SPELLBOOK_SITE_URL', None)
+
+    # Sitemap enabled by default if site_url is set
+    enabled = getattr(settings, 'SPELLBOOK_SITEMAP_ENABLED', bool(site_url))
+
+    # Default output path
+    output_path = getattr(settings, 'SPELLBOOK_SITEMAP_OUTPUT', 'sitemap.xml')
+
+    # Optional defaults for changefreq and priority
+    default_changefreq = getattr(settings, 'SPELLBOOK_SITEMAP_DEFAULT_CHANGEFREQ', None)
+    default_priority = getattr(settings, 'SPELLBOOK_SITEMAP_DEFAULT_PRIORITY', None)
+
+    return {
+        'site_url': site_url,
+        'enabled': enabled,
+        'output_path': output_path,
+        'default_changefreq': default_changefreq,
+        'default_priority': default_priority,
+    }

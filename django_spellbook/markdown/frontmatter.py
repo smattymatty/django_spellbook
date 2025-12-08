@@ -14,7 +14,7 @@ MODIFIED_KEYS = ['modified', 'modified_at', 'updated', 'updated_at']
 
 # --- Keys to exclude from custom_meta ---
 # Includes standard keys and the date aliases we might consume
-RESERVED_META_KEYS = ['title', 'is_public', 'tags', 'author', 'prev', 'next'] + PUBLISHED_KEYS + MODIFIED_KEYS
+RESERVED_META_KEYS = ['title', 'is_public', 'tags', 'author', 'prev', 'next', 'sitemap_priority', 'sitemap_changefreq', 'sitemap_exclude'] + PUBLISHED_KEYS + MODIFIED_KEYS
 # Make the check case-insensitive later for robustness
 LOWERCASE_RESERVED_META_KEYS = [k.lower() for k in RESERVED_META_KEYS]
 
