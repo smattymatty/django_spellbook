@@ -74,7 +74,6 @@ Your documentation and blog posts now have **automatic sequential navigation** -
 
 **What you get:**
 - **Filesystem-based navigation** - Files automatically link in alphabetical order within directories
-- **Smart `index.md` handling** - Index files always sorted first
 - **Directory boundaries** - Navigation respects folder structure (won't jump between different sections)
 - **Frontmatter overrides** - Manually specify prev/next in YAML when needed
 - **Beautiful UI** - Theme-aware navigation buttons with hover effects
@@ -82,8 +81,7 @@ Your documentation and blog posts now have **automatic sequential navigation** -
 **Example (automatic):**
 ```
 docs/
-  index.md        → next: 01-intro
-  01-intro.md     → prev: index, next: 02-setup
+  01-intro.md     → next: 02-setup
   02-setup.md     → prev: 01-intro, next: 03-usage
   03-usage.md     → prev: 02-setup
 ```
