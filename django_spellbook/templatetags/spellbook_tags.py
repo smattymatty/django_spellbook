@@ -132,3 +132,65 @@ def spellbook_styles():
 def dash_strip(string: str) -> str:
     """Strip the initial dashes from a string"""
     return remove_leading_dash(string)
+
+
+@register.simple_tag(takes_context=True)
+def page_header(context):
+    """
+    Display unified page header with title, author, and navigation.
+
+    Includes:
+    - Back to parent directory (if not at root)
+    - Title
+    - Author (if set)
+    - Prev/Next navigation
+
+    Args:
+        context: The template context
+
+    Returns:
+        Rendered HTML string
+    """
+    if not context:
+        return ""
+
+    metadata = context.get('metadata', {})
+
+    # Get parent directory info from context
+    parent_dir_url = context.get('parent_directory_url')
+    parent_dir_name = context.get('parent_directory_name', 'Directory')
+
+    template_context = {
+        'title': metadata.get('title'),
+        'author': metadata.get('author'),
+        'prev_page': metadata.get('prev_page'),
+        'next_page': metadata.get('next_page'),
+        'parent_dir_url': parent_dir_url,
+        'parent_dir_name': parent_dir_name,
+    }
+
+    try:
+        return render_to_string(
+            'django_spellbook/components/page_header.html',
+            template_context
+        )
+    except TemplateDoesNotExist:
+        return "Error: Page header template not found"
+    except Exception as e:
+        return f"Error: Failed to render page header: {str(e)}"
+
+
+@register.simple_tag(takes_context=True)
+def page_metadata(context, display_type="for_user"):
+    """
+    Alias for show_metadata with clearer naming.
+    Displays publication metadata (dates, tags, word count).
+
+    Args:
+        context: The template context
+        display_type: Either 'for_user' or 'for_dev'
+
+    Returns:
+        Rendered HTML string
+    """
+    return show_metadata(context, display_type)

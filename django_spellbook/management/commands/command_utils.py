@@ -76,9 +76,6 @@ def validate_spellbook_settings():
     # Validate settings
     _validate_setting_values(md_file_paths, content_apps, md_url_prefixes, base_templates)
 
-    # Validate sitemap settings (optional, just log warnings)
-    _validate_sitemap_settings()
-
     return md_file_paths, content_apps, md_url_prefixes, base_templates
 
 def _validate_setting_values(md_file_paths: List[str], content_apps: List[str], md_url_prefix: List[str], base_templates: List[Optional[str]]):
@@ -320,67 +317,3 @@ def normalize_url_prefixes(setting_url_prefix) -> List[str]:
         return [normalize_url_prefix(p) for p in setting_url_prefix]
 
 
-def _validate_sitemap_settings() -> None:
-    """
-    Validate sitemap settings (optional features, just log warnings).
-
-    Checks:
-    - SPELLBOOK_SITE_URL format if present
-    - SPELLBOOK_SITEMAP_OUTPUT is valid path
-    """
-    site_url = getattr(settings, 'SPELLBOOK_SITE_URL', None)
-
-    if site_url:
-        # Validate URL format
-        if not site_url.startswith(('http://', 'https://')):
-            logger.warning(
-                f"SPELLBOOK_SITE_URL should start with http:// or https://. "
-                f"Got: {site_url}"
-            )
-    else:
-        logger.debug(
-            "SPELLBOOK_SITE_URL not set. Sitemap generation will be skipped. "
-            "Set SPELLBOOK_SITE_URL in settings.py to enable sitemap generation."
-        )
-
-    # Validate output path if specified
-    sitemap_output = getattr(settings, 'SPELLBOOK_SITEMAP_OUTPUT', None)
-    if sitemap_output:
-        from pathlib import Path
-        try:
-            output_path = Path(sitemap_output)
-            if output_path.is_absolute() and not output_path.parent.exists():
-                logger.warning(
-                    f"SPELLBOOK_SITEMAP_OUTPUT directory does not exist: {output_path.parent}. "
-                    "Directory will be created during sitemap generation."
-                )
-        except Exception as e:
-            logger.warning(f"Invalid SPELLBOOK_SITEMAP_OUTPUT: {sitemap_output} - {str(e)}")
-
-
-def get_sitemap_settings() -> dict:
-    """
-    Get sitemap-related settings with defaults.
-
-    Returns:
-        dict with keys: site_url, enabled, output_path, default_changefreq, default_priority
-    """
-    site_url = getattr(settings, 'SPELLBOOK_SITE_URL', None)
-
-    # Sitemap enabled by default if site_url is set
-    enabled = getattr(settings, 'SPELLBOOK_SITEMAP_ENABLED', bool(site_url))
-
-    # Default output path
-    output_path = getattr(settings, 'SPELLBOOK_SITEMAP_OUTPUT', 'sitemap.xml')
-
-    # Optional defaults for changefreq and priority
-    default_changefreq = getattr(settings, 'SPELLBOOK_SITEMAP_DEFAULT_CHANGEFREQ', None)
-    default_priority = getattr(settings, 'SPELLBOOK_SITEMAP_DEFAULT_PRIORITY', None)
-
-    return {
-        'site_url': site_url,
-        'enabled': enabled,
-        'output_path': output_path,
-        'default_changefreq': default_changefreq,
-        'default_priority': default_priority,
-    }

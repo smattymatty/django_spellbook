@@ -210,6 +210,8 @@ This is the **main content** of the *card*.
 
 This command will process markdown files in the specified directory from `settings.py`, rendering them as HTML and storing them in your app's templates directory. The rendered templates are accessible for further use in Django views, providing seamless markdown-based content management.
 
+Additionally, the command generates a `spellbook_manifest.json` file in each app, which enables automatic sitemap integration (see Sitemap Integration below).
+
 ## Settings
 
 To configure the paths and templates used by Django Spellbook, add the following settings to your settings.py:
@@ -401,3 +403,85 @@ When you run the command, Django Spellbook processes all markdown files in the c
 5. Accessing the Generated URLs and Views:
    - By including `path('content/', include('django_spellbook.urls'))` in your project's main `urls.py`, all your content becomes accessible.
    - With multiple sources, each app's content is neatly organized under its own URL namespace.
+
+## Sitemap Integration
+
+Django Spellbook integrates seamlessly with Django's sitemap framework. When you run `python manage.py spellbook_md`, a manifest file (`spellbook_manifest.json`) is automatically generated in each app, enabling dynamic sitemap generation at request time.
+
+### Setup
+
+**1. Create a sitemaps.py file in your project:**
+
+```python
+# myproject/sitemaps.py
+from django_spellbook.sitemaps import SpellbookSitemap
+
+sitemaps = {
+    'spellbook': SpellbookSitemap,
+}
+```
+
+**2. Add the sitemap URL to your urls.py:**
+
+```python
+# myproject/urls.py
+from django.contrib.sitemaps.views import sitemap
+from .sitemaps import sitemaps
+
+urlpatterns = [
+    # ... your other URLs
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
+]
+```
+
+**3. Visit `/sitemap.xml`** - Django automatically generates your sitemap from all Spellbook pages!
+
+### Multi-App Support
+
+`SpellbookSitemap` automatically discovers all apps configured in `SPELLBOOK_MD_APP`. For manual control:
+
+```python
+from django_spellbook.sitemaps import SpellbookSitemap
+
+sitemaps = {
+    'docs': SpellbookSitemap(app_names=['docs_app']),
+    'blog': SpellbookSitemap(app_names=['blog_app']),
+}
+```
+
+### Mixing with Other Sitemaps
+
+SpellbookSitemap works alongside your existing Django sitemaps:
+
+```python
+from django.contrib.sitemaps import Sitemap
+from django_spellbook.sitemaps import SpellbookSitemap
+
+class BlogSitemap(Sitemap):
+    # Your custom sitemap
+    pass
+
+sitemaps = {
+    'blog': BlogSitemap,
+    'spellbook': SpellbookSitemap,  # Automatically includes all Spellbook pages
+}
+```
+
+### Customizing Sitemap Metadata
+
+Add frontmatter to your markdown files to control sitemap properties:
+
+```markdown
+---
+title: User Guide
+published: 2025-12-08
+modified: 2025-12-15
+is_public: true
+---
+
+# Your content here
+```
+
+- `published` / `modified`: Used for `<lastmod>` in sitemap
+- `is_public: false`: Excludes page from sitemap
+

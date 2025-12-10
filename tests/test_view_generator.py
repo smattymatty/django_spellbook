@@ -14,7 +14,7 @@ class TestViewGeneratorRefactored(TestCase):
     
     def setUp(self):
         """Set up test environment."""
-        self.view_generator = ViewGenerator("test_app")
+        self.view_generator = ViewGenerator("test_app", "content")
         
         # Create a properly mocked SpellbookContext
         self.mock_context = Mock(spec=SpellbookContext)
@@ -269,7 +269,7 @@ class TestViewGeneratorRefactored(TestCase):
 class TestViewGeneratorEdgeCases(TestCase):
     def setUp(self):
         """Set up test environment."""
-        self.view_generator = ViewGenerator("test_app")
+        self.view_generator = ViewGenerator("test_app", "content")
         self.mock_context = SpellbookContext(
             title="Test Page",
             published=datetime.datetime(2023, 1, 1),
@@ -471,7 +471,57 @@ class TestViewGeneratorEdgeCases(TestCase):
         # Should raise ValueError with joined errors
         with self.assertRaises(ValueError) as context:
             view_generator.validate_required_attributes(processed_file)
-        
+
         # Check error message
         self.assertIn("missing context", str(context.exception))
-    
+
+
+class TestParentDirectoryContext(TestCase):
+    """Tests for parent directory context calculation in ViewGenerator."""
+
+    def setUp(self):
+        """Set up test environment."""
+        self.view_generator = ViewGenerator("test_app", "content")
+
+    def test_calculate_parent_directory_context_with_subdirectory(self):
+        """Test parent directory calculation for page in subdirectory."""
+        result = self.view_generator._calculate_parent_directory_context('guides/getting-started')
+
+        self.assertEqual(result['url'], 'test_app:test_app_directory_index_directory_index_guides')
+        self.assertEqual(result['name'], 'Guides')
+
+    def test_calculate_parent_directory_context_with_nested_directory(self):
+        """Test parent directory calculation for deeply nested page."""
+        result = self.view_generator._calculate_parent_directory_context('docs/api/reference')
+
+        self.assertEqual(result['url'], 'test_app:test_app_directory_index_directory_index_docs_api')
+        self.assertEqual(result['name'], 'Api')
+
+    def test_calculate_parent_directory_context_at_root(self):
+        """Test parent directory calculation for root-level page."""
+        result = self.view_generator._calculate_parent_directory_context('home')
+
+        # Root-level pages should link to root directory index with url_prefix name
+        self.assertEqual(result['url'], 'test_app:test_app_directory_index_directory_index_root_test_app')
+        self.assertEqual(result['name'], 'Content')
+
+    def test_calculate_parent_directory_context_with_leading_slash(self):
+        """Test parent directory calculation with leading slash."""
+        result = self.view_generator._calculate_parent_directory_context('/guides/getting-started/')
+
+        self.assertEqual(result['url'], 'test_app:test_app_directory_index_directory_index_guides')
+        self.assertEqual(result['name'], 'Guides')
+
+    def test_calculate_parent_directory_context_with_underscores(self):
+        """Test parent directory humanization with underscores."""
+        result = self.view_generator._calculate_parent_directory_context('api_reference/endpoints')
+
+        self.assertEqual(result['url'], 'test_app:test_app_directory_index_directory_index_api_reference')
+        self.assertEqual(result['name'], 'Api Reference')
+
+    def test_calculate_parent_directory_context_with_dashes(self):
+        """Test parent directory humanization with dashes."""
+        result = self.view_generator._calculate_parent_directory_context('getting-started/quick-guide')
+
+        self.assertEqual(result['url'], 'test_app:test_app_directory_index_directory_index_getting_started')
+        self.assertEqual(result['name'], 'Getting Started')

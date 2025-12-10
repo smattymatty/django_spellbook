@@ -10,6 +10,7 @@ from django_spellbook.management.commands.processing.url_generator import URLGen
 from django_spellbook.management.commands.processing.view_generator import ViewGenerator
 from django_spellbook.management.commands.processing.file_writer import FileWriter
 from django_spellbook.management.commands.processing.navigation import NavigationBuilder
+from django_spellbook.management.commands.processing.directory_index import DirectoryIndexBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class URLViewGenerator:
         
         # Initialize components
         self.url_generator = URLGenerator(content_app)
-        self.view_generator = ViewGenerator(content_app)
+        self.view_generator = ViewGenerator(content_app, url_prefix)
         self.file_writer = FileWriter(content_app, url_prefix)
     
     def generate_urls_and_views(self, processed_files: List[ProcessedFile], toc: Dict) -> None:
@@ -63,14 +64,26 @@ class URLViewGenerator:
             logger.info(f"Building navigation for {len(processed_files)} files")
             NavigationBuilder.build_navigation(processed_files, self.content_app)
 
+            # Build directory index views
+            logger.info("Generating directory index pages")
+            index_builder = DirectoryIndexBuilder(self.content_app, self.url_prefix)
+            index_views, index_urls = index_builder.build_indexes(processed_files)
+
             # Generate URL patterns
             url_patterns = self.url_generator.generate_url_patterns(processed_files)
 
             # Generate view functions
             view_functions = self.view_generator.generate_view_functions(processed_files)
 
+            # Combine regular + index patterns/views
+            all_views = view_functions + index_views
+            all_urls = url_patterns + index_urls
+
+            logger.info(f"Generated {len(index_views)} directory index views")
+            logger.info(f"Total views: {len(all_views)}, Total URLs: {len(all_urls)}")
+
             # Write to files
-            self.file_writer.write_urls_file(url_patterns)
-            self.file_writer.write_views_file(view_functions, toc)
+            self.file_writer.write_urls_file(all_urls)
+            self.file_writer.write_views_file(all_views, toc)
         except Exception as e:
             raise CommandError(f"Failed to generate URLs and views: {str(e)}")

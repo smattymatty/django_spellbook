@@ -9,8 +9,7 @@ from django.conf import settings
 
 from django_spellbook.management.commands.command_utils import (
     validate_spellbook_settings,
-    setup_directory_structure,
-    get_sitemap_settings
+    setup_directory_structure
 )
 from django_spellbook.management.commands.spellbook_md_p.discovery import (
     discover_blocks,
@@ -22,8 +21,8 @@ from django_spellbook.management.commands.spellbook_md_p.processor import (
 from django_spellbook.management.commands.processing.file_processor import (
     ProcessedFile
 )
-from django_spellbook.management.commands.processing.sitemap import (
-    SitemapGenerator
+from django_spellbook.management.commands.processing.manifest import (
+    ManifestGenerator
 )
 
 from django_spellbook.management.commands.spellbook_md_p.reporter import (
@@ -87,17 +86,11 @@ class Command(BaseCommand):
             )
             # (md_path, content_app, success, processed_count)
 
-            # Generate sitemap if configured
-            sitemap_generated = self.generate_sitemap(all_processed_files, url_prefix_map)
+            # Generate manifests for each app (used by SpellbookSitemap)
+            self.generate_manifests(content_apps, all_processed_files, url_prefix_map)
 
             # Output Summary Report
             self.summary_report(pair_results)
-
-            # Show warning if sitemap wasn't generated
-            if not sitemap_generated and all_processed_files:
-                self.reporter.warning(
-                    "Sitemap not generated! Specify a valid SPELLBOOK_SITE_URL for automatic sitemap.xml generation."
-                )
 
         except Exception as e:
             error_message = f"Command failed: {str(e)}"
@@ -345,61 +338,64 @@ class Command(BaseCommand):
                     raise
         return pair_results, all_processed_files, url_prefix_map
 
-    def generate_sitemap(
+    def generate_manifests(
         self,
+        content_apps: List[str],
         all_processed_files: List[ProcessedFile],
         url_prefix_map: Dict[str, str]
-    ) -> bool:
+    ):
         """
-        Generate sitemap.xml from all processed files.
+        Generate manifest files for each content app.
+
+        Manifests enable Django's sitemap framework to discover Spellbook pages
+        at request time.
 
         Args:
-            all_processed_files: All successfully processed files across all pairs
+            content_apps: List of content app names
+            all_processed_files: All successfully processed files
             url_prefix_map: Mapping of content_app to url_prefix
-
-        Returns:
-            bool: True if sitemap was generated, False otherwise
         """
-        # Get sitemap settings
-        sitemap_config = get_sitemap_settings()
+        from django.apps import apps
 
-        # Check if sitemap generation is enabled and configured
-        if not sitemap_config['enabled']:
-            logger.debug("Sitemap generation is disabled")
-            return False
+        self.reporter.write("Generating manifests...")
 
-        if not sitemap_config['site_url']:
-            logger.debug("SPELLBOOK_SITE_URL not set, skipping sitemap generation")
-            return False
+        manifest_generator = ManifestGenerator()
+        manifests_generated = 0
 
-        if not all_processed_files:
-            logger.debug("No processed files to generate sitemap from")
-            return False
+        for app_name in content_apps:
+            # Filter files for this app
+            app_files = [pf for pf in all_processed_files if pf.context.namespace == app_name]
 
-        try:
-            self.reporter.write("Generating sitemap.xml...")
+            if not app_files:
+                logger.debug(f"No files for app {app_name}, skipping manifest")
+                continue
 
-            # Initialize sitemap generator
-            generator = SitemapGenerator(
-                site_url=sitemap_config['site_url'],
-                output_path=Path(sitemap_config['output_path'])
-            )
+            try:
+                # Get app path
+                app_config = apps.get_app_config(app_name)
+                app_path = Path(app_config.path)
 
-            # Generate sitemap
-            sitemap_path = generator.generate(all_processed_files, url_prefix_map)
+                # Get URL prefix
+                url_prefix = url_prefix_map.get(app_name, '')
 
-            if sitemap_path:
-                self.reporter.success(f"Sitemap generated at {sitemap_path}")
-                return True
-            else:
-                self.reporter.write("No public pages found, sitemap not generated")
-                return False
+                # Generate manifest
+                manifest_path = manifest_generator.generate(
+                    processed_files=app_files,
+                    app_name=app_name,
+                    output_dir=app_path,
+                    url_prefix=url_prefix
+                )
 
-        except Exception as e:
-            # Don't fail the entire command if sitemap generation fails
-            logger.error(f"Error generating sitemap: {str(e)}", exc_info=True)
-            self.reporter.warning(f"Failed to generate sitemap: {str(e)}")
-            return False
+                if manifest_path:
+                    self.reporter.success(f"Generated manifest for {app_name}: {manifest_path}")
+                    manifests_generated += 1
+
+            except Exception as e:
+                logger.error(f"Error generating manifest for {app_name}: {str(e)}", exc_info=True)
+                self.reporter.warning(f"Failed to generate manifest for {app_name}: {str(e)}")
+
+        if manifests_generated > 0:
+            self.reporter.success(f"Generated {manifests_generated} manifest(s)")
 
     def summary_report(self, pair_results: List[Tuple[str, str, str, bool, int]]):
         '''

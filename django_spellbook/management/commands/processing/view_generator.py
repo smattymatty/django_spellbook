@@ -21,16 +21,18 @@ class ViewGenerator:
     Handles view function generation for markdown-generated content.
     """
     
-    def __init__(self, content_app: str):
+    def __init__(self, content_app: str, url_prefix: str = ''):
         """
         Initialize view generator.
-        
+
         Args:
             content_app: Django app name where content will be stored
+            url_prefix: URL prefix for the content app (e.g., 'content', 'blog')
         """
         if not content_app or not isinstance(content_app, str):
             raise CommandError("Content app name must be a non-empty string")
         self.content_app = content_app
+        self.url_prefix = url_prefix
     
     def generate_view_functions(self, processed_files: List[ProcessedFile]) -> List[str]:
         """
@@ -107,6 +109,8 @@ class ViewGenerator:
                 # Use a fallback empty context for safety
                 context_dict = {}
 
+            # Calculate parent directory context
+            parent_dir_context = self._calculate_parent_directory_context(processed_file.relative_url)
 
             return f"""
 def {view_name}(request):
@@ -114,6 +118,8 @@ def {view_name}(request):
     context['toc'] = TOC
     context['current_url'] = '{namespaced_url}'
     context['metadata'] = {metadata_repr}
+    context['parent_directory_url'] = {repr(parent_dir_context['url'])}
+    context['parent_directory_name'] = {repr(parent_dir_context['name'])}
     return render(request, '{template_path}', context)
 """
         except Exception as e:
@@ -192,14 +198,60 @@ def {view_name}(request):
     def _prepare_context_dict(self, context: SpellbookContext) -> Dict[str, Any]:
         """
         Prepare context dictionary for template rendering.
-        
+
         Args:
             context: SpellbookContext object
-            
+
         Returns:
             Context dictionary
         """
         return context.to_dict()
+
+    def _calculate_parent_directory_context(self, relative_url: str) -> Dict[str, Optional[str]]:
+        """
+        Calculate parent directory URL name and display name for navigation.
+
+        Args:
+            relative_url: Relative URL of the current page
+
+        Returns:
+            Dictionary with 'url' and 'name' keys
+            - 'url': Django URL name for the parent directory index
+            - 'name': Human-readable name for the directory
+            - For root-level pages: links to root directory index
+            - For nested pages: links to parent directory index
+        """
+        # Strip leading/trailing slashes for consistent processing
+        clean_url = relative_url.strip('/')
+
+        # If no slashes, we're at root level - link to root directory index
+        if '/' not in clean_url:
+            # URL name: {app}:{app}_directory_index_directory_index_root_{app}
+            url_name = f"{self.content_app}:{self.content_app}_directory_index_directory_index_root_{self.content_app}"
+            # Use url_prefix for the name (e.g., "content"), or fallback to app name
+            directory_name = self.url_prefix.replace('-', ' ').replace('_', ' ').title() if self.url_prefix else self.content_app.replace('_', ' ').title()
+            return {'url': url_name, 'name': directory_name}
+
+        # Split into parts and get parent directory
+        parts = clean_url.split('/')
+        parent_parts = parts[:-1]  # Remove filename/page part
+
+        # Build parent directory URL name
+        # Convert path parts to directory view name
+        parent_dir_parts = []
+        for part in parent_parts:
+            clean_part = part.replace('-', '_').replace(' ', '_')
+            clean_part = clean_part.strip('_')
+            if clean_part:
+                parent_dir_parts.append(clean_part)
+
+        dir_name = '_'.join(parent_dir_parts) if parent_dir_parts else f'root_{self.content_app}'
+        url_name = f"{self.content_app}:{self.content_app}_directory_index_directory_index_{dir_name}"
+
+        # Build parent directory name (humanized from last part)
+        parent_name = parent_parts[-1].replace('-', ' ').replace('_', ' ').title()
+
+        return {'url': url_name, 'name': parent_name}
     
     
     def check_for_dangerous_content(self, context_str: str):

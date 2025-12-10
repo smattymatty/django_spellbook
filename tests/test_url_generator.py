@@ -45,9 +45,9 @@ class TestURLGenerator(TestCase):
         
         # Call method
         url_pattern = self.url_generator._generate_url_pattern(self.processed_file)
-        
+
         # Check result
-        self.assertEqual(url_pattern, "path('test/page/', test_page, name='test_page')")
+        self.assertEqual(url_pattern, "path('test/page/', views.test_page, name='test_page')")
         
     def test_generate_url_patterns(self):
         """Test generating URL patterns for multiple processed files."""

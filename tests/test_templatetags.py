@@ -108,3 +108,184 @@ class TestDashStrip(TestCase):
         """Test that dash_strip removes the initial dashes from a string"""
         result = dash_strip('--test-string')
         self.assertEqual(result, 'test-string')
+
+
+@override_settings(TEMPLATES=settings.TEMPLATES)
+class TestPageHeader(TestCase):
+    @patch('django_spellbook.templatetags.spellbook_tags.reverse')
+    def test_page_header_with_full_context(self, mock_reverse):
+        """Test page_header with complete context including all fields"""
+        # Mock reverse to return test URLs
+        mock_reverse.side_effect = lambda x: f'/{x}/'
+
+        template = Template(
+            "{% load spellbook_tags %}"
+            "{% page_header %}"
+        )
+        context = Context({
+            'metadata': {
+                'title': 'Test Page',
+                'author': 'Test Author',
+                'prev_page': 'test:prev',
+                'next_page': 'test:next',
+            },
+            'parent_directory_url': 'parent/',
+            'parent_directory_name': 'Parent Directory',
+        })
+
+        result = template.render(context)
+
+        # Check that key elements are present
+        self.assertIn('Test Page', result)
+        self.assertIn('Test Author', result)
+        self.assertIn('Back to Parent Directory', result)
+        self.assertIn('Previous', result)
+        self.assertIn('Next', result)
+
+    @patch('django_spellbook.templatetags.spellbook_tags.reverse')
+    def test_page_header_at_content_root(self, mock_reverse):
+        """Test page_header at content root (links back to directory index)"""
+        # Mock reverse to return test URLs
+        mock_reverse.side_effect = lambda x: f'/{x}/'
+
+        template = Template(
+            "{% load spellbook_tags %}"
+            "{% page_header %}"
+        )
+        context = Context({
+            'metadata': {
+                'title': 'Root Page',
+                'author': None,
+                'prev_page': None,
+                'next_page': None,
+            },
+            'parent_directory_url': 'content:content_directory_index_directory_index_root_content',
+            'parent_directory_name': 'Content',
+        })
+
+        result = template.render(context)
+
+        # Should have title and back button to directory index
+        self.assertIn('Root Page', result)
+        self.assertIn('Back to Content', result)
+        # Check that nav button text is not present (not just in HTML comments)
+        self.assertNotIn('<span class="sb-text-sm">Previous</span>', result)
+        self.assertNotIn('<span class="sb-text-sm">Next</span>', result)
+
+    def test_page_header_without_author(self):
+        """Test page_header with no author"""
+        template = Template(
+            "{% load spellbook_tags %}"
+            "{% page_header %}"
+        )
+        context = Context({
+            'metadata': {
+                'title': 'No Author Page',
+                'author': None,
+            },
+        })
+
+        result = template.render(context)
+
+        self.assertIn('No Author Page', result)
+        self.assertNotIn('by ', result)
+
+    @patch('django_spellbook.templatetags.spellbook_tags.reverse')
+    def test_page_header_with_only_prev(self, mock_reverse):
+        """Test page_header with only previous page"""
+        # Mock reverse to return test URLs
+        mock_reverse.side_effect = lambda x: f'/{x}/'
+
+        template = Template(
+            "{% load spellbook_tags %}"
+            "{% page_header %}"
+        )
+        context = Context({
+            'metadata': {
+                'title': 'Middle Page',
+                'prev_page': 'test:prev',
+                'next_page': None,
+            },
+        })
+
+        result = template.render(context)
+
+        self.assertIn('Previous', result)
+        # Check that "Next" button text is not present (not just in HTML comments)
+        self.assertNotIn('<span class="sb-text-sm">Next</span>', result)
+
+    @patch('django_spellbook.templatetags.spellbook_tags.reverse')
+    def test_page_header_with_only_next(self, mock_reverse):
+        """Test page_header with only next page"""
+        # Mock reverse to return test URLs
+        mock_reverse.side_effect = lambda x: f'/{x}/'
+
+        template = Template(
+            "{% load spellbook_tags %}"
+            "{% page_header %}"
+        )
+        context = Context({
+            'metadata': {
+                'title': 'First Page',
+                'prev_page': None,
+                'next_page': 'test:next',
+            },
+        })
+
+        result = template.render(context)
+
+        # Check that "Previous" button text is not present (not just in HTML comments)
+        self.assertNotIn('<span class="sb-text-sm">Previous</span>', result)
+        self.assertIn('<span class="sb-text-sm">Next</span>', result)
+
+    def test_page_header_with_empty_context(self):
+        """Test page_header with empty context"""
+        template = Template(
+            "{% load spellbook_tags %}"
+            "{% page_header %}"
+        )
+        context = Context({})
+
+        result = template.render(context)
+
+        # Should return empty string or minimal output
+        self.assertIsInstance(result, str)
+
+
+@override_settings(TEMPLATES=settings.TEMPLATES)
+class TestPageMetadata(TestCase):
+    def test_page_metadata_alias(self):
+        """Test that page_metadata is an alias for show_metadata"""
+        template = Template(
+            "{% load spellbook_tags %}"
+            "{% page_metadata %}"
+        )
+        context = Context({
+            'metadata': {
+                'published': None,
+                'modified': None,
+                'tags': [],
+            },
+        })
+
+        # Should render without errors
+        result = template.render(context)
+        self.assertIsInstance(result, str)
+
+    def test_page_metadata_for_dev(self):
+        """Test page_metadata with for_dev parameter"""
+        template = Template(
+            "{% load spellbook_tags %}"
+            "{% page_metadata 'for_dev' %}"
+        )
+        context = Context({
+            'metadata': {
+                'published': None,
+                'modified': None,
+                'tags': [],
+            },
+        })
+
+        # Should render without errors
+        result = template.render(context)
+        self.assertIsInstance(result, str)
