@@ -60,7 +60,19 @@ New validation tools help ensure your markdown files have proper metadata.
 - Type checking for dates (YYYY-MM-DD format), lists, and strings
 - Shortcuts like 'today' for date entry, 'skip' to skip fixes
 
-**Usage via Wizard:**
+**Usage - Standalone Command:**
+```bash
+# Audit mode (reports issues only)
+python manage.py spellbook_validate
+
+# Interactive fix mode
+python manage.py spellbook_validate --fix
+
+# Validate specific directory
+python manage.py spellbook_validate --source-path /path/to/markdown
+```
+
+**Usage - Via Wizard:**
 ```bash
 python manage.py spellbook_wizard
 # Select [2] Validate → [1] Validate frontmatter

@@ -1,4 +1,5 @@
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/django-spellbook?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/django-spellbook)
+[![Published on Django Packages](https://img.shields.io/badge/Published%20on-Django%20Packages-0c3c26)](https://djangopackages.org/packages/p/django_spellbook/)
 
 [Documentation Site](https://django-spellbook.org/)
 
