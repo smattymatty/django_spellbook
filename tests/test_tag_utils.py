@@ -155,7 +155,7 @@ class TestTagUtils(TestCase):
 
     # --- SIMPLIFIED test for getattr exception ---
     @patch('django_spellbook.templatetags.tag_utils.logger.error')
-    @patch('django_spellbook.templatetags.tag_utils.settings', new_callable=MagicMock)
+    @patch('django.conf.settings', new_callable=MagicMock)
     def test_get_installed_apps_setting_access_raises_exception(self, mock_settings_obj, mock_logger_error):
         """
         Test get_installed_apps when accessing SPELLBOOK_MD_APP on settings
@@ -165,24 +165,24 @@ class TestTagUtils(TestCase):
         # to be a PropertyMock that raises a RuntimeError when accessed.
         # This simulates a scenario where the settings object has a problematic property.
         prop_that_raises_error = PropertyMock(side_effect=RuntimeError("Simulated settings property failure"))
-        
+
         # To make getattr(mock_settings_obj, 'SPELLBOOK_MD_APP', ...) trigger this,
         # we assign this PropertyMock to the attribute name on the type of the mock_settings_obj.
         type(mock_settings_obj).SPELLBOOK_MD_APP = prop_that_raises_error
-        
+
         # Now, when tag_utils.get_installed_apps() calls:
         #   getattr(settings, 'SPELLBOOK_MD_APP', None)
         # ...it will use our mock_settings_obj. Accessing 'SPELLBOOK_MD_APP'
         # on it will trigger the PropertyMock's side_effect (RuntimeError).
         # This RuntimeError should be caught by the `except Exception` block.
-        
+
         result = tag_utils.get_installed_apps()
-        
+
         self.assertEqual(result, []) # Expect default empty list on error
-        #mock_logger_error.assert_called_once()
-        #logged_message = mock_logger_error.call_args[0][0]
-        #expected_error_message = f"Error getting {SETTING_NAME_MD_APP} from settings: Simulated settings property failure"
-        #self.assertIn(expected_error_message, logged_message)
+        mock_logger_error.assert_called_once()
+        logged_message = mock_logger_error.call_args[0][0]
+        expected_error_message = f"Error getting {SETTING_NAME_MD_APP} from settings: Simulated settings property failure"
+        self.assertIn(expected_error_message, logged_message)
 
         # Clean up the type-level patch to prevent interference with other tests,
         # though new_callable=MagicMock usually isolates the mock instance.

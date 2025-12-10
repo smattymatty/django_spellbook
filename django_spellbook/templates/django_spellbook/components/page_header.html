@@ -1,0 +1,44 @@
+{% load spellbook_tags %}
+<header class="sb-page-header sb-mb-2">
+  <!-- Back to directory link -->
+  {% if parent_dir_url is not None %}
+  <div class="">
+    <a href="{% spellbook_url parent_dir_url %}"
+       class="sb-flex sb-items-center sb-gap-1 sb-text-sm sb-secondary sb-no-underline sb-hover:primary sb-transition">
+      <span>←</span>
+      <span>Back to {{ parent_dir_name }}</span>
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Title and Author - Centered -->
+  <div class="sb-text-center">
+    <h1 class="sb-text-3xl sb-font-bold sb-primary sb-m-0">{{ title }}</h1>
+    {% if author %}
+    <p class="sb-text-sm sb-secondary sb-mt-2 sb-m-0">by {{ author }}</p>
+    {% endif %}
+  </div>
+
+  <!-- Prev/Next navigation -->
+  {% if prev_page or next_page %}
+  <div class="sb-flex sb-justify-between sb-gap-2 sb-mt-n2">
+    {% if prev_page %}
+    <a href="{% spellbook_url prev_page %}"
+       class="sb-flex sb-items-center sb-gap-1 sb-px-3 sb-py-2 sb-rounded sb-bg-secondary-10 sb-primary sb-no-underline sb-transition sb-hover:bg-secondary-25 sb-hover:primary-75">
+      <span>←</span>
+      <span class="sb-text-sm">Previous</span>
+    </a>
+    {% else %}
+    <div></div>
+    {% endif %}
+
+    {% if next_page %}
+    <a href="{% spellbook_url next_page %}"
+       class="sb-flex sb-items-center sb-gap-1 sb-px-3 sb-py-2 sb-rounded sb-bg-secondary-10 sb-primary sb-no-underline sb-transition sb-hover:bg-secondary-25 sb-hover:primary-75">
+      <span class="sb-text-sm">Next</span>
+      <span>→</span>
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</header>

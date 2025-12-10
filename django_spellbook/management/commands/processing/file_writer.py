@@ -124,9 +124,9 @@ urlpatterns = [
         try:
             urls_str = ',\n    '.join(url_patterns) if url_patterns else ''
             content = f"""from django.urls import path
+from django_spellbook import {self.views_module} as views
 
 app_name = '{self.content_app}'
-from django_spellbook.{self.views_module} import *
 
 urlpatterns = [
     {urls_str}

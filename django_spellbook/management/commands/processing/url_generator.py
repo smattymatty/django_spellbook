@@ -163,9 +163,9 @@ class URLGenerator:
             # Check if URL name is valid
             if not url_name or not url_name[0].isalpha() and url_name[0] != '_':
                 raise ValueError(f"Generated URL name '{url_name}' is not valid")
-            
-            pattern = f"path('{clean_url}/', {view_name}, name='{url_name}')"
-            
+
+            pattern = f"path('{clean_url}/', views.{view_name}, name='{url_name}')"
+
             # Log the generated pattern at debug level
             logger.debug(f"Generated URL pattern: {pattern}")
             

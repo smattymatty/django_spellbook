@@ -1,0 +1,88 @@
+{% load spellbook_tags %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ directory_name }} - Directory Index</title>
+    {% spellbook_styles %}
+    <link rel="stylesheet" href="{% static 'django_spellbook/css_modules/directory_index.css' %}">
+</head>
+<body class="sb-bg-background sb-text-color">
+    <div class="sb-directory-index sb-rounded sb-border sb-border-neutral-25 sb-p-4 sb-my-4 sb-bg-surface sb-w-full">
+        <!-- Header -->
+        <h2 class="sb-text-2xl sb-mb-3 sb-font-bold sb-primary">{{ directory_name }}</h2>
+
+        <!-- Subdirectories Section -->
+        {% if subdirectories %}
+        <div class="sb-mb-4">
+            <h3 class="sb-text-sm sb-font-bold sb-secondary sb-mb-2">Directories</h3>
+            <div class="sb-grid sb-grid-cols-1 sb-gap-2">
+                {% for subdir in subdirectories %}
+                <a href="{{ subdir.url }}"
+                   class="sb-flex sb-items-center sb-justify-between sb-gap-2 sb-px-3 sb-py-2 sb-rounded sb-bg-primary-25 sb-primary sb-no-underline sb-transition sb-hover:bg-primary-50">
+                    <span class="sb-text-sm sb-font-semibold">{{ subdir.title }}</span>
+                    <span class="sb-text-xs sb-text-text-secondary">{{ subdir.page_count }} page{{ subdir.page_count|pluralize }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Pages Section -->
+        {% if pages %}
+        <div>
+            <h3 class="sb-text-sm sb-font-bold sb-secondary sb-mb-2">Pages</h3>
+            <div class="sb-grid sb-grid-cols-1 sb-gap-3">
+                {% for page in pages %}
+                <div class="sb-page-item sb-px-3 sb-py-3 sb-rounded sb-bg-neutral-25 sb-border sb-border-neutral-50">
+                    <a href="{{ page.url }}" class="sb-block sb-no-underline sb-primary sb-hover:accent sb-transition sb-mb-1">
+                        <span class="sb-text-base sb-font-bold">{{ page.title }}</span>
+                    </a>
+
+                    {% if page.description %}
+                    <p class="sb-text-xs sb-text-text-secondary sb-mt-1 sb-mb-2">{{ page.description }}</p>
+                    {% endif %}
+
+                    {% if page.published or page.modified or page.tags %}
+                    <div class="sb-flex sb-flex-wrap sb-items-center sb-gap-3 sb-mt-2 sb-text-xs">
+                        {% if page.published %}
+                        <div class="sb-flex sb-items-center sb-gap-1">
+                            <span class="sb-font-bold sb-secondary">Published:</span>
+                            <span class="sb-text-text-secondary">{{ page.published|date:"d M Y" }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if page.modified %}
+                        <div class="sb-flex sb-items-center sb-gap-1">
+                            <span class="sb-font-bold sb-secondary">Modified:</span>
+                            <span class="sb-text-text-secondary">{{ page.modified|date:"d M Y" }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if page.tags %}
+                        <div class="sb-flex sb-items-center sb-gap-1 sb-flex-wrap">
+                            <span class="sb-font-bold sb-secondary">Tags:</span>
+                            {% for tag in page.tags %}
+                            <span class="sb-bg-primary-25 sb-primary sb-text-xs sb-px-2 sb-py-1 sb-rounded-full">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Empty State -->
+        {% if not subdirectories and not pages %}
+        <div class="sb-text-center sb-py-8 sb-text-text-secondary">
+            <p class="sb-text-sm">This directory is empty.</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

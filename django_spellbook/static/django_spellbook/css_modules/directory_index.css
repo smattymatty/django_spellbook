@@ -1,0 +1,7 @@
+/* Directory Index - Minimal Custom Styles */
+/* Most styling handled by Spellbook utility classes */
+
+.sb-directory-index {
+    max-width: 900px;
+    margin: 0 auto;
+}

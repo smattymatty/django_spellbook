@@ -69,8 +69,22 @@ class TestURLViewGenerator(TestCase):
         # Verify the calls to the components
         self.mock_url_gen.generate_url_patterns.assert_called_once_with([self.processed_file])
         self.mock_view_gen.generate_view_functions.assert_called_once_with([self.processed_file])
-        self.mock_file_writer.write_urls_file.assert_called_once_with(["url_pattern1", "url_pattern2"])
-        self.mock_file_writer.write_views_file.assert_called_once_with(["view_function1", "view_function2"], toc)
+
+        # Check that write_urls_file was called and includes both regular and directory index URLs
+        self.mock_file_writer.write_urls_file.assert_called_once()
+        urls_call_args = self.mock_file_writer.write_urls_file.call_args[0][0]
+        self.assertIn("url_pattern1", urls_call_args)
+        self.assertIn("url_pattern2", urls_call_args)
+        # Directory index URL should also be present
+        self.assertTrue(any("directory_index" in url for url in urls_call_args))
+
+        # Check that write_views_file was called and includes both regular and directory index views
+        self.mock_file_writer.write_views_file.assert_called_once()
+        views_call_args = self.mock_file_writer.write_views_file.call_args[0][0]
+        self.assertIn("view_function1", views_call_args)
+        self.assertIn("view_function2", views_call_args)
+        # Directory index view should also be present
+        self.assertTrue(any("directory_index" in view for view in views_call_args))
 
     @patch('django_spellbook.management.commands.processing.url_view_generator.NavigationBuilder')
     def test_generate_urls_and_views_error(self, mock_nav_builder):
@@ -178,11 +192,13 @@ class URLViewGeneratorIntegrationTest(TestCase):
         # Verify URL generator was called with the processed files
         self.mock_url_gen_instance.generate_url_patterns.assert_called_once_with(processed_files)
 
-        # Verify FileWriter.write_urls_file was called with the expected URL patterns
-        self.mock_file_writer_instance.write_urls_file.assert_called_once_with(self.expected_url_patterns)
+        # Verify FileWriter.write_urls_file was called
+        self.mock_file_writer_instance.write_urls_file.assert_called_once()
+        actual_urls = self.mock_file_writer_instance.write_urls_file.call_args[0][0]
 
-        # Verify the expected URL patterns match what we want
-        self.assertIn("path('first_blog/', first_blog, name='first_blog')", self.expected_url_patterns)
+        # Verify the expected URL patterns are present (along with directory indexes)
+        for expected_url in self.expected_url_patterns:
+            self.assertIn(expected_url, actual_urls)
         self.assertIn("path('lifestyle/digital-minimalism/', lifestyle_digital_minimalism, name='lifestyle_digital-minimalism')", self.expected_url_patterns)
         self.assertIn("path('blocks/practice/', blocks_practice, name='blocks_practice')", self.expected_url_patterns)
         self.assertIn("path('blocks/quote/', blocks_quote, name='blocks_quote')", self.expected_url_patterns)
