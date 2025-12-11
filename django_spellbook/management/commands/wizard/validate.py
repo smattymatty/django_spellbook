@@ -304,7 +304,7 @@ def handle_validate_menu(command_instance):
         choice = show_menu(
             '🔍 Validate',
             [
-                ('1', 'Validate frontmatter'),
+                ('1', 'Validate frontmatter (spellbook_validate)'),
                 ('2', 'Find dead links'),
             ],
             allow_back=True,

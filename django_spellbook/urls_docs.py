@@ -5,5 +5,5 @@ app_name = 'docs'
 
 urlpatterns = [
     path('intro/', views.view_intro, name='intro'),
-        path('', views.directory_index_root_docs, name='docs_directory_index_directory_index_root_docs'),
+    path('', views.directory_index_root_docs, name='docs_directory_index_directory_index_root_docs'),
 ]

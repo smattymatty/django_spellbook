@@ -420,7 +420,7 @@ def {view_name}(request):
         # Generate URL name
         url_name = f"{self.content_app}_directory_index_{view_name}"
 
-        return f"    path('{url_path}', views.{view_name}, name='{url_name}'),"
+        return f"path('{url_path}', views.{view_name}, name='{url_name}')"
 
     def _generate_view_name(self, directory_path: Path) -> str:
         """
