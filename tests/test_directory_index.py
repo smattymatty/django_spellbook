@@ -294,3 +294,29 @@ class TestDirectoryIndexBuilder(TestCase):
 
         # Empty string for root (will be at include prefix)
         self.assertEqual(url, '')
+
+    def test_context_includes_directory_index_flag(self):
+        """Context includes is_directory_index flag."""
+        pf1 = self._create_processed_file("/content/docs/guide.md")
+        pf2 = self._create_processed_file("/content/docs/tutorial.md")
+
+        context = self.builder._collect_directory_context(
+            Path("content/docs"),
+            [pf1, pf2],
+            [pf1, pf2]
+        )
+
+        self.assertTrue(context['is_directory_index'])
+
+    def test_view_function_includes_toc_reference(self):
+        """Generated view functions include TOC in context."""
+        context_data = {
+            'directory_name': 'Docs',
+            'directory_path': '/docs/',
+            'subdirectories': [],
+            'pages': []
+        }
+
+        view_func = self.builder._generate_view_function(Path("docs"), context_data)
+
+        self.assertIn("context['toc'] = TOC", view_func)

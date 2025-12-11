@@ -21,6 +21,7 @@
   border-left-style: solid;
   overflow: hidden;
   transition: max-height 0.3s ease-out;
+  border-right-width: 0px;
 }
 
 .toc-sublist .toc-sublist {

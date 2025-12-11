@@ -1,0 +1,35 @@
+{% load spellbook_tags %}
+<div class="sb-metadata sb-metadata-directory sb-rounded sb-border sb-p-3 sb-my-4 sb-bg-secondary-25 sb-w-full">
+  <h3 class="sb-metadata-title sb-text-lg sb-mb-2 sb-font-bold sb-primary">Directory Stats</h3>
+  <div class="sb-metadata-grid sb-grid sb-grid-cols-1 sb-md:grid-cols-2 sb-gap-2">
+
+    {% if directory_stats.total_pages %}
+    <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">Total pages:</span>
+      <span class="sb-metadata-value sb-text-sm">{{ directory_stats.total_pages }}</span>
+    </div>
+    {% endif %}
+
+    {% if directory_stats.direct_pages is not None %}
+    <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">In this directory:</span>
+      <span class="sb-metadata-value sb-text-sm">{{ directory_stats.direct_pages }}</span>
+    </div>
+    {% endif %}
+
+    {% if directory_stats.subdirectory_count %}
+    <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">Subdirectories:</span>
+      <span class="sb-metadata-value sb-text-sm">{{ directory_stats.subdirectory_count }}</span>
+    </div>
+    {% endif %}
+
+    {% if directory_stats.last_updated %}
+    <div class="sb-metadata-item sb-flex sb-items-center sb-gap-1">
+      <span class="sb-metadata-label sb-text-sm sb-font-bold sb-secondary">Last updated:</span>
+      <span class="sb-metadata-value sb-text-sm">{{ directory_stats.last_updated|date:"d M Y" }}</span>
+    </div>
+    {% endif %}
+
+  </div>
+</div>

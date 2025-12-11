@@ -241,13 +241,102 @@ class DirectoryIndexBuilder:
         # Collect page metadata
         pages = self._collect_page_metadata(files)
 
+        # Calculate directory statistics
+        directory_stats = self._calculate_directory_stats(directory, files, all_files)
+
+        # Add developer metadata to stats (for {% directory_metadata "for_dev" %})
+        directory_stats['directory_path'] = str(directory) if directory != Path('.') else ''
+        directory_stats['url_pattern'] = f"/{directory_path}" if directory_path else "/"
+        directory_stats['view_name'] = self._generate_view_name(directory)
+        directory_stats['namespace'] = self.content_app
+
         return {
             'directory_name': directory_name,
             'directory_path': directory_path,
             'parent_dir_url': parent_dir_url,
             'parent_dir_name': parent_dir_name,
             'subdirectories': subdirectories,
-            'pages': pages
+            'pages': pages,
+            'directory_stats': directory_stats,
+            'is_directory_index': True  # Signals conditional metadata in sidebar
+        }
+
+    def _calculate_directory_stats(
+        self,
+        directory: Path,
+        files: List[ProcessedFile],
+        all_files: List[ProcessedFile]
+    ) -> dict:
+        """
+        Calculate aggregate statistics for a directory.
+
+        Args:
+            directory: Directory to calculate stats for
+            files: Files directly in this directory
+            all_files: All processed files (for recursive counting)
+
+        Returns:
+            Dictionary with total_pages, direct_pages, subdirectory_count, last_updated
+        """
+        # Direct pages = files in this specific directory
+        direct_pages = len(files)
+
+        # Recursive count = all pages in this directory and subdirectories
+        total_pages = 0
+        last_updated = None
+
+        for pf in all_files:
+            # Normalize the file's directory path
+            relative_url = pf.relative_url.strip('/')
+
+            if '/' in relative_url:
+                # File is in a subdirectory - extract directory path
+                file_dir_str = '/'.join(relative_url.split('/')[:-1])
+                file_dir = Path(file_dir_str)
+            else:
+                # File is at root
+                file_dir = Path('.')
+
+            # Normalize directory path for comparison
+            # Handle both Path('.') and actual directory paths
+            compare_dir = directory if directory != Path('.') else Path('.')
+
+            # Check if this file is in the current directory tree
+            is_in_tree = False
+            if file_dir == compare_dir:
+                # Exact match - file is directly in this directory
+                is_in_tree = True
+            elif compare_dir != Path('.'):
+                # Try to see if file_dir is relative to compare_dir
+                try:
+                    file_dir.relative_to(compare_dir)
+                    is_in_tree = True
+                except ValueError:
+                    # file_dir is not relative to compare_dir
+                    is_in_tree = False
+            else:
+                # compare_dir is root ('.'), all files are in tree
+                is_in_tree = True
+
+            if is_in_tree:
+                total_pages += 1
+
+                # Track most recent modified/published date
+                # Fall back to published if modified not available
+                page_date = getattr(pf.context, 'modified', None) or getattr(pf.context, 'published', None)
+                if page_date:
+                    if last_updated is None or page_date > last_updated:
+                        last_updated = page_date
+
+        # Subdirectories already calculated by _detect_subdirectories()
+        subdirectories = self._detect_subdirectories(directory, all_files)
+        subdirectory_count = len(subdirectories)
+
+        return {
+            'total_pages': total_pages,
+            'direct_pages': direct_pages,
+            'subdirectory_count': subdirectory_count,
+            'last_updated': last_updated  # datetime or None
         }
 
     def _detect_subdirectories(
@@ -450,6 +539,7 @@ class DirectoryIndexBuilder:
 def {view_name}(request):
     """Auto-generated directory index view for {context_data['directory_path']}"""
     context = {context_repr}
+    context['toc'] = TOC
     return render(request, 'django_spellbook/directory_index/default.html', context)
 '''
 

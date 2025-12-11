@@ -248,6 +248,11 @@
   background-color: color-mix(in srgb, var(--secondary-color) 10%, var(--surface-color, var(--background-color, #ffffff)));
 }
 
+.sb-metadata-directory {
+  border-color: color-mix(in srgb, var(--secondary-color) 25%, transparent);
+  background-color: color-mix(in srgb, var(--secondary-color) 10%, var(--surface-color, var(--background-color, #ffffff)));
+}
+
 .sb-metadata-dev {
   border-color: color-mix(in srgb, var(--info-color) 25%, transparent);
   background-color: color-mix(in srgb, var(--info-color) 10%, var(--surface-color, var(--background-color, #ffffff)));

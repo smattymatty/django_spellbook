@@ -12,24 +12,23 @@
         <div class="spellbook-container">
             <div class="spellbook-layout">
                 <nav class="spellbook-toc">
-                    {% page_metadata %}
+                    {% if is_directory_index %}
+                        {% directory_metadata %}
+                    {% else %}
+                        {% page_metadata %}
+                    {% endif %}
 
                     {% include "django_spellbook/tocs/sidebar_toc.html" %}
 
                     {% if user.is_staff %}
-                        {% page_metadata "for_dev" %}
+                        {% if is_directory_index %}
+                            {% directory_metadata "for_dev" %}
+                        {% else %}
+                            {% page_metadata "for_dev" %}
+                        {% endif %}
                     {% endif %}
                 </nav>
                 <main class="spellbook-content" style="position: relative;">
-                    {% if parent_directory_url is not None %}
-                    <div style="position: absolute; top: 0; left: 0;">
-                        <a href="{% spellbook_url parent_directory_url %}"
-                           class="sb-flex sb-items-center sb-gap-1 sb-text-sm sb-secondary sb-no-underline sb-hover:primary sb-transition">
-                            <span>←</span>
-                            <span>{{ parent_directory_name }}</span>
-                        </a>
-                    </div>
-                    {% endif %}
                     {% page_header %}
                     {% block spellbook_md %}{% endblock %}
                 </main>

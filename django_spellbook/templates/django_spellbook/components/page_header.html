@@ -1,5 +1,26 @@
 {% load spellbook_tags %}
 <header class="sb-page-header sb-mb-2">
+  <!-- Back to Directory -->
+  {% if parent_dir_url %}
+    {# Directory pages: parent_dir_url is a URL path (e.g. "content/") #}
+    <div class="sb-mb-3">
+      <a href="/{{ parent_dir_url }}"
+         class="sb-flex sb-items-center sb-gap-1 sb-text-sm sb-secondary sb-no-underline sb-hover:primary sb-transition">
+        <span>←</span>
+        <span>{{ parent_dir_name }}</span>
+      </a>
+    </div>
+  {% elif parent_directory_url %}
+    {# Content pages: parent_directory_url is a URL name (e.g. "app:directory_index_root") #}
+    <div class="sb-mb-3">
+      <a href="{% spellbook_url parent_directory_url %}"
+         class="sb-flex sb-items-center sb-gap-1 sb-text-sm sb-secondary sb-no-underline sb-hover:primary sb-transition">
+        <span>←</span>
+        <span>{{ parent_directory_name }}</span>
+      </a>
+    </div>
+  {% endif %}
+
   <!-- Title and Author - Centered -->
   <div class="sb-text-center">
     <h1 class="sb-text-3xl sb-font-bold sb-primary sb-m-0">{{ title }}</h1>

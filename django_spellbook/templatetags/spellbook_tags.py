@@ -83,6 +83,61 @@ def show_metadata(context, display_type="for_user"):
         return f"Error: Failed to render metadata template '{template}': {str(e)}"
 
 
+@register.simple_tag(takes_context=True)
+def directory_metadata(context, display_type="for_user"):
+    """
+    Display directory statistics in a formatted metadata box.
+
+    Shows aggregate stats: total pages, direct pages, subdirectories, last updated.
+    Only renders if directory_stats exists in context (directory index pages only).
+
+    Args:
+        context: Template context from directory index view
+        display_type: Either 'for_user' (default) or 'for_dev'
+
+    Returns:
+        Rendered HTML string or empty string if not a directory page
+    """
+    if display_type not in ['for_user', 'for_dev']:
+        return f"Error: directory_metadata tag requires 'for_user' or 'for_dev', got '{display_type}'"
+
+    directory_stats = context.get('directory_stats')
+
+    # Only render on directory index pages
+    if not directory_stats:
+        return ''
+
+    # Check if we have any meaningful stats to display
+    # For user view, check stats; for dev view, always show if directory_stats exists
+    if display_type == 'for_user':
+        has_stats = (
+            directory_stats.get('total_pages', 0) > 0 or
+            directory_stats.get('subdirectory_count', 0) > 0 or
+            directory_stats.get('last_updated') is not None
+        )
+
+        if not has_stats:
+            return ''  # Empty directory, don't show stats box
+
+    template_context = {
+        'directory_stats': directory_stats,
+        'directory_name': context.get('directory_name', '')
+    }
+
+    # Select template based on display type
+    if display_type == 'for_user':
+        template_name = 'django_spellbook/components/directory_metadata.html'
+    else:  # display_type == 'for_dev'
+        template_name = 'django_spellbook/components/directory_metadata_dev.html'
+
+    try:
+        return render_to_string(template_name, template_context)
+    except TemplateDoesNotExist:
+        return f"Error: Directory metadata template '{template_name}' not found"
+    except Exception as e:
+        return f"Error: Failed to render directory metadata: {str(e)}"
+
+
 @register.simple_tag
 def spellbook_url(url_path: str) -> str:
     """
@@ -167,8 +222,8 @@ def page_header(context):
         'author': metadata.get('author'),
         'prev_page': metadata.get('prev_page'),
         'next_page': metadata.get('next_page'),
-        'parent_dir_url': parent_dir_url,
-        'parent_dir_name': parent_dir_name,
+        'parent_directory_url': parent_dir_url,
+        'parent_directory_name': parent_dir_name,
     }
 
     try:
