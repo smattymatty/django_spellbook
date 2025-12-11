@@ -122,7 +122,13 @@ urlpatterns = [
     def write_urls_file(self, url_patterns: List[str]) -> None:
         """Write URL patterns to app-specific urls.py file."""
         try:
-            urls_str = ',\n    '.join(url_patterns) if url_patterns else ''
+            if url_patterns:
+                urls_str = ',\n    '.join(url_patterns)
+                # Add trailing comma (Python best practice)
+                urls_str += ','
+            else:
+                urls_str = ''
+
             content = f"""from django.urls import path
 from django_spellbook import {self.views_module} as views
 

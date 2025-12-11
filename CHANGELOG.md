@@ -5,6 +5,179 @@ All notable changes to Django Spellbook will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2025-12-10
+
+### Added
+
+#### Spellbook Wizard - Interactive Command Menu
+New interactive wizard makes Django Spellbook easier to use with a menu-driven interface.
+
+**Usage:**
+```bash
+python manage.py spellbook_wizard
+```
+
+**What you get:**
+- Clean menu interface for all Spellbook commands
+- No need to remember command names and flags
+- Categories organize related tasks
+- Easy navigation with numbered selections
+
+**Example session:**
+```
+Spellbook Wizard
+
+  [1] Batch process
+  [2] Validate
+
+  [0] Exit
+
+> 1
+
+Batch Process
+
+  [1] Process markdown (spellbook_md)
+
+  [0] ← Back
+
+> 1
+
+Running spellbook_md...
+[normal spellbook_md output]
+```
+
+**Current features:**
+- Batch process category with spellbook_md integration
+- Validate category with frontmatter validation
+
+#### Frontmatter Validation
+New validation tools help ensure your markdown files have proper metadata.
+
+**Features:**
+- **Audit mode** - Reports frontmatter issues without changes
+- **Interactive fix mode** - Walk through fixes with user prompts
+- Validates required fields: title, published, author, tags
+- Type checking for dates (YYYY-MM-DD format), lists, and strings
+- Shortcuts like 'today' for date entry, 'skip' to skip fixes
+
+**Usage - Standalone Command:**
+```bash
+# Audit mode (reports issues only)
+python manage.py spellbook_validate
+
+# Interactive fix mode
+python manage.py spellbook_validate --fix
+
+# Validate specific directory
+python manage.py spellbook_validate --source-path /path/to/markdown
+```
+
+**Usage - Via Wizard:**
+```bash
+python manage.py spellbook_wizard
+# Select [2] Validate → [1] Validate frontmatter
+```
+
+**What it validates:**
+- `title`: Required, non-empty string
+- `published`: Required, valid date in YYYY-MM-DD format
+- `author`: Required, non-empty string
+- `tags`: Required, must be a list with at least 1 item
+
+**Example output:**
+```
+❌ docs/getting-started.md
+   • Missing: author
+   • tags: must have at least 1 item
+
+❌ blog/old-post.md
+   • published: invalid date format "Dec 2025" (expected YYYY-MM-DD)
+
+────────────────────────────────
+⚠️  2 pages with issues
+✅ 45 pages valid
+
+Run interactive fix? (y/n):
+```
+- More categories coming soon (validate, generate, analyze)
+
+**Benefits:**
+- Perfect for new users learning Spellbook
+- Faster workflow for common tasks
+- Consistent interface as features grow
+- Graceful error handling
+
+## [0.2.1] - 2025-12-10
+
+### Added
+
+#### Auto-Generated Directory Index Pages
+Visit any directory in your content and see a beautiful listing page automatically - no more 404 errors!
+
+**Before:** Visiting `/docs/` showed "Page not found"
+
+**Now:** Visiting `/docs/` shows all your content organized by subdirectories and pages
+
+**What you get:**
+- Directory indexes for every folder containing markdown files
+- Subdirectories listed first with page counts
+- Individual pages listed with their metadata
+- Alphabetically sorted for easy browsing
+- Matches your site's theme automatically
+- Zero configuration required
+
+**Example:**
+When you visit `/docs/`, you'll see:
+- All subdirectories (Getting Started, Advanced, API Reference)
+- All pages in that directory with their publish dates and tags
+- Clean, organized layout matching your site's design
+
+**How to use:**
+Just run `python manage.py spellbook_md` like always. Directory indexes are created automatically for every folder.
+
+**Special notes:**
+- If you already have an `index.md` file in a directory, your file takes priority
+- Empty directories won't get index pages
+- Works with nested directories at any depth
+
+#### Page Header Navigation
+Every page now has a clean navigation header showing where you are and where you can go.
+
+**What's included:**
+- Page title prominently displayed
+- Author name (if set in frontmatter)
+- "Back to [Directory]" link to browse related content
+- Previous/Next buttons to move between pages in the same directory
+
+**Example:**
+```
+← Back to Docs
+
+        Getting Started
+        by Jane Smith
+
+← Introduction              Setup Guide →
+```
+
+**What changed:**
+- Navigation moved to its own section at the top of each page
+- Metadata box now only shows publication info (dates, tags, word count)
+- Cleaner separation between navigation and content information
+
+**How to use:**
+If you're using the default `sidebar_left.html` template, you already have it. Custom templates can add `{% page_header %}` anywhere in the template.
+
+### Changed
+- Metadata display reorganized: navigation elements moved to page header
+- Publication information (dates, tags, word count) stays in metadata box
+- Default templates now include page header automatically
+
+### Backward Compatibility
+- Existing `{% show_metadata %}` tag continues working
+- Custom templates without `{% page_header %}` work normally (just won't show the header)
+- All frontmatter fields work exactly as before
+- No breaking changes to any existing functionality
+
 ## [0.2.0] - 2025-12-08
 
 ### ⚠️ Breaking Changes
