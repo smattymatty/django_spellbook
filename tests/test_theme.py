@@ -253,10 +253,10 @@ class TestSpellbookTheme(TestCase):
         
         self.assertEqual(theme.name, 'arcane')
         self.assertIn('primary', theme.colors)
-        
-        # Should have arcane colors
+
+        # Should have arcane colors (updated for WCAG AA compliance)
         primary = theme.get_color('primary')
-        self.assertEqual(primary.value, '#9D4EDD')
+        self.assertEqual(primary.value, '#7C3AED')
 
 
 class TestCSSGeneration(TestCase):
@@ -308,10 +308,11 @@ class TestThemePresets(TestCase):
     def test_get_preset_theme(self):
         """Test getting a preset theme."""
         preset = get_preset_theme('arcane')
-        
+
         self.assertEqual(preset['name'], 'arcane')
         self.assertIn('colors', preset)
-        self.assertEqual(preset['colors']['primary'], '#9D4EDD')
+        # Updated for WCAG AA compliance
+        self.assertEqual(preset['colors']['primary'], '#7c3aed')
     
     def test_get_invalid_preset(self):
         """Test getting an invalid preset."""

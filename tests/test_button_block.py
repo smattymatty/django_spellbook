@@ -10,7 +10,7 @@ from django.conf import settings
 from django.test import TestCase
 import django
 
-from django_spellbook.parsers import render_spellbook_markdown_to_html
+from django_spellbook.parsers import spellbook_render
 from django_spellbook.blocks import SpellBlockRegistry
 from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
 
@@ -131,7 +131,7 @@ class TestButtonBlockIntegration(TestCase):
         with open(input_md_path, 'r', encoding='utf-8') as f:
             markdown_text = f.read()
 
-        actual_html = render_spellbook_markdown_to_html(markdown_text)
+        actual_html = spellbook_render(markdown_text)
 
         with open(output_html_path, 'w', encoding='utf-8') as f:
             f.write(actual_html)

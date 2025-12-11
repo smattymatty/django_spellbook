@@ -5,6 +5,117 @@ All notable changes to Django Spellbook will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.2.3] - 2025-12-11
+
+### Added
+
+#### New Template Tag: `{% spellblock %}`
+Added support for using SpellBlocks directly in Django templates without writing markdown.
+
+**Usage:**
+```django
+{% load spellbook_tags %}
+
+{% spellblock 'alert' type='success' %}
+    Your changes were saved!
+{% endspellblock %}
+
+{% spellblock 'card' title='User Profile' %}
+    <p>Welcome, {{ user.name }}!</p>
+{% endspellblock %}
+```
+
+**Features:**
+- Full variable resolution in block names, arguments, and content
+- Proper error handling with user-friendly error messages
+- Support for nested blocks and complex template logic
+- Preserves HTML and whitespace correctly
+- Context isolation for clean template execution
+
+**Benefits:**
+- Use SpellBlocks in existing Django templates
+- No need to write markdown for simple components
+- Full integration with Django's template system
+- Great for dynamic content with template variables
+
+#### New Parser Function: `spellbook_render`
+Introduced a new, cleaner parser function name for better developer experience.
+
+**New function:**
+```python
+from django_spellbook.parsers import spellbook_render
+
+html = spellbook_render(markdown_text)
+```
+
+**Benefits:**
+- Shorter, easier to remember
+- Better aligns with "spellbook" branding
+- Improved documentation and examples
+
+### Changed
+
+#### Accessibility Improvements - WCAG AA Compliance
+All themes and UI components now meet WCAG AA accessibility standards for contrast and readability.
+
+**What changed:**
+- Updated all 9 theme presets with WCAG AA compliant colors (4.5:1 minimum contrast ratio)
+- Redesigned directory index page for better readability
+- Removed blue-on-blue color combinations that failed contrast requirements
+- All text colors now meet or exceed accessibility standards
+
+**Themes updated:**
+- `default` - Now uses darker blues and better grays
+- `arcane` - Adjusted purples for readability
+- `celestial` - Improved sky blues and contrast
+- `forest` - Enhanced greens and earth tones
+- `ocean` - Better ocean blues with proper contrast
+- `phoenix` - Adjusted fire colors for readability
+- `shadow` - Monochrome palette with high contrast
+- `enchanted` - Vibrant colors that remain readable
+- `pastel` - Darker pastels that meet standards
+
+**Directory index improvements:**
+- White/light backgrounds with dark text (no more blue-on-blue)
+- Clear visual hierarchy
+- Better spacing and typography
+- Hover states use border color changes instead of background
+- Tags use subtle backgrounds with readable text
+
+**Benefits:**
+- Better readability for all users
+- Compliance with accessibility standards
+- Improved user experience
+- More professional appearance
+- Consistent with content page design
+
+### Deprecated
+
+#### Parser Function: `render_spellbook_markdown_to_html`
+The function `render_spellbook_markdown_to_html` is now deprecated in favor of `spellbook_render`.
+
+**Migration:**
+```python
+# Old (deprecated - will be removed in 0.4.0)
+from django_spellbook.parsers import render_spellbook_markdown_to_html
+html = render_spellbook_markdown_to_html(markdown_text)
+
+# New (recommended)
+from django_spellbook.parsers import spellbook_render
+html = spellbook_render(markdown_text)
+```
+
+**Timeline:**
+- **0.2.4**: Deprecation warning added
+- **0.4.0**: Function will be removed
+
+**What to do:**
+- Replace all uses of `render_spellbook_markdown_to_html` with `spellbook_render`
+- Signatures are identical - simple find/replace works
+- Deprecation warnings will guide you to update
+
 ## [0.2.2] - 2025-12-10
 
 ### Added

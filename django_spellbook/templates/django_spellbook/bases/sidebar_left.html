@@ -20,7 +20,16 @@
                         {% page_metadata "for_dev" %}
                     {% endif %}
                 </nav>
-                <main class="spellbook-content">
+                <main class="spellbook-content" style="position: relative;">
+                    {% if parent_directory_url is not None %}
+                    <div style="position: absolute; top: 0; left: 0;">
+                        <a href="{% spellbook_url parent_directory_url %}"
+                           class="sb-flex sb-items-center sb-gap-1 sb-text-sm sb-secondary sb-no-underline sb-hover:primary sb-transition">
+                            <span>←</span>
+                            <span>{{ parent_directory_name }}</span>
+                        </a>
+                    </div>
+                    {% endif %}
                     {% page_header %}
                     {% block spellbook_md %}{% endblock %}
                 </main>

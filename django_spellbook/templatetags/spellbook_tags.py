@@ -5,6 +5,8 @@ from django.urls import reverse, NoReverseMatch
 from django.core.exceptions import ImproperlyConfigured
 from django.template.loader import render_to_string
 from django.template import TemplateDoesNotExist
+from django.template.base import FilterExpression, kwarg_re
+from django.utils.safestring import mark_safe
 
 from django_spellbook.utils import remove_leading_dash
 from django_spellbook.markdown.context import SpellbookContext
@@ -194,3 +196,162 @@ def page_metadata(context, display_type="for_user"):
         Rendered HTML string
     """
     return show_metadata(context, display_type)
+
+
+class MinimalReporter:
+    """
+    Minimal reporter for template tag usage.
+
+    SpellBlocks require a reporter for statistics tracking,
+    but template tags don't need this functionality.
+    """
+    def __init__(self):
+        """Initialize with empty spellblocks list."""
+        self.spellblocks = []
+
+    def record_spellblock_usage(self, name, success=True, params=None):
+        """No-op implementation of record_spellblock_usage."""
+        pass
+
+    def write(self, message, **kwargs):
+        """No-op implementation of write."""
+        pass
+
+    def error(self, message, **kwargs):
+        """No-op implementation of error."""
+        pass
+
+    def success(self, message, **kwargs):
+        """No-op implementation of success."""
+        pass
+
+
+def render_spellblock_error(message):
+    """
+    Render a visible error for SpellBlock failures.
+
+    Args:
+        message: Error message to display
+
+    Returns:
+        Safe HTML string with error styling
+    """
+    return mark_safe(
+        f'<div class="sb-spellblock-error sb-p-3 sb-rounded sb-border sb-bg-error-25 sb-text-error">'
+        f'<strong>SpellBlock Error:</strong> {message}'
+        f'</div>'
+    )
+
+
+@register.tag('spellblock')
+def do_spellblock(parser, token):
+    """
+    Render a SpellBlock in a Django template.
+
+    Usage:
+        {% spellblock "alert" type="warning" %}
+            <p>Content here</p>
+        {% endspellblock %}
+
+    Args:
+        parser: Django template parser
+        token: Current token being parsed
+
+    Returns:
+        SpellBlockTemplateNode instance
+
+    Raises:
+        TemplateSyntaxError: If block name is missing
+    """
+    bits = token.split_contents()
+    tag_name = bits.pop(0)
+
+    if not bits:
+        raise template.TemplateSyntaxError(
+            f"'{tag_name}' requires a block name as first argument"
+        )
+
+    # Parse arguments
+    args = []
+    kwargs = {}
+    for bit in bits:
+        match = kwarg_re.match(bit)
+        if match and match.group(1):
+            key, value = match.groups()
+            kwargs[key] = FilterExpression(value, parser)
+        else:
+            args.append(FilterExpression(bit, parser))
+
+    if not args:
+        raise template.TemplateSyntaxError(
+            f"'{tag_name}' requires a block name as first argument"
+        )
+
+    # Capture content until {% endspellblock %}
+    nodelist = parser.parse(('endspellblock',))
+    parser.delete_first_token()
+
+    return SpellBlockTemplateNode(args[0], nodelist, kwargs)
+
+
+class SpellBlockTemplateNode(template.Node):
+    """
+    Template node for rendering SpellBlocks.
+
+    Handles argument resolution, content rendering, and SpellBlock instantiation.
+    """
+
+    def __init__(self, name_expr, nodelist, kwargs):
+        """
+        Initialize the node.
+
+        Args:
+            name_expr: FilterExpression for block name
+            nodelist: NodeList of content between tags
+            kwargs: Dict of FilterExpressions for keyword arguments
+        """
+        self.name_expr = name_expr
+        self.nodelist = nodelist
+        self.kwargs = kwargs
+
+    def render(self, context):
+        """
+        Render the SpellBlock.
+
+        Args:
+            context: Template context
+
+        Returns:
+            Rendered HTML string
+        """
+        # Resolve block name
+        try:
+            name = self.name_expr.resolve(context)
+        except template.VariableDoesNotExist:
+            return render_spellblock_error("Block name could not be resolved")
+
+        # Resolve kwargs
+        try:
+            resolved_kwargs = {k: v.resolve(context) for k, v in self.kwargs.items()}
+        except template.VariableDoesNotExist as e:
+            return render_spellblock_error(f"Argument could not be resolved: {e}")
+
+        # Render content
+        with context.push():
+            content = self.nodelist.render(context)
+
+        # Get block from registry
+        from django_spellbook.blocks import SpellBlockRegistry
+        BlockClass = SpellBlockRegistry.get_block(name)
+
+        if BlockClass is None:
+            return render_spellblock_error(f"Block '{name}' not found in registry")
+
+        # Instantiate and render block
+        try:
+            # Pass minimal reporter for template tag usage (no statistics tracking needed)
+            reporter = MinimalReporter()
+            block_instance = BlockClass(reporter=reporter, content=content, **resolved_kwargs)
+            return mark_safe(block_instance.render())
+        except Exception as e:
+            return render_spellblock_error(f"Error rendering '{name}': {str(e)}")

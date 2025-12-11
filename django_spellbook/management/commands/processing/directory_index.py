@@ -178,6 +178,39 @@ class DirectoryIndexBuilder:
 
         return url
 
+    def _get_parent_directory_info(self, directory: Path) -> Tuple[Optional[str], Optional[str]]:
+        """
+        Get parent directory URL and name for "Back to" navigation.
+
+        Args:
+            directory: Current directory path
+
+        Returns:
+            Tuple of (parent_dir_url, parent_dir_name) or (None, None) if at root
+        """
+        if directory == Path('.'):
+            # At root, no parent
+            return None, None
+
+        # Get parent directory
+        parent = directory.parent
+
+        # Build parent URL
+        parent_url = self._build_directory_url(parent)
+
+        # Add url_prefix to the URL for proper navigation (if not already present)
+        if self.url_prefix:
+            if parent_url and not parent_url.startswith(f"{self.url_prefix}/"):
+                parent_url = f"{self.url_prefix}/{parent_url}"
+            elif not parent_url:
+                # Parent is root, just use url_prefix
+                parent_url = f"{self.url_prefix}/"
+
+        # Get parent name
+        parent_name = self._humanize_directory_name(parent)
+
+        return parent_url, parent_name
+
     def _collect_directory_context(
         self,
         directory: Path,
@@ -193,11 +226,14 @@ class DirectoryIndexBuilder:
             all_files: All processed files (for subdirectory detection)
 
         Returns:
-            Dictionary with directory_name, directory_path, subdirectories, pages
+            Dictionary with directory_name, directory_path, subdirectories, pages, parent_dir_url, parent_dir_name
         """
         # Get directory metadata
         directory_name = self._humanize_directory_name(directory)
         directory_path = self._build_directory_url(directory)
+
+        # Get parent directory info
+        parent_dir_url, parent_dir_name = self._get_parent_directory_info(directory)
 
         # Detect subdirectories
         subdirectories = self._detect_subdirectories(directory, all_files)
@@ -208,6 +244,8 @@ class DirectoryIndexBuilder:
         return {
             'directory_name': directory_name,
             'directory_path': directory_path,
+            'parent_dir_url': parent_dir_url,
+            'parent_dir_name': parent_dir_name,
             'subdirectories': subdirectories,
             'pages': pages
         }
@@ -260,6 +298,13 @@ class DirectoryIndexBuilder:
             subdir_path = parent_dir / subdir_name
             subdir_url = self._build_directory_url(subdir_path)
 
+            # Add url_prefix to subdirectory URL for proper absolute navigation (if not already present)
+            if self.url_prefix:
+                if subdir_url and not subdir_url.startswith(f"{self.url_prefix}/"):
+                    subdir_url = f"{self.url_prefix}/{subdir_url}"
+                elif not subdir_url:
+                    subdir_url = f"{self.url_prefix}/"
+
             subdir_list.append({
                 'title': self._humanize_directory_name(Path(subdir_name)),
                 'url': subdir_url,
@@ -281,8 +326,15 @@ class DirectoryIndexBuilder:
         pages = []
 
         for pf in files:
-            # Build page URL with url_prefix
+            # Build page URL
             page_url = self._build_page_url(pf.relative_url)
+
+            # Add url_prefix for absolute navigation in directory index (if not already present)
+            if self.url_prefix:
+                if page_url and not page_url.startswith(f"{self.url_prefix}/"):
+                    page_url = f"{self.url_prefix}/{page_url}"
+                elif not page_url:
+                    page_url = f"{self.url_prefix}/"
 
             # Get title (fallback to filename)
             # Handle both Path objects and strings for original_path
@@ -351,7 +403,9 @@ class DirectoryIndexBuilder:
             Human-readable string
         """
         if directory == Path('.'):
-            return self.content_app.replace('_', ' ').title()
+            # Use url_prefix if available, otherwise fall back to content_app
+            name = self.url_prefix if self.url_prefix else self.content_app
+            return name.replace('_', ' ').replace('-', ' ').title()
 
         # Get last part of path (directory name)
         name = directory.name

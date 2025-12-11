@@ -1,16 +1,5 @@
 {% load spellbook_tags %}
 <header class="sb-page-header sb-mb-2">
-  <!-- Back to directory link -->
-  {% if parent_dir_url is not None %}
-  <div class="">
-    <a href="{% spellbook_url parent_dir_url %}"
-       class="sb-flex sb-items-center sb-gap-1 sb-text-sm sb-secondary sb-no-underline sb-hover:primary sb-transition">
-      <span>←</span>
-      <span>Back to {{ parent_dir_name }}</span>
-    </a>
-  </div>
-  {% endif %}
-
   <!-- Title and Author - Centered -->
   <div class="sb-text-center">
     <h1 class="sb-text-3xl sb-font-bold sb-primary sb-m-0">{{ title }}</h1>

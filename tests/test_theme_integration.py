@@ -142,12 +142,12 @@ class TestThemeIntegration(TestCase):
         
         # Generate styles with arcane preset
         theme_css = generate_theme_css(arcane_theme)
-        
-        # Get expected primary color
+
+        # Get expected primary color (updated for WCAG AA compliance)
         arcane_primary = arcane_theme['colors']['primary']
-        
-        # Check arcane theme colors are applied
-        self.assertIn(f'--primary-color: {arcane_primary}', theme_css)
+
+        # Check arcane theme colors are applied (uppercase for CSS)
+        self.assertIn(f'--primary-color: {arcane_primary.upper()}', theme_css)
     
     def test_theme_css_complete_integration(self):
         """Test complete integration of theme CSS generation."""

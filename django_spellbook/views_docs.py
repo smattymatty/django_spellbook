@@ -37,6 +37,8 @@ def directory_index_root_docs(request):
     context = {
     'directory_name': 'Docs',
     'directory_path': '',
+    'parent_dir_url': None,
+    'parent_dir_name': None,
     'subdirectories': [],
     'pages': [
         {

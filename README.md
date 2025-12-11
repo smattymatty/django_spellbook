@@ -184,7 +184,7 @@ Those are two examples of built-in Spellblocks. You can also create your own cus
 # Usage - Rendering Markdown to HTML within a python script
 
 ```python
-from django_spellbook.parsers import render_spellbook_markdown_to_html
+from django_spellbook.parsers import spellbook_render
 
 def my_view(request):
     markdown_text = """
@@ -201,9 +201,11 @@ This is my content.
 This is the **main content** of the *card*.
 {~~}
 """
-    html = render_spellbook_markdown_to_html(markdown_text)
+    html = spellbook_render(markdown_text)
     return HttpResponse(html)
 ```
+
+> **Note:** The function `render_spellbook_markdown_to_html` is deprecated as of version 0.2.4 and will be removed in version 0.4.0. Please use `spellbook_render` instead.
 
 # Commands
 

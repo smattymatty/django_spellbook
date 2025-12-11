@@ -138,7 +138,7 @@ class TestPageHeader(TestCase):
         # Check that key elements are present
         self.assertIn('Test Page', result)
         self.assertIn('Test Author', result)
-        self.assertIn('Back to Parent Directory', result)
+        # Note: "Back to" link is now in base template, not page_header
         self.assertIn('Previous', result)
         self.assertIn('Next', result)
 
@@ -165,9 +165,9 @@ class TestPageHeader(TestCase):
 
         result = template.render(context)
 
-        # Should have title and back button to directory index
+        # Should have title (back button is now in base template, not page_header)
         self.assertIn('Root Page', result)
-        self.assertIn('Back to Content', result)
+        # Note: "Back to" link is now in base template, not page_header
         # Check that nav button text is not present (not just in HTML comments)
         self.assertNotIn('<span class="sb-text-sm">Previous</span>', result)
         self.assertNotIn('<span class="sb-text-sm">Next</span>', result)

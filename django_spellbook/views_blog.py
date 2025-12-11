@@ -37,11 +37,13 @@ def directory_index_root_blog(request):
     context = {
     'directory_name': 'Blog',
     'directory_path': '',
+    'parent_dir_url': None,
+    'parent_dir_name': None,
     'subdirectories': [],
     'pages': [
         {
             'title': 'First Post',
-            'url': 'first-post/',
+            'url': 'blog/first-post/',
             'published': None,
             'modified': None,
             'tags': [],

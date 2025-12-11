@@ -3,7 +3,7 @@ import re
 from io import StringIO
 
 from django_spellbook.utils import remove_leading_dash, titlefy
-from django_spellbook.parsers import render_spellbook_markdown_to_html
+from django_spellbook.parsers import spellbook_render
 from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
 
 
@@ -64,7 +64,7 @@ def render_markdown(markdown_str, reporter=None):
             report_level='minimal'
         )
 
-    return render_spellbook_markdown_to_html(markdown_str, reporter)
+    return spellbook_render(markdown_str, reporter)
 
 
 # ============================================================================
