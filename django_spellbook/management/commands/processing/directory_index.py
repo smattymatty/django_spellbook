@@ -532,7 +532,8 @@ class DirectoryIndexBuilder:
         view_name = self._generate_view_name(directory_path)
 
         # Generate URL name for this view (for current_url)
-        url_name = f"{self.content_app}_directory_index_{view_name}"
+        # Note: view_name already includes 'directory_index_' prefix
+        url_name = f"{self.content_app}_{view_name}"
         namespaced_url = f"{self.content_app}:{url_name}"
 
         # Convert context_data to Python literal string
@@ -567,7 +568,8 @@ def {view_name}(request):
         url_path = directory_url.lstrip('/')
 
         # Generate URL name
-        url_name = f"{self.content_app}_directory_index_{view_name}"
+        # Note: view_name already includes 'directory_index_' prefix
+        url_name = f"{self.content_app}_{view_name}"
 
         return f"path('{url_path}', views.{view_name}, name='{url_name}')"
 

@@ -226,8 +226,8 @@ def {view_name}(request):
 
         # If no slashes, we're at root level - link to root directory index
         if '/' not in clean_url:
-            # URL name: {app}:{app}_directory_index_directory_index_root_{app}
-            url_name = f"{self.content_app}:{self.content_app}_directory_index_directory_index_root_{self.content_app}"
+            # URL name: {app}:{app}_directory_index_root_{app}
+            url_name = f"{self.content_app}:{self.content_app}_directory_index_root_{self.content_app}"
             # Use url_prefix for the name (e.g., "content"), or fallback to app name
             directory_name = self.url_prefix.replace('-', ' ').replace('_', ' ').title() if self.url_prefix else self.content_app.replace('_', ' ').title()
             return {'url': url_name, 'name': directory_name}
@@ -246,7 +246,7 @@ def {view_name}(request):
                 parent_dir_parts.append(clean_part)
 
         dir_name = '_'.join(parent_dir_parts) if parent_dir_parts else f'root_{self.content_app}'
-        url_name = f"{self.content_app}:{self.content_app}_directory_index_directory_index_{dir_name}"
+        url_name = f"{self.content_app}:{self.content_app}_directory_index_{dir_name}"
 
         # Build parent directory name (humanized from last part)
         parent_name = parent_parts[-1].replace('-', ' ').replace('_', ' ').title()

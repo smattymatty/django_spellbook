@@ -118,7 +118,7 @@ class TestDirectoryIndexBuilder(TestCase):
         # since it will be added by include() in main urls.py
         # Result: path('', ...) which becomes 'docs/' when included at 'docs/'
         self.assertIn("path('', views.directory_index_docs", url_pattern)
-        self.assertIn("name='test_app_directory_index_directory_index_docs'", url_pattern)
+        self.assertIn("name='test_app_directory_index_docs'", url_pattern)
 
     def test_skips_directories_with_index_conflict(self):
         """Directories with index.md are skipped."""

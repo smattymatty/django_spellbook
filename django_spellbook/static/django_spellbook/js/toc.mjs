@@ -142,6 +142,20 @@ function expandPathToActiveItem(parentPath) {
       }
     }
   }
+
+  // ALSO expand the active item itself IF it has children (directory index case)
+  // This handles the case where we're viewing a directory index page
+  const activeItemId = parentPath[parentPath.length - 1];
+  const activeItem = document.querySelector(`[data-toc-id="${activeItemId}"]`);
+  if (activeItem) {
+    const sublist = activeItem.querySelector(":scope > .toc-sublist");
+    const toggle = activeItem.querySelector(":scope > .toc-item-header > .toc-toggle");
+
+    // If the active item has children, expand it
+    if (sublist) {
+      expandTocItem(activeItem, sublist, toggle);
+    }
+  }
 }
 
 /**
