@@ -251,6 +251,59 @@ class TestPageHeader(TestCase):
         # Should return empty string or minimal output
         self.assertIsInstance(result, str)
 
+    def test_page_header_for_directory_with_name(self):
+        """Test page_header for directory index with directory_name set"""
+        template = Template(
+            "{% load spellbook_tags %}"
+            "{% page_header %}"
+        )
+        context = Context({
+            'is_directory_index': True,
+            'directory_name': 'My Folder',
+            'directory_path': 'my_folder/',
+        })
+
+        result = template.render(context)
+
+        self.assertIn('My Folder', result)
+        self.assertNotIn('None', result)
+
+    def test_page_header_for_directory_without_name(self):
+        """Test page_header for directory index without directory_name (fallback to directory_path)"""
+        template = Template(
+            "{% load spellbook_tags %}"
+            "{% page_header %}"
+        )
+        context = Context({
+            'is_directory_index': True,
+            'directory_name': None,  # Missing or None
+            'directory_path': 'api_docs/',
+        })
+
+        result = template.render(context)
+
+        # Should extract from directory_path and humanize it
+        self.assertIn('Api Docs', result)
+        self.assertNotIn('None', result)
+
+    def test_page_header_for_directory_no_name_no_path(self):
+        """Test page_header for directory index without directory_name or directory_path (fallback to 'Content')"""
+        template = Template(
+            "{% load spellbook_tags %}"
+            "{% page_header %}"
+        )
+        context = Context({
+            'is_directory_index': True,
+            'directory_name': None,
+            'directory_path': '',
+        })
+
+        result = template.render(context)
+
+        # Should use 'Content' as fallback
+        self.assertIn('Content', result)
+        self.assertNotIn('None', result)
+
 
 @override_settings(TEMPLATES=settings.TEMPLATES)
 class TestPageMetadata(TestCase):

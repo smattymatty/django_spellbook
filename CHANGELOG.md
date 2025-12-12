@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+#### Improved Directory Navigation Experience
+Directory index pages now provide a cleaner, more intuitive navigation experience with better visual organization.
+
+**What changed:**
+- **Single title display** - Removed duplicate title and "back" button that appeared on directory pages. Your directory name now appears once at the top, clean and clear.
+- **Active directory highlighting in TOC** - When viewing a directory index page, the corresponding folder in the table of contents now:
+  - Gets highlighted with your theme's accent color
+  - Automatically expands to show its contents
+  - Becomes clickable to easily return to the directory view
+- **Consistent page headers** - Directory index pages now use the same header style as regular pages, with proper back navigation and visual consistency
+
+**Before:**
+```
+← Content                  ← Appeared twice
+Folder
+
+← Content                  ← with duplicate sections
+Folder
+
+[Directory contents...]
+```
+
+**Now:**
+```
+← Content
+Folder                     ← Clean, single header
+
+[Directory contents...]
+```
+
+**How the TOC works now:**
+- When you're on `/docs/advanced/`, the "Advanced" folder in the sidebar gets highlighted
+- The folder automatically opens to show all pages inside
+- Click the folder name to jump back to the directory index
+- Just like page links, folders are now fully integrated into navigation
+
+**Benefits:**
+- ✅ Cleaner page layout without repetition
+- ✅ Better wayfinding - always know which directory you're viewing
+- ✅ Consistent navigation patterns across pages and directories
+- ✅ Clickable folders make browsing easier
+- ✅ Works automatically - no configuration needed
+
+**Backward Compatibility:**
+- All existing templates continue to work
+- TOC expansion behavior remains the same for regular pages
+- No changes to your markdown files needed
+- Folders without index pages remain non-clickable (backwards compatible)
+
 ## [0.2.3] - 2025-12-11
 
 ### Added

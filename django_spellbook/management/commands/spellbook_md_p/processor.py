@@ -138,7 +138,43 @@ class MarkdownProcessor:
                     logger.error(f"Error adding TOC entry for {file_path}: {str(e)}")
                     # Continue with next file instead of failing completely
                     continue
-            
+
+            # Add directory URLs to the TOC
+            # Collect all unique directories that contain files
+            directories = set()
+            for file_path in md_files:
+                relative_path = file_path.relative_to(self.source_path)
+                parent_path = relative_path.parent
+
+                # Add all parent directories in the path
+                while parent_path != Path('.'):
+                    directories.add(parent_path)
+                    parent_path = parent_path.parent
+
+            # Set URL for each directory
+            for directory in sorted(directories):
+                # Generate URL name for this directory to match DirectoryIndexBuilder format
+                # DirectoryIndexBuilder creates view_name, then URL is {app}_directory_index_{view_name}
+                parts = []
+                for part in directory.parts:
+                    # Replace invalid characters (same as DirectoryIndexBuilder)
+                    clean = part.replace('-', '_').replace(' ', '_').replace('/', '_')
+                    clean = clean.strip('_')
+                    if clean:
+                        parts.append(clean)
+
+                # Match DirectoryIndexBuilder's _generate_view_name format exactly
+                if not parts:  # Root directory - Path('.')
+                    view_name = f'directory_index_root_{self.content_app}'
+                else:
+                    view_name = '_'.join(parts)
+
+                # URL name format: {app}_directory_index_{view_name}
+                directory_url = f"{self.content_app}:{self.content_app}_directory_index_{view_name}"
+
+                logger.debug(f"Adding directory URL for {directory}: {directory_url}")
+                toc_generator.set_directory_url(directory, directory_url)
+
             toc = toc_generator.get_toc()
             logger.info(f"Built TOC with {len(toc['children']) if 'children' in toc else 0} entries")
             return toc

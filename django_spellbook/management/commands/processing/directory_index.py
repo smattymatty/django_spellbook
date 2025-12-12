@@ -531,6 +531,10 @@ class DirectoryIndexBuilder:
         # Generate view name from directory path
         view_name = self._generate_view_name(directory_path)
 
+        # Generate URL name for this view (for current_url)
+        url_name = f"{self.content_app}_directory_index_{view_name}"
+        namespaced_url = f"{self.content_app}:{url_name}"
+
         # Convert context_data to Python literal string
         context_repr = self._dict_to_python_literal(context_data)
 
@@ -540,6 +544,7 @@ def {view_name}(request):
     """Auto-generated directory index view for {context_data['directory_path']}"""
     context = {context_repr}
     context['toc'] = TOC
+    context['current_url'] = '{namespaced_url}'
     return render(request, 'django_spellbook/directory_index/default.html', context)
 '''
 

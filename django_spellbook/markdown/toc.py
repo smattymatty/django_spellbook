@@ -62,6 +62,32 @@ class TOCGenerator:
             url=clean_url,
         )
 
+    def set_directory_url(self, directory_path: Path, url: str):
+        """
+        Set the URL for a directory entry in the TOC.
+
+        Args:
+            directory_path: Path to the directory (relative to source root)
+            url: Django URL name for the directory index view
+        """
+        if directory_path == Path('.'):
+            # Root directory - no action needed
+            return
+
+        parts = directory_path.parts
+        current = self.root
+
+        # Navigate to the directory entry
+        for part in parts:
+            if part in current.children:
+                current = current.children[part]
+            else:
+                # Directory not found in TOC (shouldn't happen)
+                return
+
+        # Update the URL for this directory
+        current.url = url
+
     def get_toc(self) -> Dict:
         """Get the complete TOC structure"""
         def _convert_to_dict(entry: TOCEntry) -> Dict:

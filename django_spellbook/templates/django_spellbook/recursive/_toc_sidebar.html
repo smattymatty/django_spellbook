@@ -8,7 +8,11 @@
                         <path d="M7 10l5 5 5-5H7z" />
                     </svg>
                 </button>
-                <a class="toc-link has-children sb-text-secondary sb-hover:bg-neutral-25 sb-hover:text-text sb-transition-all">{{ data.title }}</a>
+                {% if data.url %}
+                    <a href="{% spellbook_url data.url %}" class="toc-link has-children sb-text-secondary sb-hover:bg-neutral-25 sb-hover:text-text sb-transition-all{% if data.url == current_url %} sb-bg-primary-25 sb-primary{% endif %}">{{ data.title }}</a>
+                {% else %}
+                    <a class="toc-link has-children sb-text-secondary sb-hover:bg-neutral-25 sb-hover:text-text sb-transition-all">{{ data.title }}</a>
+                {% endif %}
             {% else %}
             {% if data.url %}
                 <a href="{% spellbook_url data.url %}"

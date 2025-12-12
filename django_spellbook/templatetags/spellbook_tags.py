@@ -212,18 +212,41 @@ def page_header(context):
         return ""
 
     metadata = context.get('metadata', {})
+    is_directory = context.get('is_directory_index', False)
 
     # Get parent directory info from context
-    parent_dir_url = context.get('parent_directory_url')
-    parent_dir_name = context.get('parent_directory_name', 'Directory')
+    # Directory pages use parent_dir_url, content pages use parent_directory_url
+    parent_dir_url = context.get('parent_directory_url') or context.get('parent_dir_url')
+    parent_dir_name = context.get('parent_directory_name') or context.get('parent_dir_name', 'Directory')
+
+    # For directory pages, use directory_name as title
+    if is_directory:
+        title = context.get('directory_name')
+        # If directory_name is not set or is empty, try to extract from directory_path
+        if not title:
+            directory_path = context.get('directory_path', '').strip('/')
+            if directory_path:
+                # Get the last part of the path and humanize it
+                path_parts = directory_path.split('/')
+                last_part = path_parts[-1] if path_parts else ''
+                if last_part:
+                    title = last_part.replace('_', ' ').replace('-', ' ').title()
+                else:
+                    title = 'Content'
+            else:
+                title = 'Content'
+    else:
+        title = metadata.get('title')
 
     template_context = {
-        'title': metadata.get('title'),
-        'author': metadata.get('author'),
-        'prev_page': metadata.get('prev_page'),
-        'next_page': metadata.get('next_page'),
+        'title': title,
+        'author': metadata.get('author') if not is_directory else None,
+        'prev_page': metadata.get('prev_page') if not is_directory else None,
+        'next_page': metadata.get('next_page') if not is_directory else None,
         'parent_directory_url': parent_dir_url,
         'parent_directory_name': parent_dir_name,
+        'parent_dir_url': context.get('parent_dir_url'),  # Also pass for directory pages
+        'parent_dir_name': context.get('parent_dir_name'),
     }
 
     try:
