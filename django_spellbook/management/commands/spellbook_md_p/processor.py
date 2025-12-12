@@ -62,34 +62,54 @@ class MarkdownProcessor:
     """
     
     def __init__(
-        self, 
-        content_app: str, 
-        source_path: Union[str, Path], 
-        content_dir_path: Union[str, Path], 
+        self,
+        content_app: str,
+        source_path: Union[str, Path],
+        content_dir_path: Union[str, Path],
         template_dir: Union[str, Path],
         reporter: MarkdownReporter,
         url_prefix: str = '',
         base_template: Optional[str] = None,
+        extend_from: Optional[str] = None,
     ):
         self.content_app: str = content_app
         self.source_path: Path = Path(source_path)
         self.content_dir_path: Path = Path(content_dir_path)
         self.template_dir: Path = Path(template_dir)
         self.url_prefix: str = url_prefix
-        self.base_template: Optional[str] = base_template
         self.reporter: MarkdownReporter = reporter
-        
+
+        # Determine final base template
+        # Priority: EXTEND_FROM > BASE_TEMPLATE > default
+        if extend_from:
+            # Import here to avoid circular imports
+            from django_spellbook.management.commands.processing.base_template_generator import SpellbookBaseGenerator
+
+            # Generate wrapper and use it
+            base_gen = SpellbookBaseGenerator(
+                content_app,
+                Path(template_dir),
+                extend_from
+            )
+            final_base = base_gen.process()  # Returns '{app}/spellbook_base.html' or None
+        elif base_template:
+            # Use explicit base template
+            final_base = base_template
+        else:
+            # Use default
+            final_base = 'django_spellbook/bases/sidebar_left.html'
+
         # Initialize sub-processors
         self.file_processor = MarkdownFileProcessor(self.reporter)
         self.file_processor.current_source_path = str(self.source_path)
-        self.template_generator = TemplateGenerator(content_app, str(self.template_dir), self.base_template)
+        self.template_generator = TemplateGenerator(content_app, str(self.template_dir), final_base)
         self.url_generator = URLViewGenerator(
             content_app=content_app,
             content_dir_path=str(self.content_dir_path),
             source_path=str(self.source_path),
             url_prefix=self.url_prefix
         )
-        
+
         logger.debug(f"Initialized MarkdownProcessor for app {content_app}")
     
     def build_toc(self) -> Dict[str, TOCEntry]:

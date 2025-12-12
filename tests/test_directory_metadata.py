@@ -228,7 +228,7 @@ class TestDirectoryMetadataTemplateTag(TestCase):
         # No heading in template - just verify stats are present
         self.assertIn('Total pages:', result)
         self.assertIn('12', result)
-        self.assertIn('This directory:', result)
+        self.assertIn('This folder:', result)
         self.assertIn('8', result)
         self.assertIn('Subdirectories:', result)
         self.assertIn('3', result)

@@ -47,13 +47,15 @@ def validate_spellbook_settings():
     Validate required settings and support multiple source-destination pairs.
 
     Returns:
-        Tuple[List[str], List[str], List[str], List[Optional[str]]]: md_paths, md_apps, md_url_prefix, base_templates.
+        Tuple[List[str], List[str], List[str], List[Optional[str]], List[Optional[str]]]:
+        md_paths, md_apps, md_url_prefix, base_templates, extend_from_templates.
     """
     # Get settings values with backward compatibility
     md_path = getattr(settings, 'SPELLBOOK_MD_PATH', None)
     md_app = getattr(settings, 'SPELLBOOK_MD_APP', None)
     md_url_prefix = getattr(settings, 'SPELLBOOK_MD_URL_PREFIX', None)
     md_base_template = getattr(settings, 'SPELLBOOK_MD_BASE_TEMPLATE', None)
+    md_extend_from = getattr(settings, 'SPELLBOOK_BASE_EXTEND_FROM', None)
 
     # Normalize settings to lists
     md_file_paths, content_apps, base_templates = normalize_settings(md_path, md_app, md_base_template)
@@ -63,6 +65,14 @@ def validate_spellbook_settings():
 
     if not content_apps:
         raise CommandError("Missing required settings: SPELLBOOK_MD_APP or SPELLBOOK_CONTENT_APP")
+
+    # Normalize extend_from to list (after content_apps validation)
+    if md_extend_from is None:
+        extend_from_templates = [None] * len(content_apps)
+    elif isinstance(md_extend_from, str):
+        extend_from_templates = [md_extend_from] * len(content_apps)
+    else:
+        extend_from_templates = md_extend_from
 
     # Generate default URL prefixes if not provided
     if not md_url_prefixes:
@@ -75,8 +85,10 @@ def validate_spellbook_settings():
 
     # Validate settings
     _validate_setting_values(md_file_paths, content_apps, md_url_prefixes, base_templates)
+    _validate_base_templates(base_templates)
+    _validate_extend_from_setting(extend_from_templates, content_apps)
 
-    return md_file_paths, content_apps, md_url_prefixes, base_templates
+    return md_file_paths, content_apps, md_url_prefixes, base_templates, extend_from_templates
 
 def _validate_setting_values(md_file_paths: List[str], content_apps: List[str], md_url_prefix: List[str], base_templates: List[Optional[str]]):
     """
@@ -160,13 +172,58 @@ def _validate_setting_values(md_file_paths: List[str], content_apps: List[str], 
         dangerous_patterns = ['..', '//', '<?', '%', '\x00']
         if any(pattern in prefix for pattern in dangerous_patterns):
             raise CommandError(f"URL prefix '{prefix}' contains invalid characters.")
-        
+
         # Check for invalid URL characters
         import re
         if prefix and not re.match(r'^[a-zA-Z0-9_\-]+$', prefix):
             logger.warning(f"URL prefix '{prefix}' contains characters that may cause issues with URL routing.")
-    
-    # Validate base templates
+
+def _validate_extend_from_setting(extend_from: List[Optional[str]], content_apps: List[str]):
+    """
+    Validate SPELLBOOK_BASE_EXTEND_FROM setting.
+
+    Args:
+        extend_from: List of template paths to extend from
+        content_apps: List of content app names
+
+    Raises:
+        CommandError: If invalid values detected
+    """
+    # Check list length matches
+    if len(extend_from) != len(content_apps):
+        raise CommandError(
+            f"SPELLBOOK_BASE_EXTEND_FROM has {len(extend_from)} entries "
+            f"but SPELLBOOK_MD_APP has {len(content_apps)}. "
+            f"Use None for apps using standalone Spellbook."
+        )
+
+    # Validate each non-None template
+    from django.template.loader import get_template
+    from django.template import TemplateDoesNotExist
+
+    for i, template_path in enumerate(extend_from):
+        if template_path is None:
+            continue
+
+        # Check template exists
+        try:
+            template = get_template(template_path)
+        except TemplateDoesNotExist:
+            raise CommandError(
+                f"SPELLBOOK_BASE_EXTEND_FROM template not found: '{template_path}'"
+            )
+
+        # Check for required block
+        template_source = template.template.source
+        if '{%' in template_source and 'block spellbook' not in template_source:
+            raise CommandError(
+                f"Template '{template_path}' missing required block: 'spellbook'\n\n"
+                f"Add this to your template:\n"
+                f"    {{% block spellbook %}}{{% endblock %}}"
+            )
+
+def _validate_base_templates(base_templates: List[Optional[str]]):
+    """Validate base template values."""
     for template in base_templates:
         if template is not None:
             if not isinstance(template, str):

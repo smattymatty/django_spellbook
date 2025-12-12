@@ -78,11 +78,11 @@ class Command(BaseCommand):
         try:
             self.discover_spellblocks()
             # Validate settings (Should all be List[str] of equal lengths)
-            md_file_paths, content_apps, md_url_prefix, base_templates = self.validate_settings()
+            md_file_paths, content_apps, md_url_prefix, base_templates, extend_from_templates = self.validate_settings()
             self.reporter.write(f"Base templates: {base_templates}", level='debug')
             # Process each source-destination pair
             pair_results, all_processed_files, url_prefix_map = self.process_each_source_pair(
-                md_file_paths, content_apps, md_url_prefix, base_templates
+                md_file_paths, content_apps, md_url_prefix, base_templates, extend_from_templates
             )
             # (md_path, content_app, success, processed_count)
 
@@ -98,7 +98,7 @@ class Command(BaseCommand):
             logger.error(f"Command failed: {str(e)}", exc_info=True)
             raise
 
-    def _process_source_destination_pair(self, md_path: Path, content_app: str, md_url_prefix: str, base_template: str) -> Tuple[int, List[ProcessedFile]]:
+    def _process_source_destination_pair(self, md_path: Path, content_app: str, md_url_prefix: str, base_template: str, extend_from: Optional[str] = None) -> Tuple[int, List[ProcessedFile]]:
         """
         Process all markdown files for a single source-destination pair.
 
@@ -107,6 +107,7 @@ class Command(BaseCommand):
             content_app (str): Name of the content app
             md_url_prefix (str): URL prefix for the content app
             base_template (str): Base template for the content app
+            extend_from (Optional[str]): Base template to extend from
 
         Raises:
             ContentDiscoveryError if no markdown files are found
@@ -158,6 +159,7 @@ class Command(BaseCommand):
                 template_dir=template_dir,
                 url_prefix=md_url_prefix,
                 base_template=base_template,
+                extend_from=extend_from,
                 reporter=self.reporter
             )
         except Exception as e:
@@ -255,7 +257,7 @@ class Command(BaseCommand):
             ConfigurationError: If any settings are missing or invalid
         '''
         try:
-            md_file_paths, content_apps, md_url_prefix, base_templates = validate_spellbook_settings()
+            md_file_paths, content_apps, md_url_prefix, base_templates, extend_from_templates = validate_spellbook_settings()
         except Exception as e:
             error_message = f"Configuration error: {str(e)}"
             self.reporter.error(error_message)
@@ -265,15 +267,16 @@ class Command(BaseCommand):
             )
             logger.error(f"Settings validation error: {str(e)}", exc_info=True)
             raise ConfigurationError(f"Settings validation failed: {str(e)}")
-        
-        return md_file_paths, content_apps, md_url_prefix, base_templates
+
+        return md_file_paths, content_apps, md_url_prefix, base_templates, extend_from_templates
     
     def process_each_source_pair(
         self,
         md_file_paths: List[Path],
         content_apps: List[str],
         md_url_prefix: List[str],
-        base_templates: List[Optional[str]]
+        base_templates: List[Optional[str]],
+        extend_from_templates: List[Optional[str]]
     ) -> Tuple[List[Tuple[str, str, str, str, bool, int]], List[ProcessedFile], Dict[str, str]]:
         '''
         Process each source-destination pair.
@@ -283,6 +286,7 @@ class Command(BaseCommand):
             content_apps (List[str]): List of content app names
             md_url_prefix (List[str]): List of URL prefixes for the content app
             base_templates (List[Optional[str]]): List of base templates
+            extend_from_templates (List[Optional[str]]): List of base templates to extend from
 
         returns:
             Tuple containing:
@@ -299,7 +303,9 @@ class Command(BaseCommand):
         all_processed_files: List[ProcessedFile] = []
         url_prefix_map: Dict[str, str] = {}
 
-        for i, (md_path, content_app, url_prefix, base_template) in enumerate(zip(md_file_paths, content_apps, md_url_prefix, base_templates)):
+        for i, (md_path, content_app, url_prefix, base_template, extend_from) in enumerate(
+            zip(md_file_paths, content_apps, md_url_prefix, base_templates, extend_from_templates)
+        ):
             pair_name = f"pair {i+1}/{len(md_file_paths)}: {md_path} → {content_app}"
 
             # Track URL prefix for this app
@@ -317,7 +323,7 @@ class Command(BaseCommand):
             self.reporter.write(f"{base_template_doc_help_text}")
 
             try:
-                processed_count, processed_files = self._process_source_destination_pair(md_path, content_app, url_prefix, base_template)
+                processed_count, processed_files = self._process_source_destination_pair(md_path, content_app, url_prefix, base_template, extend_from)
                 pair_results.append((md_path, content_app, url_prefix, True, processed_count))
 
                 # Add namespace to each processed file's context for sitemap generation

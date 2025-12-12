@@ -328,7 +328,7 @@ def handle_frontmatter_validation(command_instance):
     # Get source paths from settings
     try:
         from django_spellbook.management.commands.command_utils import validate_spellbook_settings
-        md_file_paths, _, _, _ = validate_spellbook_settings()
+        md_file_paths, _, _, _, _ = validate_spellbook_settings()
     except Exception as e:
         command_instance.stdout.write(command_instance.style.ERROR(f"\n  Error: {str(e)}\n"))
         input("\n  Press Enter to continue...")
@@ -398,7 +398,7 @@ def handle_dead_links(command_instance):
     # Get source paths from settings
     try:
         from django_spellbook.management.commands.command_utils import validate_spellbook_settings
-        md_file_paths, _, _, _ = validate_spellbook_settings()
+        md_file_paths, _, _, _, _ = validate_spellbook_settings()
     except Exception as e:
         command_instance.stdout.write(command_instance.style.ERROR(f"\n  Error: {str(e)}\n"))
         input("\n  Press Enter to continue...")

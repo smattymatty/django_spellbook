@@ -69,7 +69,7 @@ class TestBaseTemplateHandling(TestCase):
     )
     def test_validate_spellbook_settings_with_base_template(self):
         """Test validate_spellbook_settings with base template setting."""
-        md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         self.assertEqual(md_paths, ['/test/path'])
         self.assertEqual(md_apps, ['test_app'])
@@ -83,7 +83,7 @@ class TestBaseTemplateHandling(TestCase):
     )
     def test_validate_spellbook_settings_with_multiple_base_templates(self):
         """Test validate_spellbook_settings with multiple base templates."""
-        md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
@@ -96,7 +96,7 @@ class TestBaseTemplateHandling(TestCase):
     )
     def test_validate_spellbook_settings_with_shared_base_template(self):
         """Test validate_spellbook_settings with a shared base template."""
-        md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
@@ -132,14 +132,10 @@ class TestBaseTemplateHandling(TestCase):
             )
     
     def test_validate_setting_values_with_invalid_template(self):
-        """Test _validate_setting_values with invalid template."""
+        """Test _validate_base_templates with invalid template."""
+        from django_spellbook.management.commands.command_utils import _validate_base_templates
         with self.assertRaises(CommandError):
-            _validate_setting_values(
-                ['/test/path'],
-                ['test_app'],
-                ['test_prefix'],
-                [123]  # Not a string or None
-            )
+            _validate_base_templates([123])  # Not a string or None
     
     @patch('django_spellbook.management.commands.spellbook_md.Command._process_source_destination_pair')
     @patch('django_spellbook.management.commands.spellbook_md.Command.validate_settings')
@@ -150,7 +146,8 @@ class TestBaseTemplateHandling(TestCase):
             ['/test/path'],
             ['test_app'],
             [''],
-            ['custom_base.html']
+            ['custom_base.html'],
+            [None]
         )
         # _process_source_destination_pair now returns (count, processed_files)
         mock_process.return_value = (5, [])  # 5 files processed, empty list
@@ -163,9 +160,10 @@ class TestBaseTemplateHandling(TestCase):
         mock_process.assert_called_once()
         call_args = mock_process.call_args[0]
         self.assertEqual(call_args[0], '/test/path')  # md_path
-        self.assertEqual(call_args[1], 'test_app')    # content_app 
+        self.assertEqual(call_args[1], 'test_app')    # content_app
         self.assertEqual(call_args[2], '')            # md_url_prefix
         self.assertEqual(call_args[3], 'custom_base.html')  # base_template
+        self.assertEqual(call_args[4], None)          # extend_from
     
     @patch('django_spellbook.management.commands.spellbook_md.Command._process_source_destination_pair')
     @patch('django_spellbook.management.commands.spellbook_md.Command.validate_settings')
@@ -176,7 +174,8 @@ class TestBaseTemplateHandling(TestCase):
             ['/path1', '/path2'],
             ['app1', 'app2'],
             ['', 'app2'],
-            ['base1.html', 'base2.html']
+            ['base1.html', 'base2.html'],
+            [None, None]
         )
         # _process_source_destination_pair now returns (count, processed_files)
         mock_process.return_value = (3, [])  # 3 files processed, empty list
@@ -194,13 +193,15 @@ class TestBaseTemplateHandling(TestCase):
         self.assertEqual(first_call_args[1], 'app1')        # content_app
         self.assertEqual(first_call_args[2], '')            # url_prefix
         self.assertEqual(first_call_args[3], 'base1.html')  # base_template
-        
+        self.assertEqual(first_call_args[4], None)          # extend_from
+
         # Second call should use base2.html
         second_call_args = mock_process.call_args_list[1][0]
         self.assertEqual(second_call_args[0], '/path2')     # md_path
         self.assertEqual(second_call_args[1], 'app2')       # content_app
         self.assertEqual(second_call_args[2], 'app2')       # url_prefix
         self.assertEqual(second_call_args[3], 'base2.html') # base_template
+        self.assertEqual(second_call_args[4], None)         # extend_from
     
     @patch('django_spellbook.management.commands.spellbook_md_p.processor.MarkdownProcessor')
     @patch('django_spellbook.management.commands.spellbook_md.Command._process_source_destination_pair')
@@ -209,10 +210,11 @@ class TestBaseTemplateHandling(TestCase):
         """Test that base_template is passed to the MarkdownProcessor constructor."""
         # Setup mocks
         mock_validate.return_value = (
-            ['/test/path'], 
-            ['test_app'], 
-            [''], 
-            ['custom_base.html']
+            ['/test/path'],
+            ['test_app'],
+            [''],
+            ['custom_base.html'],
+            [None]
         )
         # Mock the processor instantiation to capture the arguments
         mock_processor_instance = MagicMock()
@@ -220,7 +222,7 @@ class TestBaseTemplateHandling(TestCase):
         
         # We'll need to override the actual _process_source_destination_pair method
         # to call our mock constructor
-        def side_effect(md_path, content_app, url_prefix, base_template):
+        def side_effect(md_path, content_app, url_prefix, base_template, extend_from=None):
             # This would happen inside _process_source_destination_pair
             from django_spellbook.management.commands.command_utils import setup_directory_structure
             with patch('django_spellbook.management.commands.command_utils.setup_directory_structure') as mock_setup:

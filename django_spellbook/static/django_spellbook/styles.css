@@ -3,6 +3,7 @@
 @import 'css_modules/spellblocks/alert.css';
 @import 'css_modules/spellblocks/card.css';
 @import 'css_modules/spellblocks/accordion.css';
+@import 'css_modules/components.css';
 
 :root {
     --sb-btn-default-color: var(--sb-primary-color);
