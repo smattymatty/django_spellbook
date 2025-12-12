@@ -22,7 +22,7 @@ class TestSpellbookMDCommand(TestCase):
     def test_handle_basic_execution(self, mock_process_pair, mock_validate, mock_discover):
         """Test basic successful execution of the command"""
         # Set up mocks
-        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None])
+        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None], [None])
         # _process_source_destination_pair now returns (count, processed_files)
         mock_process_pair.return_value = (5, [])
 
@@ -36,7 +36,7 @@ class TestSpellbookMDCommand(TestCase):
         mock_validate.assert_called_once()
 
         # Verify processing was called with correct arguments
-        mock_process_pair.assert_called_once_with('/test/path', 'test_app', 'test_prefix', None)
+        mock_process_pair.assert_called_once_with('/test/path', 'test_app', 'test_prefix', None, None)
         
 
     @patch('django_spellbook.management.commands.spellbook_md.discover_blocks')
@@ -45,7 +45,7 @@ class TestSpellbookMDCommand(TestCase):
     def test_handle_multiple_pairs(self, mock_process_pair, mock_validate, mock_discover):
         """Test handling of multiple source-destination pairs"""
         # Set up mocks
-        mock_validate.return_value = (['/path1', '/path2'], ['app1', 'app2'], ['test', ''], [None, None])
+        mock_validate.return_value = (['/path1', '/path2'], ['app1', 'app2'], ['test', ''], [None, None], [None, None])
         # _process_source_destination_pair now returns (count, processed_files)
         mock_process_pair.return_value = (5, [])
 
@@ -54,8 +54,8 @@ class TestSpellbookMDCommand(TestCase):
 
         # Verify processing was called twice with correct arguments
         expected_calls = [
-            call('/path1', 'app1', 'test', None),
-            call('/path2', 'app2', '', None)
+            call('/path1', 'app1', 'test', None, None),
+            call('/path2', 'app2', '', None, None)
         ]
         self.assertEqual(mock_process_pair.call_count, 2)
         mock_process_pair.assert_has_calls(expected_calls)
@@ -71,7 +71,7 @@ class TestSpellbookMDCommand(TestCase):
     def test_handle_error_single_pair(self, mock_process_pair, mock_validate, mock_discover):
         """Test error handling with a single pair (should raise)"""
         # Set up mocks
-        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], ["template"])
+        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], ["template"], [None])
         
         # Set up error
         test_error = CommandError("Test processing error")
@@ -93,11 +93,11 @@ class TestSpellbookMDCommand(TestCase):
         """Test error handling with multiple pairs (should continue)"""
         # Set up mocks
         mock_validate.return_value = (
-            ['/path1', '/path2', '/path3'], ['app1', 'app2', 'app3'], ['test_prefix', 'gg', ''], [None, 'Template', None]
+            ['/path1', '/path2', '/path3'], ['app1', 'app2', 'app3'], ['test_prefix', 'gg', ''], [None, 'Template', None], [None, None, None]
             )
         
         # Set up error for the second pair
-        def side_effect(path, app, url_prefix, base_template):
+        def side_effect(path, app, url_prefix, base_template, extend_from=None):
             if path == '/path2':
                 raise CommandError("Test processing error")
             return 1  # Return an integer count on success (not None)
@@ -109,9 +109,9 @@ class TestSpellbookMDCommand(TestCase):
         
         # Verify all pairs were attempted
         expected_calls = [
-            call('/path1', 'app1', 'test_prefix', None),
-            call('/path2', 'app2', 'gg', "Template"),
-            call('/path3', 'app3', '', None)
+            call('/path1', 'app1', 'test_prefix', None, None),
+            call('/path2', 'app2', 'gg', "Template", None),
+            call('/path3', 'app3', '', None, None)
         ]
         self.assertEqual(mock_process_pair.call_count, 3)
         mock_process_pair.assert_has_calls(expected_calls)
@@ -127,7 +127,7 @@ class TestSpellbookMDCommand(TestCase):
         self.command.reporter = MarkdownReporter(self.command.stdout)
         # Execute and test
         with self.assertRaises(CommandError) as context:
-            self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix', None)
+            self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix', None, None)
         
         self.assertIn("No markdown files found", str(context.exception))
         mock_find_files.assert_called_once_with('/test/path')
@@ -154,7 +154,7 @@ class TestSpellbookMDCommand(TestCase):
         # add reporter to command
         self.command.reporter = MarkdownReporter(self.command.stdout)
         # Execute
-        self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix', None)
+        self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix', None, None)
         
         # Verify processor was initialized correctly!
         mock_processor_class.assert_called_once_with(
@@ -164,7 +164,8 @@ class TestSpellbookMDCommand(TestCase):
             template_dir='/template/dir',
             reporter=self.command.reporter,
             url_prefix='test_prefix',
-            base_template=None
+            base_template=None,
+            extend_from=None
         )
         
         # Verify TOC was built
@@ -208,7 +209,7 @@ class TestSpellbookMDCommand(TestCase):
         self.command.reporter = MarkdownReporter(self.command.stdout)
         # Execute and test
         with self.assertRaises(CommandError) as context:
-            self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix', None)
+            self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix', None, None)
         
         self.assertIn("No markdown files were processed successfully", str(context.exception))
         
@@ -243,7 +244,7 @@ class TestSpellbookMDCommand(TestCase):
         # add reporter to command
         self.command.reporter = MarkdownReporter(self.command.stdout)
         # Execute
-        self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix', 'template2/path')
+        self.command._process_source_destination_pair('/test/path', 'test_app', 'test_prefix', 'template2/path', None)
         
         # Verify all files were attempted
         self.assertEqual(mock_processor.process_file.call_count, 3)
@@ -324,7 +325,7 @@ class TestSpellbookMDExceptions(TestCase):
         mock_reporter_class.return_value = self.mock_reporter
         
         # Setup mocks
-        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None])
+        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None], [None])
         mock_find_files.return_value = []
         
         # Execute command - should raise the error
@@ -350,7 +351,7 @@ class TestSpellbookMDExceptions(TestCase):
         mock_reporter_class.return_value = self.mock_reporter
         
         # Setup mocks
-        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None])
+        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None], [None])
         mock_find_files.return_value = [('/test/path', 'test.md')]
         mock_setup.side_effect = OSError("Permission denied")
         
@@ -380,7 +381,7 @@ class TestSpellbookMDExceptions(TestCase):
         mock_reporter_class.return_value = self.mock_reporter
         
         # Setup mocks
-        mock_validate.return_value = (['/test/path'], ['test_app'], ['wumbo'], [None])
+        mock_validate.return_value = (['/test/path'], ['test_app'], ['wumbo'], [None], [None])
         mock_find_files.return_value = [('/test/path', 'test.md')]
         mock_setup.return_value = ('/test/path/app', '/test/path/app/templates')
         
@@ -414,7 +415,7 @@ class TestSpellbookMDExceptions(TestCase):
         mock_reporter_class.return_value = self.mock_reporter
         
         # Setup mocks
-        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None])
+        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None], [None])
         mock_find_files.return_value = [
             ('/test/path', 'good.md'),
             ('/test/path', 'bad.md')
@@ -464,7 +465,7 @@ class TestSpellbookMDExceptions(TestCase):
         mock_reporter_class.return_value = self.mock_reporter
         
         # Setup mocks
-        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None])
+        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None], [None])
         mock_find_files.return_value = [('/test/path', 'test.md')]
         mock_setup.return_value = ('/content/path', '/template/path')
         
@@ -487,9 +488,10 @@ class TestSpellbookMDExceptions(TestCase):
             source_path='/test/path',
             content_dir_path='/content/path',
             template_dir='/template/path',
-            reporter=self.command.reporter,
             url_prefix='test_prefix',
-            base_template=None
+            base_template=None,
+            extend_from=None,
+            reporter=self.command.reporter
         )
 
     @patch('django_spellbook.management.commands.spellbook_md.MarkdownReporter')
@@ -504,7 +506,7 @@ class TestSpellbookMDExceptions(TestCase):
         mock_reporter_class.return_value = self.mock_reporter
         
         # Setup mocks
-        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None])
+        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None], [None])
         mock_find_files.return_value = [('/test/path', 'file1.md'), ('/test/path', 'file2.md')]
         mock_setup.return_value = ('/content/path', '/template/path')
         
@@ -548,7 +550,7 @@ class TestSpellbookMDExceptions(TestCase):
         mock_reporter_class.return_value = self.mock_reporter
         
         # Setup mocks
-        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None])
+        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None], [None])
         mock_find_files.return_value = [
             ('/test/path', 'good1.md'),
             ('/test/path', 'error.md'),
@@ -614,7 +616,7 @@ class TestSpellbookMDExceptions(TestCase):
         mock_reporter_class.return_value = self.mock_reporter
         
         # Setup mocks
-        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None])
+        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None], [None])
         mock_find_files.return_value = [
             ('/test/path', 'good.md'),
             ('/test/path', 'error.md'),
@@ -670,7 +672,7 @@ class TestSpellbookMDExceptions(TestCase):
         mock_reporter_class.return_value = self.mock_reporter
         
         # Setup mocks
-        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None])
+        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None], [None])
         mock_find_files.return_value = [('/test/path', 'file1.md'), ('/test/path', 'file2.md')]
         mock_setup.return_value = ('/content/path', '/template/path')
         
@@ -731,7 +733,7 @@ class TestSpellbookMDExceptions(TestCase):
         mock_discover.side_effect = ImportError("Cannot import module 'custom_blocks'")
         
         # Setup other mocks for successful processing
-        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None])
+        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None], [None])
         mock_find_files.return_value = [('/test/path', 'file1.md')]
         mock_setup.return_value = ('/content/path', '/template/path')
         
@@ -771,7 +773,7 @@ class TestSpellbookMDExceptions(TestCase):
         mock_reporter_class.return_value = self.mock_reporter
         
         # Setup mocks
-        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None])
+        mock_validate.return_value = (['/test/path'], ['test_app'], ['test_prefix'], [None], [None])
         
         # Simulate a general exception (not ContentDiscoveryError) in find_markdown_files
         # This could be an I/O error, permission error, etc.

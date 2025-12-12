@@ -1,11 +1,11 @@
 <!-- Subdirectories Section -->
 {% if subdirectories %}
-<div class="sb-rounded sb-border sb-p-3 sb-mb-6 sb-bg-secondary-25">
+<div class="sb-rounded sb-p-3 sb-mb-6 sb-bg-secondary-10">
     <h3 class="sb-text-lg sb-font-bold sb-text-text sb-mb-3">Directories</h3>
     <div class="sb-grid sb-grid-cols-1 sb-gap-2">
         {% for subdir in subdirectories %}
         <a href="/{{ subdir.url }}"
-           class="sb-flex sb-items-center sb-justify-between sb-gap-2 sb-px-4 sb-py-4 sb-rounded sb-border sb-bg-background sb-no-underline sb-transition sb-hover:bg-secondary-10 sb-hover:border-primary">
+           class="sb-flex sb-items-center sb-justify-between sb-border-primary-50 sb-gap-2 sb-px-4 sb-py-4 sb-rounded sb-border sb-bg-background sb-no-underline sb-transition sb-hover:bg-secondary-10 sb-hover:border-primary">
             <span class="sb-text-base sb-font-semibold sb-primary">{{ subdir.title }}</span>
             <span class="sb-text-sm sb-text-text-secondary">{{ subdir.page_count }} page{{ subdir.page_count|pluralize }}</span>
         </a>
@@ -16,13 +16,16 @@
 
 <!-- Pages Section -->
 {% if pages %}
-<div class="sb-rounded sb-border sb-p-3 sb-bg-secondary-25">
+<div class="sb-rounded sb-p-3 sb-bg-secondary-10">
     <h3 class="sb-text-lg sb-font-bold sb-text-text sb-mb-3">Pages</h3>
     <div class="sb-grid sb-grid-cols-1 sb-gap-3">
         {% for page in pages %}
-        <a href="/{{ page.url }}" class="sb-block sb-px-4 sb-py-4 sb-rounded sb-border sb-bg-background sb-no-underline sb-transition sb-hover:bg-secondary-10 sb-hover:border-primary">
+        <a href="/{{ page.url }}" class="sb-block sb-px-4 sb-py-4 sb-rounded sb-border sb-bg-background sb-no-underline sb-transition sb-hover:bg-secondary-10 sb-border-primary-50 sb-hover:border-primary">
             <div class="sb-flex sb-items-center sb-justify-between sb-gap-2 sb-mb-1">
                 <span class="sb-text-base sb-font-bold sb-primary">{{ page.title }}</span>
+                {% if page.author %}
+                <span class="sb-text-sm sb-text-text-secondary">by {{ page.author }}</span>
+                {% endif %}
             </div>
 
             {% if page.description %}

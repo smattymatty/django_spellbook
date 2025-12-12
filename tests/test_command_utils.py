@@ -70,7 +70,7 @@ class TestValidateSpellbookSettings(TestCase):
     )
     def test_settings_with_new_names(self):
         """Test validation with new setting names."""
-        md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         self.assertEqual(md_paths, ['/test/path'])
         self.assertEqual(md_apps, ['test_app'])
@@ -83,7 +83,7 @@ class TestValidateSpellbookSettings(TestCase):
     )
     def test_settings_with_multiple_pairs(self):
         """Test validation with multiple source-destination pairs."""
-        md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes, base_templates, _ = validate_spellbook_settings()
         
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
@@ -446,7 +446,7 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
     )
     def test_with_single_base_template(self):
         """Test validation with a single base template."""
-        md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         self.assertEqual(md_paths, ['/test/path'])
         self.assertEqual(md_apps, ['test_app'])
@@ -461,7 +461,7 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
     )
     def test_with_multiple_base_templates(self):
         """Test validation with multiple base templates."""
-        md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
@@ -475,7 +475,7 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
     )
     def test_single_template_for_multiple_paths(self):
         """Test validation with a single template for multiple paths."""
-        md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         self.assertEqual(md_paths, ['/path1', '/path2', '/path3'])
         self.assertEqual(md_apps, ['app1', 'app2', 'app3'])
@@ -490,7 +490,7 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
     def test_with_insufficient_base_templates(self):
         """Test validation with insufficient base templates."""
         with self.assertRaises(CommandError) as context:
-            md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
+            md_paths, md_apps, md_url_prefixes, base_templates, _ = validate_spellbook_settings()
             
             self.assertIn("SPELLBOOK_MD_BASE_TEMPLATE", str(context.exception))
     
@@ -502,7 +502,7 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
     )
     def test_with_custom_url_prefixes_and_none_base_template(self):
         """Test validation with custom URL prefixes and None base template (defaults to sidebar_left.html)."""
-        md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
@@ -516,7 +516,7 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
     )
     def test_with_mixed_none_and_string_templates(self):
         """Test validation with mixed None and string templates."""
-        md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
@@ -530,7 +530,7 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
     )
     def test_with_empty_string_base_template(self):
         """Test validation with empty string base template."""
-        md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, md_apps, md_url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         self.assertEqual(md_paths, ['/path1', '/path2'])
         self.assertEqual(md_apps, ['app1', 'app2'])
@@ -545,7 +545,7 @@ class TestValidateSpellbookSettingsWithBaseTemplate(TestCase):
     def test_with_too_many_templates_for_single_path(self):
         """Test validation with too many templates for a single path."""
         with self.assertRaises(CommandError) as context:
-            md_paths, md_apps, md_url_prefixes, base_templates = validate_spellbook_settings()
+            md_paths, md_apps, md_url_prefixes, base_templates, _ = validate_spellbook_settings()
             
             self.assertIn("SPELLBOOK_MD_BASE_TEMPLATE", str(context.exception))
         
@@ -587,14 +587,10 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
             'subfolder/./../../secret.txt'
         ]
 
+        from django_spellbook.management.commands.command_utils import _validate_base_templates
         for template in dangerous_traversal_templates:
             with self.assertRaises(CommandError) as context:
-                _validate_setting_values(
-                    ['/test/path'],
-                    ['test_app'],
-                    ['prefix'],
-                    [template]
-                )
+                _validate_base_templates([template])
             self.assertIn("dangerous characters", str(context.exception).lower())
     
     @override_settings(TESTING=True)
@@ -608,14 +604,10 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
             '\\\\server\\share\\file.html'  # UNC path
         ]
 
+        from django_spellbook.management.commands.command_utils import _validate_base_templates
         for template in absolute_path_templates:
             with self.assertRaises(CommandError) as context:
-                _validate_setting_values(
-                    ['/test/path'],
-                    ['test_app'],
-                    ['prefix'],
-                    [template]
-                )
+                _validate_base_templates([template])
             self.assertIn("contains potentially dangerous characters", str(context.exception).lower())
     
     @override_settings(TESTING=True)
@@ -631,14 +623,10 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
             '`rm -rf /`'
         ]
 
+        from django_spellbook.management.commands.command_utils import _validate_base_templates
         for template in command_injection_templates:
             with self.assertRaises(CommandError) as context:
-                _validate_setting_values(
-                    ['/test/path'],
-                    ['test_app'],
-                    ['prefix'],
-                    [template]
-                )
+                _validate_base_templates([template])
             self.assertIn("dangerous characters", str(context.exception).lower())
     
     @override_settings(TESTING=True)
@@ -655,14 +643,10 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
             'base(parenthesis).html'  # Parentheses
         ]
 
+        from django_spellbook.management.commands.command_utils import _validate_base_templates
         for template in special_char_templates:
             with self.assertRaises(CommandError) as context:
-                _validate_setting_values(
-                    ['/test/path'],
-                    ['test_app'],
-                    ['prefix'],
-                    [template]
-                )
+                _validate_base_templates([template])
             self.assertIn("dangerous characters", str(context.exception).lower())
     
     @override_settings(TESTING=True)
@@ -676,14 +660,10 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
             object()
         ]
 
+        from django_spellbook.management.commands.command_utils import _validate_base_templates
         for template in non_string_templates:
             with self.assertRaises(CommandError) as context:
-                _validate_setting_values(
-                    ['/test/path'],
-                    ['test_app'],
-                    ['prefix'],
-                    [template]
-                )
+                _validate_base_templates([template])
             self.assertIn("must be None or a string", str(context.exception))
     
     @override_settings(TESTING=True)
@@ -731,11 +711,7 @@ class TestValidateSettingValuesWithDangerousTemplates(TestCase):
     @override_settings(TESTING=True)
     def test_multiple_templates_one_invalid(self):
         """Test validation when only one template in a list is invalid."""
+        from django_spellbook.management.commands.command_utils import _validate_base_templates
         with self.assertRaises(CommandError) as context:
-            _validate_setting_values(
-                ['/path1', '/path2', '/path3'],
-                ['app1', 'app2', 'app3'],
-                ['prefix1', 'prefix2', 'prefix3'],
-                ['valid.html', '../traversal.html', 'also_valid.html']
-            )
+            _validate_base_templates(['valid.html', '../traversal.html', 'also_valid.html'])
         self.assertIn("dangerous characters", str(context.exception).lower())

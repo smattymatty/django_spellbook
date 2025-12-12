@@ -436,6 +436,7 @@ class DirectoryIndexBuilder:
             modified = getattr(pf.context, 'modified', None)
             tags = getattr(pf.context, 'tags', None) or []
             description = getattr(pf.context, 'description', None)
+            author = getattr(pf.context, 'author', None)
 
             page_data = {
                 'title': title,
@@ -443,7 +444,8 @@ class DirectoryIndexBuilder:
                 'published': published,  # Keep as datetime for template's |date filter
                 'modified': modified,    # Keep as datetime for template's |date filter
                 'tags': tags,
-                'description': description
+                'description': description,
+                'author': author
             }
 
             pages.append(page_data)

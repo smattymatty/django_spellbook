@@ -37,7 +37,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f"\nUsing source path: {source_path_override}\n"))
         else:
             try:
-                md_file_paths, _, _, _ = validate_spellbook_settings()
+                md_file_paths, _, _, _, _ = validate_spellbook_settings()
             except Exception as e:
                 self.stdout.write(self.style.ERROR(f"\nError: {str(e)}\n"))
                 self.stdout.write(

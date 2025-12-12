@@ -84,7 +84,7 @@ class TestURLPrefixEdgeCasesIntegration(TestCase):
     )
     def test_normalize_url_prefix_single_app(self):
         """Test URL prefix normalization for a single app."""
-        md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, content_apps, url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         # Prefix should have slashes removed
         self.assertEqual(url_prefixes, ['prefix'])
@@ -99,7 +99,7 @@ class TestURLPrefixEdgeCasesIntegration(TestCase):
     def test_normalize_base_templates_unequal_lengths(self):
         """Test normalization of base templates with unequal lengths."""
         with self.assertRaises(CommandError):
-            md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
+            md_paths, content_apps, url_prefixes, base_templates, _ = validate_spellbook_settings()
 
 
     @override_settings(
@@ -110,7 +110,7 @@ class TestURLPrefixEdgeCasesIntegration(TestCase):
     )
     def test_normalize_url_prefixes_multi_app(self):
         """Test URL prefix normalization for multiple apps."""
-        md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, content_apps, url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         # All prefixes should have slashes removed
         self.assertEqual(url_prefixes, ['prefix1', 'prefix2', 'prefix3'])
@@ -124,7 +124,7 @@ class TestURLPrefixEdgeCasesIntegration(TestCase):
     )
     def test_string_base_template_for_multi_app(self):
         """Test base template normalization for multiple apps."""
-        md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, content_apps, url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         # All templates should be strings
         self.assertEqual(base_templates, ['template1', 'template1', 'template1'])
@@ -150,7 +150,7 @@ class TestURLPrefixEdgeCasesIntegration(TestCase):
     )
     def test_empty_url_prefixes(self):
         """Test with empty string URL prefixes."""
-        md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, content_apps, url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         # Empty prefixes should be preserved
         self.assertEqual(url_prefixes, ['', ''])
@@ -168,7 +168,7 @@ class TestURLPrefixDefaultsIntegration(TestCase):
     )
     def test_default_url_prefix_single_app(self):
         """Test default URL prefix for a single app."""
-        md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, content_apps, url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         # Single app should get empty prefix by default
         self.assertEqual(url_prefixes, [''])
@@ -181,7 +181,7 @@ class TestURLPrefixDefaultsIntegration(TestCase):
     )
     def test_default_url_prefixes_multi_app(self):
         """Test default URL prefixes for multiple apps."""
-        md_paths, content_apps, url_prefixes, base_templates = validate_spellbook_settings()
+        md_paths, content_apps, url_prefixes, base_templates, _ = validate_spellbook_settings()
 
         # First app gets empty prefix, others get app name
         self.assertEqual(url_prefixes, ['', 'app2', 'app3'])
