@@ -29,7 +29,10 @@ class TestManifestGeneration(TestCase):
         published: datetime = None,
         modified: datetime = None,
         title: str = "Test Page",
-        namespace: str = "test_app"
+        namespace: str = "test_app",
+        sitemap_priority: float = None,
+        sitemap_changefreq: str = None,
+        sitemap_exclude: bool = False
     ):
         """Helper to create a ProcessedFile with SpellbookContext."""
         context = SpellbookContext(
@@ -38,7 +41,10 @@ class TestManifestGeneration(TestCase):
             raw_content="Test content",
             is_public=is_public,
             published=published,
-            modified=modified
+            modified=modified,
+            sitemap_priority=sitemap_priority,
+            sitemap_changefreq=sitemap_changefreq,
+            sitemap_exclude=sitemap_exclude
         )
         context.namespace = namespace
 
@@ -172,6 +178,65 @@ class TestManifestGeneration(TestCase):
 
         self.assertIsNone(result)
         mock_file.assert_not_called()
+
+    @patch('pathlib.Path.mkdir')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_manifest_includes_priority(self, mock_file, mock_mkdir):
+        """Priority from context included in manifest."""
+        pf = self._create_processed_file(url_path="page", sitemap_priority=0.9)
+
+        self.generator.generate([pf], self.app_name, self.output_dir)
+
+        written_content = ''.join(
+            call.args[0] for call in mock_file().write.call_args_list
+        )
+        manifest = json.loads(written_content)
+
+        self.assertEqual(manifest['pages'][0]['priority'], 0.9)
+
+    @patch('pathlib.Path.mkdir')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_manifest_includes_changefreq(self, mock_file, mock_mkdir):
+        """Changefreq from context included in manifest."""
+        pf = self._create_processed_file(url_path="page", sitemap_changefreq="daily")
+
+        self.generator.generate([pf], self.app_name, self.output_dir)
+
+        written_content = ''.join(
+            call.args[0] for call in mock_file().write.call_args_list
+        )
+        manifest = json.loads(written_content)
+
+        self.assertEqual(manifest['pages'][0]['changefreq'], 'daily')
+
+    @patch('pathlib.Path.mkdir')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_manifest_excludes_sitemap_exclude(self, mock_file, mock_mkdir):
+        """Pages with sitemap_exclude=true are filtered out."""
+        pf = self._create_processed_file(url_path="excluded", sitemap_exclude=True)
+
+        result = self.generator.generate([pf], self.app_name, self.output_dir)
+
+        # Should return None because all pages are excluded
+        self.assertIsNone(result)
+        mock_file.assert_not_called()
+
+    @patch('pathlib.Path.mkdir')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_manifest_mixed_sitemap_exclude(self, mock_file, mock_mkdir):
+        """Only non-excluded pages included in manifest."""
+        pf1 = self._create_processed_file(url_path="included", sitemap_exclude=False)
+        pf2 = self._create_processed_file(url_path="excluded", sitemap_exclude=True)
+
+        self.generator.generate([pf1, pf2], self.app_name, self.output_dir)
+
+        written_content = ''.join(
+            call.args[0] for call in mock_file().write.call_args_list
+        )
+        manifest = json.loads(written_content)
+
+        self.assertEqual(len(manifest['pages']), 1)
+        self.assertEqual(manifest['pages'][0]['path'], '/included/')
 
 
 class TestSpellbookSitemap(TestCase):
@@ -325,3 +390,31 @@ class TestSpellbookSitemap(TestCase):
         apps = sitemap._discover_spellbook_apps()
 
         self.assertEqual(apps, [])
+
+    def test_priority_from_item(self):
+        """priority() returns item priority."""
+        sitemap = SpellbookSitemap()
+        item = {'path': '/test/', 'priority': 0.8}
+
+        self.assertEqual(sitemap.priority(item), 0.8)
+
+    def test_priority_missing(self):
+        """priority() returns None for missing priority (uses class default)."""
+        sitemap = SpellbookSitemap()
+        item = {'path': '/test/'}
+
+        self.assertIsNone(sitemap.priority(item))
+
+    def test_changefreq_from_item(self):
+        """changefreq() returns item changefreq."""
+        sitemap = SpellbookSitemap()
+        item = {'path': '/test/', 'changefreq': 'daily'}
+
+        self.assertEqual(sitemap.changefreq(item), 'daily')
+
+    def test_changefreq_missing(self):
+        """changefreq() returns None for missing changefreq (uses class default)."""
+        sitemap = SpellbookSitemap()
+        item = {'path': '/test/'}
+
+        self.assertIsNone(sitemap.changefreq(item))

@@ -243,32 +243,19 @@ class BlockProcessor:
         """
         Parse block arguments string into a dictionary.
 
+        Supports both shorthand (.class, #id) and explicit (key="value") syntax,
+        including hyphenated attributes (hx-*, data-*, aria-*, @*).
+
         Args:
             args_str (str): The string containing block arguments
 
         Returns:
             Dict[str, Any]: Dictionary of parsed arguments
         """
+        from django_spellbook.markdown.attribute_parser import parse_shorthand_and_explicit_attributes
+
         try:
-            if not args_str:
-                return {}
-
-            kwargs: Dict[str, Any] = {}
-            pattern = r'(\w+)=(?:"([^"]*?)"|\'([^\']*?)\'|(\S+))'
-
-            # Validate the argument string format
-            if not re.match(r'^(\s*\w+=(("[^"]*?")|(\'{1}[^\']*?\')|(\S+))\s*)*$', args_str):
-                logger.error(f"Invalid argument format: {args_str}")
-                return {}
-
-            matches = re.finditer(pattern, args_str)
-            for match in matches:
-                key = match.group(1)
-                # Get the first non-None value from the capturing groups
-                value = next(v for v in match.groups()[1:] if v is not None)
-                kwargs[key] = value
-
-            return kwargs
+            return parse_shorthand_and_explicit_attributes(args_str, self.reporter)
         except Exception as e:
             logger.error(f"Error parsing block arguments: {str(e)}")
             return {}

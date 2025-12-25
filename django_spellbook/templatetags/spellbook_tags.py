@@ -372,6 +372,20 @@ def do_spellblock(parser, token):
     return SpellBlockTemplateNode(args[0], nodelist, kwargs)
 
 
+@register.tag('endspellblock')
+def do_endspellblock(parser, token):
+    """
+    Closing tag for spellblock.
+    
+    This should never actually execute - it's consumed by parser.parse() 
+    in do_spellblock. Registration is required for Django's template parser.
+    """
+    raise template.TemplateSyntaxError(
+        "Orphaned {% endspellblock %} tag found. "
+        "endspellblock must be paired with a preceding {% spellblock %} tag."
+    )
+
+
 class SpellBlockTemplateNode(template.Node):
     """
     Template node for rendering SpellBlocks.

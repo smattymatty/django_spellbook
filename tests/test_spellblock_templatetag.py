@@ -43,6 +43,14 @@ class TestSpellBlockTemplateTag(TestCase):
 
         self.assertIn("requires a block name", str(cm.exception))
 
+    def test_orphaned_endspellblock_raises_syntax_error(self):
+        """Orphaned {% endspellblock %} tag raises TemplateSyntaxError."""
+        with self.assertRaises(TemplateSyntaxError) as cm:
+            Template("{% load spellbook_tags %}{% endspellblock %}")
+
+        self.assertIn("Orphaned", str(cm.exception))
+        self.assertIn("endspellblock", str(cm.exception))
+
     def test_valid_syntax_parses_without_error(self):
         """Valid syntax parses without error."""
         template = Template(

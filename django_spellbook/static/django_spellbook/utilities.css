@@ -44,6 +44,43 @@
   display: none;
 }
 
+/* Responsive Display */
+@media (min-width: 640px) {
+  .sb-sm\:block { display: block; }
+  .sb-sm\:inline { display: inline; }
+  .sb-sm\:inline-block { display: inline-block; }
+  .sb-sm\:flex { display: flex; }
+  .sb-sm\:grid { display: grid; }
+  .sb-sm\:hidden { display: none; }
+}
+
+@media (min-width: 768px) {
+  .sb-md\:block { display: block; }
+  .sb-md\:inline { display: inline; }
+  .sb-md\:inline-block { display: inline-block; }
+  .sb-md\:flex { display: flex; }
+  .sb-md\:grid { display: grid; }
+  .sb-md\:hidden { display: none; }
+}
+
+@media (min-width: 1024px) {
+  .sb-lg\:block { display: block; }
+  .sb-lg\:inline { display: inline; }
+  .sb-lg\:inline-block { display: inline-block; }
+  .sb-lg\:flex { display: flex; }
+  .sb-lg\:grid { display: grid; }
+  .sb-lg\:hidden { display: none; }
+}
+
+@media (min-width: 1280px) {
+  .sb-xl\:block { display: block; }
+  .sb-xl\:inline { display: inline; }
+  .sb-xl\:inline-block { display: inline-block; }
+  .sb-xl\:flex { display: flex; }
+  .sb-xl\:grid { display: grid; }
+  .sb-xl\:hidden { display: none; }
+}
+
 /* Position */
 .sb-static {
   position: static;
@@ -442,6 +479,18 @@
 .sb-py-8 {
   padding-top: 3rem;
   padding-bottom: 3rem;
+}
+.sb-py-10 {
+  padding-top: 3.5rem;
+  padding-bottom: 3.5rem;
+}
+.sb-py-12 {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+.sb-py-16 {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
 }
 
 /* Individual Padding */
@@ -1214,7 +1263,8 @@
   aspect-ratio: 21 / 9;
 }
 
-* Object Fit */ .sb-object-contain {
+/* Object Fit */
+.sb-object-contain {
   object-fit: contain;
 }
 .sb-object-cover {
@@ -1382,6 +1432,13 @@
   font-weight: 700;
 }
 
+.sb-font-italic {
+  font-style: italic;
+}
+.sb-font-bold {
+  font-weight: 700;
+}
+
 /* Word Break */
 .sb-break-normal {
   overflow-wrap: normal;
@@ -1462,71 +1519,103 @@
 
 /* Individual Borders */
 .sb-border-t {
-  border-top-width: 1px;
-  border-style: solid;
+  border-top: 1px solid;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
 }
 .sb-border-r {
-  border-right-width: 1px;
-  border-style: solid;
+  border-top: 0;
+  border-right: 1px solid;
+  border-bottom: 0;
+  border-left: 0;
 }
 .sb-border-b {
-  border-bottom-width: 1px;
-  border-style: solid;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 1px solid;
+  border-left: 0;
 }
 .sb-border-l {
-  border-left-width: 1px;
-  border-style: solid;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 1px solid;
 }
 /* Individual Borders 2px */
 .sb-border-t-2 {
-  border-top-width: 2px;
-  border-style: solid;
+  border-top: 2px solid;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
 }
 .sb-border-r-2 {
-  border-right-width: 2px;
-  border-style: solid;
+  border-top: 0;
+  border-right: 2px solid;
+  border-bottom: 0;
+  border-left: 0;
 }
 .sb-border-b-2 {
-  border-bottom-width: 2px;
-  border-style: solid;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 2px solid;
+  border-left: 0;
 }
 .sb-border-l-2 {
-  border-left-width: 2px;
-  border-style: solid;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 2px solid;
 }
 /* Individual Borders 4px */
 .sb-border-t-4 {
-  border-top-width: 4px;
-  border-style: solid;
+  border-top: 4px solid;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
 }
 .sb-border-r-4 {
-  border-right-width: 4px;
-  border-style: solid;
+  border-top: 0;
+  border-right: 4px solid;
+  border-bottom: 0;
+  border-left: 0;
 }
 .sb-border-b-4 {
-  border-bottom-width: 4px;
-  border-style: solid;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 4px solid;
+  border-left: 0;
 }
 .sb-border-l-4 {
-  border-left-width: 4px;
-  border-style: solid;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 4px solid;
 }
 /* Individual Borders 8px */
 .sb-border-t-8 {
-  border-top-width: 8px;
-  border-style: solid;
+  border-top: 8px solid;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
 }
 .sb-border-r-8 {
-  border-right-width: 8px;
-  border-style: solid;
+  border-top: 0;
+  border-right: 8px solid;
+  border-bottom: 0;
+  border-left: 0;
 }
 .sb-border-b-8 {
-  border-bottom-width: 8px;
-  border-style: solid;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 8px solid;
+  border-left: 0;
 }
 .sb-border-l-8 {
-  border-left-width: 8px;
-  border-style: solid;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 8px solid;
 }
 
 /* Border Radius */

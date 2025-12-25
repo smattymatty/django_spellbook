@@ -75,7 +75,11 @@ class ManifestGenerator:
             # Build page entry
             page_entry = self._build_page_entry(pf, url_prefix)
             if page_entry:
-                manifest['pages'].append(page_entry)
+                # Skip pages with sitemap_exclude flag
+                if not page_entry.get('sitemap_exclude', False):
+                    # Remove the flag before adding to manifest (internal use only)
+                    page_entry.pop('sitemap_exclude', None)
+                    manifest['pages'].append(page_entry)
 
         if not manifest['pages']:
             logger.warning("No public pages found, skipping manifest generation")
@@ -123,6 +127,16 @@ class ManifestGenerator:
                 entry['lastmod'] = lastmod.strftime('%Y-%m-%d')
             else:
                 entry['lastmod'] = str(lastmod)
+
+        # Add sitemap control
+        if pf.context.sitemap_priority is not None:
+            entry['priority'] = float(pf.context.sitemap_priority)
+
+        if pf.context.sitemap_changefreq:
+            entry['changefreq'] = pf.context.sitemap_changefreq
+
+        if pf.context.sitemap_exclude:
+            entry['sitemap_exclude'] = True
 
         return entry
 

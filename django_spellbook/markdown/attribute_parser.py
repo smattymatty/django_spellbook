@@ -82,8 +82,18 @@ def parse_shorthand_and_explicit_attributes(
     args_with_placeholders = re.sub(r'"[^"]*"|\'[^\']*\'', save_quoted, raw_args_str)
 
     # Step 2: Parse shorthand syntax (.class, #id) from string with placeholders
-    # This prevents parse_attributes() from seeing #result inside hx-target="#result"
-    shorthand_attrs = parse_attributes(args_with_placeholders)
+    # This prevents seeing #result inside hx-target="#result"
+    shorthand_attrs = {}
+
+    # Parse shorthand classes
+    shorthand_classes = RE_CLASS.findall(args_with_placeholders)
+    if shorthand_classes:
+        shorthand_attrs['class'] = ' '.join(shorthand_classes)
+
+    # Parse shorthand ID
+    id_match = RE_ID.search(args_with_placeholders)
+    if id_match:
+        shorthand_attrs['id'] = id_match.group(1)
 
     # Step 3: Remove shorthand tokens for explicit parsing
     # Now remove shorthand tokens (they're only outside quotes)

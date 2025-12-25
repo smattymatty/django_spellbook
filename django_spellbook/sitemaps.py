@@ -79,6 +79,14 @@ class SpellbookSitemap(Sitemap):
                 return None
         return None
 
+    def priority(self, item):
+        """Return priority for item, or None to use class default."""
+        return item.get('priority')
+
+    def changefreq(self, item):
+        """Return changefreq for item, or None to use class default."""
+        return item.get('changefreq')
+
     def _load_manifests(self) -> List[dict]:
         """Load all spellbook_manifest.json files."""
         manifests = []
