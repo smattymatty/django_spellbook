@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.template.loader import render_to_string
 from django_spellbook.blocks.base import BasicSpellBlock
 from django_spellbook.markdown.extensions.list_aware_nl2br import ListAwareNl2BrExtension
+from django_spellbook.markdown.extensions.list_separation import ListSeparationExtension
 from django_spellbook.markdown.preprocessors.list_fixer import ListFixerExtension
 
 from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
@@ -60,37 +61,38 @@ class TestBasicSpellBlock(TestCase):
         mock_markdown.return_value = '<h1>Test Header</h1>\n<p>Test content</p>'
         block = self.BlockClass(MarkdownReporter(StringIO()), self.test_content)
         processed_content = block.process_content()
-        
+
         # Get the actual call arguments
         args, kwargs = mock_markdown.call_args
-        
+
         # Verify the content matches
         self.assertEqual(args[0], self.test_content + '')
-        
-        # Verify extensions list length (7 extensions: ListFixer added, DjangoLike removed)
+
+        # Verify extensions list length (8 extensions)
         extensions = kwargs['extensions']
-        self.assertEqual(len(extensions), 7)
+        self.assertEqual(len(extensions), 8)
 
         # Verify the type of the first extensions
         self.assertIsInstance(extensions[0], ListFixerExtension)
 
-        # Verify the remaining extensions match exactly (DjangoLike removed, so indices shifted)
+        # Verify the remaining extensions match exactly
         self.assertEqual(extensions[1], 'markdown.extensions.fenced_code')
         self.assertEqual(extensions[2], 'markdown.extensions.tables')
         self.assertIsInstance(extensions[3], ListAwareNl2BrExtension)
-        self.assertEqual(extensions[4:], [
+        self.assertIsInstance(extensions[4], ListSeparationExtension)
+        self.assertEqual(extensions[5:], [
             'markdown.extensions.footnotes',
             'markdown.extensions.attr_list',
             'markdown.extensions.toc',
         ])
-        
+
         self.assertEqual(
             processed_content,
             '<h1>Test Header</h1>\n<p>Test content</p>'
         )
 
-    
-    
+
+
     def test_render(self):
         """Test template rendering with context."""
         expected_output = '<div>Rendered content</div>'
@@ -161,7 +163,6 @@ class TestBasicSpellBlock(TestCase):
         required_extension_strings = [
             'markdown.extensions.fenced_code',
             'markdown.extensions.tables',
-            # Note: sane_lists removed to allow lists without blank lines
         ]
         for ext in required_extension_strings:
             self.assertIn(ext, extensions)
@@ -177,3 +178,9 @@ class TestBasicSpellBlock(TestCase):
             isinstance(ext, ListAwareNl2BrExtension) for ext in extensions
         )
         self.assertTrue(has_nl2br_extension, "ListAwareNl2BrExtension should be present")
+
+        # Verify ListSeparationExtension is present
+        has_list_separation = any(
+            isinstance(ext, ListSeparationExtension) for ext in extensions
+        )
+        self.assertTrue(has_list_separation, "ListSeparationExtension should be present")

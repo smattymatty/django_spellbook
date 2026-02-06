@@ -5,7 +5,162 @@ All notable changes to Django Spellbook will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.5] - 2025-12-12
+
+### Added
+
+#### Template Wrapper Support
+New `SPELLBOOK_BASE_EXTEND_FROM` setting allows you to integrate Django Spellbook into existing sites without rebuilding your entire template structure.
+
+**What it does:**
+- Wraps Spellbook's sidebar layout inside your existing base template
+- Preserves your site's header, navigation, footer, and overall structure
+- Generates wrapper templates automatically during `python manage.py spellbook_md`
+- Validates templates and required template blocks
+- Cleans up generated files when setting is removed
+
+**Usage:**
+```python
+# settings.py
+SPELLBOOK_MD_PATH = ['docs/content']
+SPELLBOOK_MD_APP = ['docs_app']
+SPELLBOOK_BASE_EXTEND_FROM = ['base.html']  # Your existing base template
+```
+
+```django
+<!-- base.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Site</title>
+    <!-- Your site's CSS/JS -->
+</head>
+<body>
+    <nav><!-- Your site navigation --></nav>
+
+    {% block spellbook %}
+    <!-- Spellbook content renders here -->
+    {% endblock %}
+
+    <footer><!-- Your site footer --></footer>
+</body>
+</html>
+```
+
+**Features:**
+- One setting per content app in multi-source configurations
+- Automatic validation of template paths and required blocks
+- Template precedence: EXTEND_FROM > BASE_TEMPLATE > default
+- Generated templates stored in `<app>/templates/<app>/spellbook_base.html`
+- Comprehensive validation prevents path traversal and injection attacks
+
+**Benefits:**
+- Seamlessly integrate documentation into existing sites
+- Keep your site's branding and navigation
+- No need to rebuild templates from scratch
+- Works with multi-app configurations
+- Automatic cleanup maintains clean codebase
+
+**Validation:**
+The system validates:
+- Template files exist and are accessible
+- Required `{% block spellbook %}` is present
+- No dangerous characters or path traversal attempts
+- List length matches number of content apps
+
+**How it works:**
+1. Run `python manage.py spellbook_md` with `SPELLBOOK_BASE_EXTEND_FROM` configured
+2. System validates your base template exists and contains `{% block spellbook %}`
+3. Wrapper template generated automatically at `<app>/templates/<app>/spellbook_base.html`
+4. All markdown pages use the wrapper, which extends your base template
+5. Remove the setting and run the command again to clean up generated files
+
+#### Directory Index Author Display
+Directory listing pages now show the author name next to each page title for better content attribution.
+
+**What changed:**
+- Author metadata now appears to the right of page titles in directory listings
+- Extracted from frontmatter during markdown processing
+- Displays in subtle secondary text color
+- Only shows if author is defined in the page's frontmatter
+
+**Example:**
+```
+Introduction                                by Jane Smith
+Getting Started Guide                       by John Doe
+Advanced Topics
+```
+
+**Benefits:**
+- Better content attribution in directory views
+- Consistent with single-page author display
+- Helps users identify content creators at a glance
+
+### Changed
+
+#### CSS Utility Expansion
+Added -10 and -90 opacity variants for all color utilities, providing finer control over transparency.
+
+**New classes available:**
+- Background colors: `sb-bg-primary-10`, `sb-bg-secondary-90`, etc. (34 new classes)
+- Hover backgrounds: `sb-hover:bg-primary-10`, `sb-hover:bg-accent-90`, etc. (34 new classes)
+- Border colors: `sb-border-neutral-10`, `sb-border-danger-90`, etc. (34 new classes)
+- Hover borders: `sb-hover:border-primary-10`, etc. (30 new classes)
+
+**Total:** 204 new utility classes across all 17 theme colors
+
+**Benefits:**
+- More granular opacity control (10%, 25%, 50%, 75%, 90%)
+- Better design flexibility for subtle backgrounds and borders
+- Consistent naming convention across all utilities
+
+#### Component Styling
+Added dedicated `components.css` file with styling for page headers and other UI components.
+
+**What's included:**
+- Page header styling with gradient border effect
+- Uses `color-mix()` for subtle, theme-aware borders
+- Glow effect using CSS filters
+- Responsive padding and spacing
+
+**Technical details:**
+- Border uses `color-mix(in srgb, var(--secondary-color) 10%, var(--surface-color))`
+- Gradient glow applied via `::after` pseudo-element
+- Integrated into main styles bundle automatically
+
+### Fixed
+
+#### Base Template Validation
+Fixed missing validation call for base templates in the settings validation chain.
+
+**What was broken:**
+- `_validate_base_templates()` function existed but was never called
+- Invalid template types (non-strings) were not being caught
+- Dangerous template paths could slip through validation
+
+**What's fixed:**
+- Added call to `_validate_base_templates()` in `validate_spellbook_settings()`
+- Template type validation now runs for all configurations
+- Security validation (path traversal, special characters) now active
+
+**Benefits:**
+- Better error messages for invalid template configurations
+- Prevents security issues from malformed template paths
+- Consistent validation across all template settings
+
+#### Settings Validation Order
+Fixed bug where `extend_from` normalization could fail if `content_apps` was `None`.
+
+**What was broken:**
+- Code attempted to call `len(content_apps)` before checking if it was `None`
+- Would raise `TypeError` when settings were missing
+
+**What's fixed:**
+- Moved `extend_from` normalization to occur after `content_apps` validation
+- Validation now fails gracefully with clear error messages
+- Proper error handling for missing required settings
+
+## [0.2.4] - 2025-12-12
 
 ### Changed
 

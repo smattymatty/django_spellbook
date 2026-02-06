@@ -18,7 +18,16 @@ class FileWriter:
     """
     Handles file I/O operations for the URL and view generators.
     """
-    
+
+    # Track all modules written in this process/session
+    # This prevents stale includes from persisting across deploys
+    _session_modules: Dict[str, str] = {}
+
+    @classmethod
+    def reset_session(cls) -> None:
+        """Reset session modules. Call at start of spellbook_md run."""
+        cls._session_modules = {}
+
     INITIAL_URLS_CONTENT = """from django.urls import path
 from django_spellbook.{views_module} import *
 
@@ -55,7 +64,10 @@ urlpatterns = [
         # Create module names for app-specific files
         self.urls_module = f"urls_{content_app.replace('-', '_')}"
         self.views_module = f"views_{content_app.replace('-', '_')}"
-        
+
+        # Register this module in the session tracker
+        FileWriter._session_modules[self.urls_module] = self.url_prefix
+
         self._ensure_urls_views_files()
         self._update_main_urls_file()
     
@@ -80,41 +92,21 @@ urlpatterns = [
         create_file_if_not_exists(main_urls_path, main_urls_content)
     
     def _update_main_urls_file(self) -> None:
-        """Update main urls.py to include app-specific URL modules."""
+        """Update main urls.py to include app-specific URL modules.
+
+        Only includes modules registered in the current session (_session_modules).
+        This prevents stale includes from persisting when config changes or
+        modules aren't regenerated on redeploy.
+        """
         main_urls_path = os.path.join(self.spellbook_dir, 'urls.py')
-        
-        # Dictionary of existing includes
-        includes = {}
-        
-        if os.path.exists(main_urls_path):
-            # Read existing file content
-            try:
-                with open(main_urls_path, 'r') as f:
-                    content = f.read()
-                
-                # Extract existing includes using regex
-                import re
-                pattern = r"path\('([^']+)',\s*include\('django_spellbook\.([^']+)'\)\)"
-                matches = re.findall(pattern, content)
-                
-                for prefix, module in matches:
-                    # Strip trailing slashes from the prefix
-                    cleaned_prefix = prefix.rstrip('/')
-                    includes[module] = cleaned_prefix
-            except Exception as e:
-                logger.error(f"Error reading urls.py: {str(e)}")
-        
-        # Add current module's include if not already present
-        # Use the provided URL prefix, even if it's empty
-        if self.urls_module not in includes:
-            includes[self.urls_module] = self.url_prefix
-        slash = '/' if self.url_prefix else ''
-        # Generate the includes list for the urlpatterns
+
+        # Use only modules from current session - don't preserve old includes from disk
         includes_str = ',\n    '.join([
-            f"path('{prefix}{slash}', include('django_spellbook.{module}'))" 
-            for module, prefix in includes.items()
+            f"path('{prefix}/', include('django_spellbook.{module}'))"
+            if prefix else f"path('', include('django_spellbook.{module}'))"
+            for module, prefix in FileWriter._session_modules.items()
         ])
-        
+
         # Write the updated main urls.py
         main_urls_content = self.MAIN_URLS_TEMPLATE.format(includes=includes_str)
         write_file(main_urls_path, main_urls_content)

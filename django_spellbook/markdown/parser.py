@@ -1,6 +1,7 @@
 # django_spellbook/markdown/parser.py
 
 from .extensions.list_aware_nl2br import ListAwareNl2BrExtension
+from .extensions.list_separation import ListSeparationExtension
 from .preprocessors.list_fixer import ListFixerExtension
 from ..blocks import SpellBlockRegistry
 from typing import Dict, Any, Optional, List, Tuple
@@ -46,8 +47,7 @@ class MarkdownParser:
                 'markdown.extensions.fenced_code',
                 'markdown.extensions.tables',
                 ListAwareNl2BrExtension(),
-                # Note: sane_lists removed to allow lists without blank lines before them
-                # toc
+                ListSeparationExtension(),
                 'markdown.extensions.toc',
             ],
         )
@@ -101,8 +101,7 @@ class BlockProcessor:
             'markdown.extensions.fenced_code',
             'markdown.extensions.tables',
             ListAwareNl2BrExtension(),
-            # Note: sane_lists removed to allow lists without blank lines before them
-            # toc
+            ListSeparationExtension(),
             'markdown.extensions.toc',
         ]
         self.reporter: MarkdownReporter = reporter
@@ -200,13 +199,13 @@ class BlockProcessor:
             if not block_class:
                 logger.warning(f"Block '{block_name}' not found in registry")
 
-                    
+
                 return f"<!-- Block '{block_name}' not found -->"
 
             return self._render_block(block_class, args_str, block_content)
         except Exception as e:
             logger.error(f"Error handling block match: {str(e)}")
-            
+
             # We can't record a specific block name here since we don't know what it is
             return f"<!-- Error processing block: {str(e)} -->"
 
@@ -230,8 +229,8 @@ class BlockProcessor:
                 reporter=self.reporter,
                 **kwargs
             )
-            
-        
+
+
             return block_instance.render()
         except Exception as e:
             if self.reporter:
@@ -243,33 +242,19 @@ class BlockProcessor:
         """
         Parse block arguments string into a dictionary.
 
+        Supports both shorthand (.class, #id) and explicit (key="value") syntax,
+        including hyphenated attributes (hx-*, data-*, aria-*, @*).
+
         Args:
             args_str (str): The string containing block arguments
 
         Returns:
             Dict[str, Any]: Dictionary of parsed arguments
         """
+        from django_spellbook.markdown.attribute_parser import parse_shorthand_and_explicit_attributes
+
         try:
-            if not args_str:
-                return {}
-
-            kwargs: Dict[str, Any] = {}
-            pattern = r'(\w+)=(?:"([^"]*?)"|\'([^\']*?)\'|(\S+))'
-
-            # Validate the argument string format
-            if not re.match(r'^(\s*\w+=(("[^"]*?")|(\'{1}[^\']*?\')|(\S+))\s*)*$', args_str):
-                logger.error(f"Invalid argument format: {args_str}")
-                return {}
-
-            matches = re.finditer(pattern, args_str)
-            for match in matches:
-                key = match.group(1)
-                # Get the first non-None value from the capturing groups
-                value = next(v for v in match.groups()[1:] if v is not None)
-                kwargs[key] = value
-
-            return kwargs
+            return parse_shorthand_and_explicit_attributes(args_str, self.reporter)
         except Exception as e:
             logger.error(f"Error parsing block arguments: {str(e)}")
             return {}
-

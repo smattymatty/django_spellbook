@@ -15,6 +15,7 @@ from django.template.exceptions import TemplateDoesNotExist
 from django_spellbook.blocks import SpellBlockRegistry, BasicSpellBlock
 from django_spellbook.management.commands.spellbook_md_p.reporter import MarkdownReporter
 from django_spellbook.markdown.extensions.list_aware_nl2br import ListAwareNl2BrExtension
+from django_spellbook.markdown.extensions.list_separation import ListSeparationExtension
 from django_spellbook.markdown.preprocessors.list_fixer import ListFixerExtension
 from django_spellbook.management.commands.spellbook_md_p.discovery import discover_blocks
 from django_spellbook.markdown.attribute_parser import parse_spellblock_style_attributes
@@ -88,9 +89,9 @@ class SpellbookMarkdownEngine:
         )
         self.db_handler: Optional[Any] = db_handler
         self.fail_on_error: bool = fail_on_error
-        
+
         blocks = discover_blocks(self.reporter)
-        
+
         reporter.write(f"SpellbookMarkdownEngine: Found {blocks} blocks.", level='debug')
 
         if markdown_extensions is None:
@@ -99,7 +100,7 @@ class SpellbookMarkdownEngine:
                 'markdown.extensions.fenced_code',
                 'markdown.extensions.tables',
                 ListAwareNl2BrExtension(),
-                # Note: sane_lists removed to allow lists without blank lines before them
+                ListSeparationExtension(),
                 'markdown.extensions.footnotes',
                 'markdown.extensions.attr_list',
                 'markdown.extensions.toc',
@@ -137,7 +138,7 @@ class SpellbookMarkdownEngine:
 
         if current_segment_lines: # Append any remaining segment
             segments.append(("".join(current_segment_lines), in_code_block))
-        
+
         logger.debug(f"Split markdown into {len(segments)} segments (code/non-code).")
         return segments
 
@@ -146,7 +147,7 @@ class SpellbookMarkdownEngine:
         Parses a raw string of SpellBlock arguments into a dictionary using a utility function.
         """
         kwargs = parse_spellblock_style_attributes(raw_args_str, self.reporter)
-        
+
 
         logger.debug(f"Parsed arguments from '{raw_args_str}' (via util): {kwargs}")
         return kwargs
@@ -191,7 +192,7 @@ class SpellbookMarkdownEngine:
         # For content-wrapping blocks, pass the raw_content; the block itself
         # can decide if/how to process it further (e.g., nested markdown parsing).
         content_for_block = "" if is_self_closing else raw_content
-        
+
         block_instance = BlockClass(
             reporter=self.reporter,
             content=content_for_block,
@@ -200,7 +201,7 @@ class SpellbookMarkdownEngine:
         )
 
         rendered_html_from_block = block_instance.render()
-        
+
         # --- ENGINE-LEVEL POST-PROCESSING ---
         # Strip leading/trailing whitespace from the whole block first
         processed_html = rendered_html_from_block.strip()
@@ -246,14 +247,14 @@ class SpellbookMarkdownEngine:
         # This is a deliberate simplification for the *initial structural refactor*.
         # The GitHub issue "Refactor BlockProcessor for True Nested SpellBlock Parsing"
         # will address this directly.
-        
+
         # First, handle self-closing blocks
         def replace_self_closing(match_obj):
             block_name = match_obj.group(1)
             raw_args_str = match_obj.group(2) or ''
             # _process_single_spellblock now returns cleaned (stripped, lstripped lines) HTML
             block_html = self._process_single_spellblock(block_name, raw_args_str, "", True)
-            
+
             if block_html.strip(): # If the block rendered something meaningful
                 # Ensure it's treated as a distinct block by the final Markdown pass
                 return f"\n\n{block_html}\n\n"
@@ -263,7 +264,7 @@ class SpellbookMarkdownEngine:
 
         # Then, handle content-wrapping blocks on the result
         temp_segment = processed_segment
-        
+
         last_match_end = 0
         new_segments_list = []
 
@@ -274,20 +275,20 @@ class SpellbookMarkdownEngine:
             block_name = match.group(1)
             raw_args_str = match.group(2) or '' # Should be match.group(2)
             raw_content = match.group(3) or ''  # Should be match.group(3)
-            
+
             block_html = self._process_single_spellblock(block_name, raw_args_str, raw_content, False)
-            
+
             if block_html.strip():
                 new_segments_list.append(f"\n\n{block_html}\n\n")
             # else: if block is empty, we effectively remove it and add nothing here.
-            
+
             last_match_end = match.end()
-        
+
         # Add any remaining text after the last match
         new_segments_list.append(temp_segment[last_match_end:])
-        
+
         processed_segment = "".join(new_segments_list)
-        
+
         return processed_segment
 
     def parse_and_render(self, markdown_text: str) -> str:
@@ -307,9 +308,9 @@ class SpellbookMarkdownEngine:
             f"SpellbookMarkdownEngine: Starting parsing for text of length {len(markdown_text)}.",
             level='debug'
             )
-        
+
         segments = self._split_markdown_by_code_fences(markdown_text)
-        
+
         processed_segments_content: List[str] = []
         for content, is_code_block in segments:
             if is_code_block:
@@ -319,7 +320,7 @@ class SpellbookMarkdownEngine:
                 logger.debug("Processing non-code segment for SpellBlocks.")
                 processed_text_segment = self._process_spellblocks_in_segment(content)
                 processed_segments_content.append(processed_text_segment)
-        
+
         # Join segments. Using splitlines/join might be safer than simple string joining
         # if original line endings matter for python-markdown.
         # However, for this context, simple join is usually fine.
@@ -335,7 +336,7 @@ class SpellbookMarkdownEngine:
         self.reporter.success("SpellbookMarkdownEngine: Markdown to HTML conversion complete.")
         logger.info("Successfully converted processed markdown to HTML.")
         return final_html
-        
+
 
     # --- Placeholder for Database Interaction Logic ---
     def process_spellblocks_for_database(self, markdown_text: str) -> List[Any]:
@@ -399,7 +400,7 @@ if __name__ == '__main__':
         django.setup() # Initializes the app registry, among other things.
     except Exception as e:
         print(f"WARNING: Minimal Django setup for __main__ failed: {e}")
-    # --- End Minimal Django Setup ---  
+    # --- End Minimal Django Setup ---
     debug_reporter = MarkdownReporter(
         stdout=StringIO(), style=None, report_level='debug', report_format='text', report_output=None
     )

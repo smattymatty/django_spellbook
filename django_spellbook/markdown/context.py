@@ -25,7 +25,12 @@ class SpellbookContext:
     toc: Dict[str, Dict] = field(default_factory=dict)
     next_page: Optional[str] = None
     prev_page: Optional[str] = None
-    
+
+    # Sitemap control
+    sitemap_priority: Optional[float] = None
+    sitemap_changefreq: Optional[str] = None
+    sitemap_exclude: bool = False
+
     # Content Metrics (calculated dynamically)
     word_count: int = 0
     reading_time_minutes: int = 0

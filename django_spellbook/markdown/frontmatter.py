@@ -106,6 +106,26 @@ class FrontMatterParser:
         prev_page = self.metadata.get('prev')  # Can be None or namespaced URL like 'blog:intro'
         next_page = self.metadata.get('next')  # Can be None or namespaced URL like 'docs:setup'
 
+        # --- Extract sitemap control values ---
+        sitemap_priority = self.metadata.get('sitemap_priority')
+        if sitemap_priority is not None:
+            try:
+                sitemap_priority = float(sitemap_priority)
+                if not 0.0 <= sitemap_priority <= 1.0:
+                    print(f"Warning: sitemap_priority must be 0.0-1.0 in {self.file_path}, got {sitemap_priority}. Ignoring.")
+                    sitemap_priority = None
+            except (ValueError, TypeError):
+                print(f"Warning: Invalid sitemap_priority '{sitemap_priority}' in {self.file_path}. Must be a number 0.0-1.0.")
+                sitemap_priority = None
+
+        sitemap_changefreq = self.metadata.get('sitemap_changefreq')
+        VALID_CHANGEFREQ = {'always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never'}
+        if sitemap_changefreq and sitemap_changefreq not in VALID_CHANGEFREQ:
+            print(f"Warning: Invalid sitemap_changefreq '{sitemap_changefreq}' in {self.file_path}. Valid: {VALID_CHANGEFREQ}. Ignoring.")
+            sitemap_changefreq = None
+
+        sitemap_exclude = multi_bool(self.metadata.get('sitemap_exclude', False))
+
         # --- Create context ---
         return SpellbookContext(
             title=titlefy(remove_leading_dash(
@@ -125,7 +145,11 @@ class FrontMatterParser:
             custom_meta=custom_meta_data,
             toc={},  # This will be filled by the command later
             next_page=next_page,  # From frontmatter or None (will be auto-filled by NavigationBuilder)
-            prev_page=prev_page   # From frontmatter or None (will be auto-filled by NavigationBuilder)
+            prev_page=prev_page,  # From frontmatter or None (will be auto-filled by NavigationBuilder)
+            # Sitemap control
+            sitemap_priority=sitemap_priority,
+            sitemap_changefreq=sitemap_changefreq,
+            sitemap_exclude=sitemap_exclude
         )
 
 def multi_bool(value):
