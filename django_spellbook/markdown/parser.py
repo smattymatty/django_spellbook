@@ -1,6 +1,7 @@
 # django_spellbook/markdown/parser.py
 
 from .extensions.list_aware_nl2br import ListAwareNl2BrExtension
+from .extensions.list_separation import ListSeparationExtension
 from .preprocessors.list_fixer import ListFixerExtension
 from ..blocks import SpellBlockRegistry
 from typing import Dict, Any, Optional, List, Tuple
@@ -46,8 +47,7 @@ class MarkdownParser:
                 'markdown.extensions.fenced_code',
                 'markdown.extensions.tables',
                 ListAwareNl2BrExtension(),
-                # Note: sane_lists removed to allow lists without blank lines before them
-                # toc
+                ListSeparationExtension(),
                 'markdown.extensions.toc',
             ],
         )
@@ -101,8 +101,7 @@ class BlockProcessor:
             'markdown.extensions.fenced_code',
             'markdown.extensions.tables',
             ListAwareNl2BrExtension(),
-            # Note: sane_lists removed to allow lists without blank lines before them
-            # toc
+            ListSeparationExtension(),
             'markdown.extensions.toc',
         ]
         self.reporter: MarkdownReporter = reporter
@@ -200,13 +199,13 @@ class BlockProcessor:
             if not block_class:
                 logger.warning(f"Block '{block_name}' not found in registry")
 
-                    
+
                 return f"<!-- Block '{block_name}' not found -->"
 
             return self._render_block(block_class, args_str, block_content)
         except Exception as e:
             logger.error(f"Error handling block match: {str(e)}")
-            
+
             # We can't record a specific block name here since we don't know what it is
             return f"<!-- Error processing block: {str(e)} -->"
 
@@ -230,8 +229,8 @@ class BlockProcessor:
                 reporter=self.reporter,
                 **kwargs
             )
-            
-        
+
+
             return block_instance.render()
         except Exception as e:
             if self.reporter:
@@ -259,4 +258,3 @@ class BlockProcessor:
         except Exception as e:
             logger.error(f"Error parsing block arguments: {str(e)}")
             return {}
-

@@ -353,3 +353,61 @@ class TestSpellbookMarkdownEngine(unittest.TestCase):
         log_output = self.reporter_stdout.getvalue()
 
         self.assertIn("'errorblock' not found in registry.", log_output)
+
+    # --- List type transition tests ---
+
+    def test_ordered_then_unordered_list_separation(self):
+        """Ordered list followed by unordered list should produce two separate lists."""
+        markdown_text = "1. First item\n2. Second item\n3. Third item\n\n- Unordered item 1\n- Unordered item 2"
+        html = self.engine.parse_and_render(markdown_text)
+        self.assertIn('<ol>', html)
+        self.assertIn('</ol>', html)
+        self.assertIn('<ul>', html)
+        self.assertIn('</ul>', html)
+        # Ensure ol comes before ul
+        ol_pos = html.index('<ol>')
+        ul_pos = html.index('<ul>')
+        self.assertLess(ol_pos, ul_pos)
+
+    def test_unordered_then_ordered_list_separation(self):
+        """Unordered list followed by ordered list should produce two separate lists."""
+        markdown_text = "- Unordered item 1\n- Unordered item 2\n\n1. First item\n2. Second item"
+        html = self.engine.parse_and_render(markdown_text)
+        self.assertIn('<ul>', html)
+        self.assertIn('</ul>', html)
+        self.assertIn('<ol>', html)
+        self.assertIn('</ol>', html)
+        ul_pos = html.index('<ul>')
+        ol_pos = html.index('<ol>')
+        self.assertLess(ul_pos, ol_pos)
+
+    def test_multiple_list_type_transitions(self):
+        """Multiple consecutive list type transitions should all produce separate lists."""
+        markdown_text = (
+            "1. Ordered 1\n2. Ordered 2\n\n"
+            "- Unordered 1\n- Unordered 2\n\n"
+            "1. Ordered again 1\n2. Ordered again 2"
+        )
+        html = self.engine.parse_and_render(markdown_text)
+        self.assertEqual(html.count('<ol>'), 2, f"Expected 2 <ol> tags. HTML: {html}")
+        self.assertEqual(html.count('<ul>'), 1, f"Expected 1 <ul> tag. HTML: {html}")
+
+    def test_list_type_transition_without_blank_line(self):
+        """Ordered list directly followed by unordered (no blank line) should still separate."""
+        markdown_text = "1. Ordered item\n- Unordered item"
+        html = self.engine.parse_and_render(markdown_text)
+        self.assertIn('<ol>', html)
+        self.assertIn('<ul>', html)
+
+    def test_nested_lists_still_work(self):
+        """Nested unordered list inside ordered list via indentation should be unaffected."""
+        markdown_text = "1. Ordered 1\n    - Nested unordered\n    - Another nested\n2. Ordered 2"
+        html = self.engine.parse_and_render(markdown_text)
+        self.assertIn('<ol>', html)
+        self.assertIn('<ul>', html)
+        # The ul should be nested inside the ol, not a sibling
+        ol_pos = html.index('<ol>')
+        ul_pos = html.index('<ul>')
+        ol_end_pos = html.index('</ol>')
+        self.assertLess(ol_pos, ul_pos)
+        self.assertLess(ul_pos, ol_end_pos)

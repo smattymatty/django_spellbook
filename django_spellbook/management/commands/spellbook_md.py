@@ -24,6 +24,9 @@ from django_spellbook.management.commands.processing.file_processor import (
 from django_spellbook.management.commands.processing.manifest import (
     ManifestGenerator
 )
+from django_spellbook.management.commands.processing.file_writer import (
+    FileWriter
+)
 
 from django_spellbook.management.commands.spellbook_md_p.reporter import (
     MarkdownReporter
@@ -62,6 +65,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Process markdown files from all configured source-destination pairs."""
         self.continue_on_error = options.get('continue_on_error', False)
+
+        # Reset FileWriter session to prevent stale URL includes from persisting
+        FileWriter.reset_session()
 
         # Extract Reporting Options
         self.report_level = options.get('report_level', 'detailed')

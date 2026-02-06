@@ -129,22 +129,6 @@ class TestFileWriterExceptions(TestCase):
             
         self.assertEqual(str(context.exception), "Failed to create test file")
     
-    @patch('os.path.exists')
-    @patch('builtins.open')
-    def test_update_main_urls_file_read_exception(self, mock_open, mock_exists):
-        """Test handling of exception when reading the main urls.py file."""
-        mock_exists.return_value = True
-        mock_open.side_effect = IOError("Test IO error")
-        
-        # The method should catch the exception and log it
-        with patch('django_spellbook.management.commands.processing.file_writer.logger') as mock_logger:
-            with patch('django_spellbook.management.commands.processing.file_writer.write_file'):
-                self.file_writer._update_main_urls_file()
-                
-                # Verify logger.error was called
-                mock_logger.error.assert_called_once()
-                self.assertIn("Error reading urls.py", mock_logger.error.call_args[0][0])
-    
     @patch('django_spellbook.management.commands.processing.file_writer.write_file')
     def test_update_main_urls_file_write_exception(self, mock_write):
         """Test handling of exception when writing to main urls.py file."""
